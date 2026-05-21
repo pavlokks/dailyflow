@@ -1,31 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/errors.js';
+import ModuleState from './ModuleState.jsx';
 
 const TasksModule = () => {
-  const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
-  const loadTasks = async () => {
-    try {
-      setError('');
-      const { data } = await api.get('/tasks');
-      setTasks(data);
-    } catch (requestError) {
-      setError(
-        requestError.response?.data?.message ||
-          'Could not load tasks. Please try again.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadTasks();
+  const loadTasks = useCallback(async () => {
+    const { data } = await api.get('/tasks');
+    return data;
   }, []);
+
+  const { error, isLoading, items: tasks, setError, setItems: setTasks } =
+    useAsyncList({
+      fallbackError: 'AI assistant could not load your tasks. Please try again.',
+      loadItems: loadTasks
+    });
 
   const handleCreateTask = async (event) => {
     event.preventDefault();
@@ -47,8 +39,7 @@ const TasksModule = () => {
       setTitle('');
     } catch (requestError) {
       setError(
-        requestError.response?.data?.message ||
-          'Could not create task. Please try again.'
+        getApiErrorMessage(requestError, 'Could not add this focus task. Please try again.')
       );
     } finally {
       setIsCreating(false);
@@ -69,8 +60,7 @@ const TasksModule = () => {
       );
     } catch (requestError) {
       setError(
-        requestError.response?.data?.message ||
-          'Could not update task. Please try again.'
+        getApiErrorMessage(requestError, 'Could not update this task. Please try again.')
       );
     }
   };
@@ -84,8 +74,7 @@ const TasksModule = () => {
       );
     } catch (requestError) {
       setError(
-        requestError.response?.data?.message ||
-          'Could not delete task. Please try again.'
+        getApiErrorMessage(requestError, 'Could not remove this task. Please try again.')
       );
     }
   };
@@ -96,7 +85,7 @@ const TasksModule = () => {
     <article className="dashboard-card tasks-card">
       <div className="card-heading">
         <div>
-          <h2>Tasks</h2>
+          <h2>Focus Tasks</h2>
           <p>{completedCount} of {tasks.length} completed</p>
         </div>
         <span>{tasks.length}</span>
@@ -107,20 +96,20 @@ const TasksModule = () => {
           type="text"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder="Add a new task"
+          placeholder="Add a focus task"
         />
         <button type="submit" disabled={isCreating || !title.trim()}>
           Add
         </button>
       </form>
 
-      {error && <p className="task-error">{error}</p>}
+      {error && <ModuleState tone="error">{error}</ModuleState>}
 
       <div className="task-list">
         {isLoading ? (
-          <p className="task-empty">Loading tasks...</p>
+          <ModuleState tone="loading">AI is loading your tasks...</ModuleState>
         ) : tasks.length === 0 ? (
-          <p className="task-empty">No tasks yet. Add your first task above.</p>
+          <ModuleState>No focus tasks yet. Add one above.</ModuleState>
         ) : (
           tasks.map((task) => (
             <div className="task-item" key={task._id}>
@@ -139,7 +128,7 @@ const TasksModule = () => {
                 type="button"
                 onClick={() => handleDeleteTask(task._id)}
               >
-                Delete
+                Remove
               </button>
             </div>
           ))

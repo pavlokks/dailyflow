@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
@@ -30,7 +31,10 @@ app.use('/api/test', testRoutes);
 app.use('/api/weather', weatherRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ message: 'DailyFlow API is running' });
+  res.json({ message: 'DailyFlow AI API is running' });
 });
+
+app.use(notFound);
+app.use(errorHandler);
 
 export default app;

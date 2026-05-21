@@ -1,7 +1,7 @@
 {
   "name": "dailyflow-server",
   "version": "1.0.0",
-  "description": "Backend API for DailyFlow MERN coursework project",
+  "description": "Backend API for DailyFlow AI productivity assistant",
   "main": "server.js",
   "type": "module",
   "scripts": {

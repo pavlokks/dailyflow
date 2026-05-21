@@ -1,5 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/errors.js';
+import ModuleState from './ModuleState.jsx';
 
 const formatEventDate = (date) =>
   new Intl.DateTimeFormat('en', {
@@ -11,32 +14,21 @@ const formatEventDate = (date) =>
   }).format(new Date(date));
 
 const EventsModule = () => {
-  const [events, setEvents] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
-  const loadEvents = async () => {
-    try {
-      setError('');
-      const { data } = await api.get('/events');
-      setEvents(data);
-    } catch (requestError) {
-      setError(
-        requestError.response?.data?.message ||
-          'Could not load events. Please try again.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadEvents();
+  const loadEvents = useCallback(async () => {
+    const { data } = await api.get('/events');
+    return data;
   }, []);
+
+  const { error, isLoading, items: events, setError, setItems: setEvents } =
+    useAsyncList({
+      fallbackError: 'AI assistant could not load your schedule. Please try again.',
+      loadItems: loadEvents
+    });
 
   const handleCreateEvent = async (event) => {
     event.preventDefault();
@@ -68,8 +60,7 @@ const EventsModule = () => {
       setDate('');
     } catch (requestError) {
       setError(
-        requestError.response?.data?.message ||
-          'Could not create event. Please try again.'
+        getApiErrorMessage(requestError, 'Could not add this schedule item. Please try again.')
       );
     } finally {
       setIsCreating(false);
@@ -85,8 +76,7 @@ const EventsModule = () => {
       );
     } catch (requestError) {
       setError(
-        requestError.response?.data?.message ||
-          'Could not delete event. Please try again.'
+        getApiErrorMessage(requestError, 'Could not remove this schedule item. Please try again.')
       );
     }
   };
@@ -95,8 +85,8 @@ const EventsModule = () => {
     <article className="dashboard-card events-card">
       <div className="card-heading">
         <div>
-          <h2>Events</h2>
-          <p>Upcoming calendar events</p>
+          <h2>Smart Schedule</h2>
+          <p>Upcoming calendar context</p>
         </div>
         <span>{events.length}</span>
       </div>
@@ -106,7 +96,7 @@ const EventsModule = () => {
           type="text"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder="Event title"
+          placeholder="Schedule item"
         />
         <input
           type="datetime-local"
@@ -116,21 +106,21 @@ const EventsModule = () => {
         <textarea
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          placeholder="Description"
+          placeholder="Context for the assistant"
           rows="3"
         />
         <button type="submit" disabled={isCreating || !title.trim() || !date}>
-          Add event
+          Add to schedule
         </button>
       </form>
 
-      {error && <p className="event-error">{error}</p>}
+      {error && <ModuleState tone="error">{error}</ModuleState>}
 
       <div className="event-list">
         {isLoading ? (
-          <p className="event-empty">Loading events...</p>
+          <ModuleState tone="loading">AI is reading your schedule...</ModuleState>
         ) : events.length === 0 ? (
-          <p className="event-empty">No events yet. Add your first event above.</p>
+          <ModuleState>No schedule items yet. Add one above.</ModuleState>
         ) : (
           events.map((currentEvent) => (
             <div className="event-item" key={currentEvent._id}>
@@ -146,7 +136,7 @@ const EventsModule = () => {
                 type="button"
                 onClick={() => handleDeleteEvent(currentEvent._id)}
               >
-                Delete
+                Remove
               </button>
             </div>
           ))

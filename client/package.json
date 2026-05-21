@@ -1,7 +1,7 @@
 {
   "name": "dailyflow-client",
   "version": "1.0.0",
-  "description": "Frontend for DailyFlow MERN coursework project",
+  "description": "Frontend for DailyFlow AI productivity assistant",
   "private": true,
   "type": "module",
   "scripts": {

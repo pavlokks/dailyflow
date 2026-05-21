@@ -1,7 +1,9 @@
-import React from 'react';
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AuthLayout from '../components/AuthLayout.jsx';
+import FormField from '../components/FormField.jsx';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/errors.js';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -35,8 +37,10 @@ const RegisterPage = () => {
       navigate('/dashboard');
     } catch (requestError) {
       setError(
-        requestError.response?.data?.message ||
+        getApiErrorMessage(
+          requestError,
           'Не вдалося створити акаунт. Спробуйте ще раз.'
+        )
       );
     } finally {
       setIsSubmitting(false);
@@ -44,75 +48,60 @@ const RegisterPage = () => {
   };
 
   return (
-    <main className="auth-page">
-      <section className="auth-panel">
-        <div className="auth-copy">
-          <p className="eyebrow">DailyFlow</p>
-          <h1>Створіть акаунт</h1>
-          <p>Організуйте задачі, місто та щоденний ритм в одному робочому просторі.</p>
-        </div>
+    <AuthLayout
+      title="Створіть DailyFlow AI"
+      description="Налаштуйте персональний простір, де помічник тримає задачі, календар, погоду й новини в одному контексті."
+      switchText="Вже маєте акаунт?"
+      switchLabel="Увійти"
+      switchTo="/login"
+      onSubmit={handleSubmit}
+    >
+      <FormField
+        label="Ім'я"
+        name="name"
+        type="text"
+        value={formData.name}
+        onChange={handleChange}
+        placeholder="Павло"
+        required
+      />
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label>
-            Ім'я
-            <input
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Павло"
-              required
-            />
-          </label>
+      <FormField
+        label="Email"
+        name="email"
+        type="email"
+        value={formData.email}
+        onChange={handleChange}
+        placeholder="pavlo@example.com"
+        required
+      />
 
-          <label>
-            Email
-            <input
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="pavlo@example.com"
-              required
-            />
-          </label>
+      <FormField
+        label="Пароль"
+        name="password"
+        type="password"
+        value={formData.password}
+        onChange={handleChange}
+        placeholder="Мінімум 6 символів"
+        minLength="6"
+        required
+      />
 
-          <label>
-            Пароль
-            <input
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Мінімум 6 символів"
-              minLength="6"
-              required
-            />
-          </label>
+      <FormField
+        label="Місто"
+        name="city"
+        type="text"
+        value={formData.city}
+        onChange={handleChange}
+        placeholder="Київ"
+      />
 
-          <label>
-            Місто
-            <input
-              name="city"
-              type="text"
-              value={formData.city}
-              onChange={handleChange}
-              placeholder="Київ"
-            />
-          </label>
+      {error && <p className="form-error">{error}</p>}
 
-          {error && <p className="form-error">{error}</p>}
-
-          <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Створення...' : 'Зареєструватися'}
-          </button>
-
-          <p className="auth-switch">
-            Вже маєте акаунт? <Link to="/login">Увійти</Link>
-          </p>
-        </form>
-      </section>
-    </main>
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? 'Створення...' : 'Запустити AI-помічника'}
+      </button>
+    </AuthLayout>
   );
 };
 

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import AppTopbar from '../components/AppTopbar.jsx';
+import ModuleState from '../components/ModuleState.jsx';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/errors.js';
 
 const ProfilePage = () => {
-  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [city, setCity] = useState('');
   const [error, setError] = useState('');
@@ -20,8 +21,10 @@ const ProfilePage = () => {
         setCity(data.user.city || '');
       } catch (requestError) {
         setError(
-          requestError.response?.data?.message ||
-            'Could not load profile. Please try again.'
+          getApiErrorMessage(
+            requestError,
+            'Could not load your assistant profile. Please try again.'
+          )
         );
       } finally {
         setIsLoading(false);
@@ -30,11 +33,6 @@ const ProfilePage = () => {
 
     loadProfile();
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('dailyflowToken');
-    navigate('/login');
-  };
 
   const handleUpdateCity = async (event) => {
     event.preventDefault();
@@ -49,11 +47,13 @@ const ProfilePage = () => {
 
       setUser(data.user);
       setCity(data.user.city || '');
-      setSuccess('City updated successfully.');
+      setSuccess('Assistant context updated successfully.');
     } catch (requestError) {
       setError(
-        requestError.response?.data?.message ||
-          'Could not update city. Please try again.'
+        getApiErrorMessage(
+          requestError,
+          'Could not update assistant city context. Please try again.'
+        )
       );
     } finally {
       setIsSaving(false);
@@ -62,25 +62,17 @@ const ProfilePage = () => {
 
   return (
     <main className="dashboard-page">
-      <header className="dashboard-topbar">
-        <div>
-          <p className="eyebrow">DailyFlow</p>
-          <h1>Profile</h1>
-        </div>
-        <div className="topbar-actions">
-          <Link className="secondary-button" to="/dashboard">
-            Dashboard
-          </Link>
-          <button className="logout-button" type="button" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-      </header>
+      <AppTopbar
+        title="Assistant Profile"
+        subtitle="Personal context used by DailyFlow AI."
+        backLink="/dashboard"
+        backLabel="Dashboard"
+      />
 
       <section className="profile-shell">
         <article className="dashboard-card profile-card">
           {isLoading ? (
-            <p className="profile-muted">Loading profile...</p>
+            <ModuleState tone="loading">Loading assistant profile...</ModuleState>
           ) : user ? (
             <>
               <div className="profile-summary">
@@ -93,14 +85,14 @@ const ProfilePage = () => {
                   <h2>{user.email}</h2>
                 </div>
                 <div>
-                  <p>City</p>
+                  <p>Weather city</p>
                   <h2>{user.city || 'Not set'}</h2>
                 </div>
               </div>
 
               <form className="profile-form" onSubmit={handleUpdateCity}>
                 <label>
-                  Update city
+                  Update weather city
                   <input
                     type="text"
                     value={city}
@@ -109,16 +101,16 @@ const ProfilePage = () => {
                   />
                 </label>
                 <button type="submit" disabled={isSaving}>
-                  {isSaving ? 'Saving...' : 'Save city'}
+                  {isSaving ? 'Saving...' : 'Save context'}
                 </button>
               </form>
             </>
           ) : (
-            <p className="profile-muted">Profile is unavailable.</p>
+            <ModuleState>Assistant profile is unavailable.</ModuleState>
           )}
 
-          {error && <p className="profile-error">{error}</p>}
-          {success && <p className="profile-success">{success}</p>}
+          {error && <ModuleState tone="error">{error}</ModuleState>}
+          {success && <ModuleState tone="success">{success}</ModuleState>}
         </article>
       </section>
     </main>

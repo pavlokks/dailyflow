@@ -1,7 +1,9 @@
-import React from 'react';
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AuthLayout from '../components/AuthLayout.jsx';
+import FormField from '../components/FormField.jsx';
 import api from '../services/api.js';
+import { getApiErrorMessage } from '../utils/errors.js';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -33,8 +35,10 @@ const LoginPage = () => {
       navigate('/dashboard');
     } catch (requestError) {
       setError(
-        requestError.response?.data?.message ||
+        getApiErrorMessage(
+          requestError,
           'Не вдалося увійти. Перевірте email і пароль.'
+        )
       );
     } finally {
       setIsSubmitting(false);
@@ -42,51 +46,40 @@ const LoginPage = () => {
   };
 
   return (
-    <main className="auth-page">
-      <section className="auth-panel">
-        <div className="auth-copy">
-          <p className="eyebrow">DailyFlow</p>
-          <h1>Увійдіть в акаунт</h1>
-          <p>Поверніться до своїх задач і продовжуйте планувати день без зайвого шуму.</p>
-        </div>
+    <AuthLayout
+      title="DailyFlow AI"
+      description="Персональний AI вебпомічник для задач, подій, погоди й щоденного фокусу."
+      switchText="Немає акаунта?"
+      switchLabel="Зареєструватися"
+      switchTo="/register"
+      onSubmit={handleSubmit}
+    >
+      <FormField
+        label="Email"
+        name="email"
+        type="email"
+        value={formData.email}
+        onChange={handleChange}
+        placeholder="pavlo@example.com"
+        required
+      />
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label>
-            Email
-            <input
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="pavlo@example.com"
-              required
-            />
-          </label>
+      <FormField
+        label="Пароль"
+        name="password"
+        type="password"
+        value={formData.password}
+        onChange={handleChange}
+        placeholder="Ваш пароль"
+        required
+      />
 
-          <label>
-            Пароль
-            <input
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Ваш пароль"
-              required
-            />
-          </label>
+      {error && <p className="form-error">{error}</p>}
 
-          {error && <p className="form-error">{error}</p>}
-
-          <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Вхід...' : 'Увійти'}
-          </button>
-
-          <p className="auth-switch">
-            Немає акаунта? <Link to="/register">Зареєструватися</Link>
-          </p>
-        </form>
-      </section>
-    </main>
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? 'Вхід...' : 'Увійти до помічника'}
+      </button>
+    </AuthLayout>
   );
 };
 

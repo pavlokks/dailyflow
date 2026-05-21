@@ -1,47 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
+import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
+import ModuleState from './ModuleState.jsx';
 
 const NewsModule = () => {
-  const [articles, setArticles] = useState([]);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadNews = async () => {
-      try {
-        setError('');
-        const { data } = await api.get('/news');
-        setArticles(data);
-      } catch (requestError) {
-        setError(
-          requestError.response?.data?.message ||
-            'Could not load news. Please try again.'
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadNews();
+  const loadNews = useCallback(async () => {
+    const { data } = await api.get('/news');
+    return data;
   }, []);
+
+  const { error, isLoading, items: articles } = useAsyncList({
+    fallbackError: 'AI assistant could not load your news brief. Please try again.',
+    loadItems: loadNews
+  });
 
   return (
     <article className="dashboard-card news-card">
       <div className="card-heading">
         <div>
-          <h2>News</h2>
-          <p>Latest headlines</p>
+          <h2>AI News Brief</h2>
+          <p>Headlines for your context</p>
         </div>
         <span>{articles.length}</span>
       </div>
 
-      {error && <p className="news-error">{error}</p>}
+      {error && <ModuleState tone="error">{error}</ModuleState>}
 
       <div className="news-list">
         {isLoading ? (
-          <p className="news-empty">Loading news...</p>
+          <ModuleState tone="loading">AI is preparing headlines...</ModuleState>
         ) : articles.length === 0 ? (
-          <p className="news-empty">No news available right now.</p>
+          <ModuleState>No headlines available right now.</ModuleState>
         ) : (
           articles.map((article) => (
             <div className="news-item" key={article.url}>
@@ -54,7 +43,7 @@ const NewsModule = () => {
                 <p className="news-source">{article.source}</p>
                 <h3>{article.title}</h3>
                 <a href={article.url} target="_blank" rel="noreferrer">
-                  Read More
+                  Read
                 </a>
               </div>
             </div>

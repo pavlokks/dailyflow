@@ -14,4 +14,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const requestUrl = error.config?.url || '';
+    const isAuthRequest = requestUrl.startsWith('/auth/login') ||
+      requestUrl.startsWith('/auth/register');
+
+    if (error.response?.status === 401 && !isAuthRequest) {
+      localStorage.removeItem('dailyflowToken');
+      window.location.assign('/login');
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default api;

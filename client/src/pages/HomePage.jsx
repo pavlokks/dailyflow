@@ -4,11 +4,11 @@ const HomePage = () => {
   return (
     <main className="app-shell">
       <section className="intro">
-        <p className="eyebrow">DailyFlow</p>
-        <h1>Планувальник щоденних задач</h1>
+        <p className="eyebrow">DailyFlow AI</p>
+        <h1>Персональний AI вебпомічник</h1>
         <p>
-          Стартова структура MERN-проєкту готова. Наступним кроком можна
-          додати моделі, маршрути та сторінки для задач.
+          DailyFlow AI поєднує задачі, календар, погоду та новини в одному
+          продуктивному просторі для щоденного фокусу.
         </p>
       </section>
     </main>

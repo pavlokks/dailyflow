@@ -1,6 +1,20 @@
-# DailyFlow
+# DailyFlow AI
 
-DailyFlow is a MERN-stack coursework project.
+DailyFlow AI is a MERN-stack personal productivity assistant. It keeps authentication, focus tasks, calendar events, local weather and news in one workspace, then presents them as an AI-style daily brief for planning the next useful action.
+
+The current assistant brief is powered by the app's own user context and productivity data, so it works without adding a paid AI provider. The structure is ready to extend later with an LLM API if needed.
+
+## Features
+
+- JWT authentication with register, login and protected routes
+- Personal profile with city context for weather
+- Focus task management
+- Calendar event management
+- Weather context from OpenWeather
+- News brief from NewsAPI
+- AI Assistant Brief dashboard card
+- Loading states and basic error handling on the client
+- JSON 404/error responses on the server
 
 ## Tech Stack
 
@@ -8,6 +22,7 @@ DailyFlow is a MERN-stack coursework project.
 - Express.js
 - React + Vite
 - Node.js
+- Axios
 - dotenv
 
 ## Project Structure
@@ -17,16 +32,16 @@ DailyFlow/
   client/
     src/
       components/
-      context/
+      hooks/
       pages/
       services/
+      utils/
   server/
-    src/
-      config/
-      controllers/
-      middleware/
-      models/
-      routes/
+    config/
+    controllers/
+    middleware/
+    models/
+    routes/
 ```
 
 ## Getting Started
@@ -43,18 +58,20 @@ npm install
 
 ### 2. Configure environment variables
 
-Create `.env` files from the examples:
-
-```bash
-cp server/.env.example server/.env
-cp client/.env.example client/.env
-```
-
-Update `server/.env` if your MongoDB connection string is different:
+Create `server/.env`:
 
 ```env
 PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/dailyflow
+JWT_SECRET=replace-with-your-secret
+OPENWEATHER_API_KEY=replace-with-your-openweather-key
+NEWS_API_KEY=replace-with-your-newsapi-key
+```
+
+Optional client API override:
+
+```env
+VITE_API_URL=http://localhost:5000/api
 ```
 
 ### 3. Run the backend
@@ -64,7 +81,7 @@ cd server
 npm run dev
 ```
 
-The API will run at:
+The API runs at:
 
 ```text
 http://localhost:5000
@@ -85,12 +102,28 @@ cd client
 npm run dev
 ```
 
-The frontend will run at the URL shown by Vite, usually:
+The frontend runs at the URL shown by Vite, usually:
 
 ```text
 http://localhost:5173
 ```
 
-## Notes
+## Core API Areas
 
-Authentication is intentionally not implemented yet.
+- `/api/auth` - register, login, current user, profile update
+- `/api/tasks` - authenticated task CRUD
+- `/api/events` - authenticated event CRUD
+- `/api/weather` - weather for the user's profile city
+- `/api/news` - latest news headlines
+- `/api/health` - service health check
+
+## DailyFlow AI Concept
+
+DailyFlow AI is positioned as a personal web assistant rather than a plain dashboard. The assistant brief combines existing project data into a productivity snapshot:
+
+- how many tasks are still open
+- how many tasks are complete
+- what schedule context is coming next
+- what the user should focus on first
+
+This keeps the original MERN coursework functionality intact while making the product feel like an AI-powered productivity assistant.

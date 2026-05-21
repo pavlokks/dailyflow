@@ -104,3 +104,9 @@ export const loginUser = async (req, res) => {
     });
   }
 };
+
+export const getCurrentUser = (req, res) => {
+  return res.json({
+    user: toUserResponse(req.user)
+  });
+};

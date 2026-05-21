@@ -10,7 +10,7 @@ const NewsModule = () => {
   }, []);
 
   const { error, isLoading, items: articles } = useAsyncList({
-    fallbackError: 'AI assistant could not load your news brief. Please try again.',
+    fallbackError: 'Не вдалося завантажити новини. Перевірте NEWS_API_KEY або спробуйте пізніше.',
     loadItems: loadNews
   });
 
@@ -18,8 +18,8 @@ const NewsModule = () => {
     <article className="dashboard-card news-card">
       <div className="card-heading">
         <div>
-          <h2>AI News Brief</h2>
-          <p>Headlines for your context</p>
+          <h2>Новини</h2>
+          <p>Актуальні заголовки для контексту</p>
         </div>
         <span>{articles.length}</span>
       </div>
@@ -28,9 +28,9 @@ const NewsModule = () => {
 
       <div className="news-list">
         {isLoading ? (
-          <ModuleState tone="loading">AI is preparing headlines...</ModuleState>
+          <ModuleState tone="loading">Завантажуємо новини...</ModuleState>
         ) : articles.length === 0 ? (
-          <ModuleState>No headlines available right now.</ModuleState>
+          <ModuleState>Новин зараз немає. Для демонстрації можна показати інші модулі.</ModuleState>
         ) : (
           articles.map((article) => (
             <div className="news-item" key={article.url}>
@@ -43,7 +43,7 @@ const NewsModule = () => {
                 <p className="news-source">{article.source}</p>
                 <h3>{article.title}</h3>
                 <a href={article.url} target="_blank" rel="noreferrer">
-                  Read
+                  Читати
                 </a>
               </div>
             </div>

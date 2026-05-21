@@ -34,7 +34,7 @@ const ProductivityStatsWidget = () => {
   }, []);
 
   const { error, isLoading, items, refresh } = useAsyncList({
-    fallbackError: 'Productivity statistics are unavailable right now.',
+    fallbackError: 'Статистика продуктивності зараз недоступна.',
     loadItems: loadStatsContext
   });
 
@@ -61,40 +61,40 @@ const ProductivityStatsWidget = () => {
     <article className="dashboard-card productivity-stats-card">
       <div className="card-heading">
         <div>
-          <h2>Productivity Statistics</h2>
-          <p>Task progress and today&apos;s workload</p>
+          <h2>Статистика продуктивності</h2>
+          <p>Прогрес задач і навантаження на сьогодні</p>
         </div>
         <span>{completionProgress}%</span>
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">Calculating productivity stats...</ModuleState>
+        <ModuleState tone="loading">Рахуємо статистику...</ModuleState>
       ) : error ? (
         <ModuleState tone="error">{error}</ModuleState>
       ) : (
         <>
           <div className="stats-grid">
             <div>
-              <p>All tasks</p>
+              <p>Усі задачі</p>
               <strong>{totalTasks}</strong>
             </div>
             <div>
-              <p>Completed</p>
+              <p>Виконано</p>
               <strong>{completedTasks}</strong>
             </div>
             <div>
-              <p>High priority</p>
+              <p>Високий пріоритет</p>
               <strong>{highPriorityTasks}</strong>
             </div>
             <div>
-              <p>Today events</p>
+              <p>Події сьогодні</p>
               <strong>{todayEvents}</strong>
             </div>
           </div>
 
           <div className="task-progress">
             <div>
-              <span>Task completion</span>
+              <span>Виконання задач</span>
               <strong>{completionProgress}%</strong>
             </div>
             <div className="progress-track" aria-label="Task completion progress">

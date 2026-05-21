@@ -5,9 +5,9 @@ import { getApiErrorMessage } from '../utils/errors.js';
 import ModuleState from './ModuleState.jsx';
 
 const priorityLabels = {
-  high: 'High',
-  low: 'Low',
-  medium: 'Medium'
+  high: 'Високий',
+  low: 'Низький',
+  medium: 'Середній'
 };
 
 const priorityOrder = {
@@ -25,7 +25,7 @@ const initialTaskForm = {
 
 const formatDeadline = (deadline) => {
   if (!deadline) {
-    return 'No deadline';
+    return 'Без дедлайну';
   }
 
   return new Intl.DateTimeFormat('en', {
@@ -75,7 +75,7 @@ const TasksModule = () => {
 
   const { error, isLoading, items: tasks, refresh, setError, setItems: setTasks } =
     useAsyncList({
-      fallbackError: 'AI assistant could not load your tasks. Please try again.',
+      fallbackError: 'Не вдалося завантажити задачі. Спробуйте ще раз.',
       loadItems: loadTasks
     });
 
@@ -120,7 +120,7 @@ const TasksModule = () => {
       notifyTasksUpdated();
     } catch (requestError) {
       setError(
-        getApiErrorMessage(requestError, 'Could not add this focus task. Please try again.')
+        getApiErrorMessage(requestError, 'Не вдалося додати задачу. Спробуйте ще раз.')
       );
     } finally {
       setIsCreating(false);
@@ -144,7 +144,7 @@ const TasksModule = () => {
       notifyTasksUpdated();
     } catch (requestError) {
       setError(
-        getApiErrorMessage(requestError, 'Could not update this task. Please try again.')
+        getApiErrorMessage(requestError, 'Не вдалося оновити задачу. Спробуйте ще раз.')
       );
     }
   };
@@ -159,7 +159,7 @@ const TasksModule = () => {
       notifyTasksUpdated();
     } catch (requestError) {
       setError(
-        getApiErrorMessage(requestError, 'Could not remove this task. Please try again.')
+        getApiErrorMessage(requestError, 'Не вдалося видалити задачу. Спробуйте ще раз.')
       );
     }
   };
@@ -171,8 +171,8 @@ const TasksModule = () => {
     <article className="dashboard-card tasks-card">
       <div className="card-heading">
         <div>
-          <h2>Focus Tasks</h2>
-          <p>{completedCount} of {tasks.length} completed</p>
+          <h2>Задачі</h2>
+          <p>Виконано {completedCount} з {tasks.length}</p>
         </div>
         <span>{tasks.length}</span>
       </div>
@@ -183,13 +183,13 @@ const TasksModule = () => {
           type="text"
           value={formData.title}
           onChange={handleChange}
-          placeholder="Add a focus task"
+          placeholder="Додайте задачу"
         />
         <textarea
           name="description"
           value={formData.description}
           onChange={handleChange}
-          placeholder="Add context or notes"
+          placeholder="Опис або нотатки"
           rows="3"
         />
         <div className="task-form-row">
@@ -197,22 +197,22 @@ const TasksModule = () => {
             name="priority"
             value={formData.priority}
             onChange={handleChange}
-            aria-label="Task priority"
+            aria-label="Пріоритет задачі"
           >
-            <option value="low">Low priority</option>
-            <option value="medium">Medium priority</option>
-            <option value="high">High priority</option>
+            <option value="low">Низький пріоритет</option>
+            <option value="medium">Середній пріоритет</option>
+            <option value="high">Високий пріоритет</option>
           </select>
           <input
             name="deadline"
             type="date"
             value={formData.deadline}
             onChange={handleChange}
-            aria-label="Task deadline"
+            aria-label="Дедлайн задачі"
           />
         </div>
         <button type="submit" disabled={isCreating || !formData.title.trim()}>
-          {isCreating ? 'Adding...' : 'Add task'}
+          {isCreating ? 'Додаємо...' : 'Додати задачу'}
         </button>
       </form>
 
@@ -220,9 +220,9 @@ const TasksModule = () => {
 
       <div className="task-list">
         {isLoading ? (
-          <ModuleState tone="loading">AI is loading your tasks...</ModuleState>
+          <ModuleState tone="loading">Завантажуємо задачі...</ModuleState>
         ) : sortedTasks.length === 0 ? (
-          <ModuleState>No focus tasks yet. Add one above.</ModuleState>
+          <ModuleState>Задач поки немає. Додайте першу задачу або натисніть Load Demo Data на огляді.</ModuleState>
         ) : (
           sortedTasks.map((task) => {
             const priority = task.priority || 'medium';
@@ -243,12 +243,12 @@ const TasksModule = () => {
                   </div>
 
                   <p className="task-description">
-                    {task.description || 'No description added.'}
+                    {task.description || 'Опис не додано.'}
                   </p>
 
                   <div className="task-meta">
                     <span>{formatDeadline(task.deadline)}</span>
-                    <span>{task.completed ? 'Completed' : 'In progress'}</span>
+                    <span>{task.completed ? 'Виконано' : 'У процесі'}</span>
                   </div>
                 </div>
 
@@ -259,14 +259,14 @@ const TasksModule = () => {
                       checked={task.completed}
                       onChange={() => handleToggleTask(task)}
                     />
-                    <span>{task.completed ? 'Done' : 'Complete'}</span>
+                    <span>{task.completed ? 'Готово' : 'Виконати'}</span>
                   </label>
                   <button
                     className="task-delete"
                     type="button"
                     onClick={() => handleDeleteTask(task._id)}
                   >
-                    Remove
+                    Видалити
                   </button>
                 </div>
               </div>

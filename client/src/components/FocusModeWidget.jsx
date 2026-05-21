@@ -41,25 +41,12 @@ const FocusModeWidget = () => {
     return ((focusDuration - remainingSeconds) / focusDuration) * 100;
   }, [remainingSeconds]);
 
-  const handleStart = () => {
-    setIsRunning(true);
-  };
-
-  const handlePause = () => {
-    setIsRunning(false);
-  };
-
-  const handleReset = () => {
-    setIsRunning(false);
-    setRemainingSeconds(focusDuration);
-  };
-
   return (
     <article className="dashboard-card focus-mode-card">
       <div className="card-heading">
         <div>
-          <h2>Focus Mode</h2>
-          <p>25-minute Pomodoro session</p>
+          <h2>Фокус-режим</h2>
+          <p>Pomodoro-сесія на 25 хвилин</p>
         </div>
         <span>{completedSessions}</span>
       </div>
@@ -73,25 +60,31 @@ const FocusModeWidget = () => {
         >
           <div>
             <strong>{formatTime(remainingSeconds)}</strong>
-            <p>{isRunning ? 'Focus in progress' : 'Ready to focus'}</p>
+            <p>{isRunning ? 'Фокус триває' : 'Готово до фокусу'}</p>
           </div>
         </div>
       </div>
 
       <div className="focus-actions">
-        <button type="button" onClick={handleStart} disabled={isRunning}>
-          Start
+        <button type="button" onClick={() => setIsRunning(true)} disabled={isRunning}>
+          Старт
         </button>
-        <button type="button" onClick={handlePause} disabled={!isRunning}>
-          Pause
+        <button type="button" onClick={() => setIsRunning(false)} disabled={!isRunning}>
+          Пауза
         </button>
-        <button type="button" onClick={handleReset}>
-          Reset
+        <button
+          type="button"
+          onClick={() => {
+            setIsRunning(false);
+            setRemainingSeconds(focusDuration);
+          }}
+        >
+          Скинути
         </button>
       </div>
 
       <p className="focus-sessions">
-        Completed focus sessions: <strong>{completedSessions}</strong>
+        Завершені фокус-сесії: <strong>{completedSessions}</strong>
       </p>
     </article>
   );

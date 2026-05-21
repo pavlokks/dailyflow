@@ -49,8 +49,8 @@ const RegisterPage = () => {
 
   return (
     <AuthLayout
-      title="Створіть DailyFlow AI"
-      description="Налаштуйте персональний простір, де помічник тримає задачі, календар, погоду й новини в одному контексті."
+      title="Створіть DailyFlow"
+      description="Налаштуйте персональний простір для задач, подій, погоди, новин і фокус-сесій."
       switchText="Вже маєте акаунт?"
       switchLabel="Увійти"
       switchTo="/login"
@@ -99,7 +99,7 @@ const RegisterPage = () => {
       {error && <p className="form-error">{error}</p>}
 
       <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Створення...' : 'Запустити AI-помічника'}
+        {isSubmitting ? 'Створення...' : 'Зареєструватися'}
       </button>
     </AuthLayout>
   );

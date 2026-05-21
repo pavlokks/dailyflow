@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AppTopbar from '../components/AppTopbar.jsx';
+import DashboardShell from '../components/DashboardShell.jsx';
 import ModuleState from '../components/ModuleState.jsx';
 import api from '../services/api.js';
 import { getApiErrorMessage } from '../utils/errors.js';
@@ -23,7 +24,7 @@ const ProfilePage = () => {
         setError(
           getApiErrorMessage(
             requestError,
-            'Could not load your assistant profile. Please try again.'
+            'Не вдалося завантажити профіль. Спробуйте ще раз.'
           )
         );
       } finally {
@@ -47,12 +48,12 @@ const ProfilePage = () => {
 
       setUser(data.user);
       setCity(data.user.city || '');
-      setSuccess('Assistant context updated successfully.');
+      setSuccess('Контекст профілю оновлено.');
     } catch (requestError) {
       setError(
         getApiErrorMessage(
           requestError,
-          'Could not update assistant city context. Please try again.'
+          'Не вдалося оновити місто. Спробуйте ще раз.'
         )
       );
     } finally {
@@ -61,23 +62,21 @@ const ProfilePage = () => {
   };
 
   return (
-    <main className="dashboard-page">
+    <DashboardShell>
       <AppTopbar
-        title="Assistant Profile"
-        subtitle="Personal context used by DailyFlow AI."
-        backLink="/dashboard"
-        backLabel="Dashboard"
+        title="Профіль"
+        subtitle="Персональний контекст для DailyFlow."
       />
 
       <section className="profile-shell">
         <article className="dashboard-card profile-card">
           {isLoading ? (
-            <ModuleState tone="loading">Loading assistant profile...</ModuleState>
+            <ModuleState tone="loading">Завантажуємо профіль...</ModuleState>
           ) : user ? (
             <>
               <div className="profile-summary">
                 <div>
-                  <p>Name</p>
+                  <p>Ім'я</p>
                   <h2>{user.name}</h2>
                 </div>
                 <div>
@@ -85,35 +84,35 @@ const ProfilePage = () => {
                   <h2>{user.email}</h2>
                 </div>
                 <div>
-                  <p>Weather city</p>
-                  <h2>{user.city || 'Not set'}</h2>
+                  <p>Місто для погоди</p>
+                  <h2>{user.city || 'Не вказано'}</h2>
                 </div>
               </div>
 
               <form className="profile-form" onSubmit={handleUpdateCity}>
                 <label>
-                  Update weather city
+                  Оновити місто
                   <input
                     type="text"
                     value={city}
                     onChange={(event) => setCity(event.target.value)}
-                    placeholder="Kyiv"
+                    placeholder="Київ"
                   />
                 </label>
                 <button type="submit" disabled={isSaving}>
-                  {isSaving ? 'Saving...' : 'Save context'}
+                  {isSaving ? 'Збереження...' : 'Зберегти'}
                 </button>
               </form>
             </>
           ) : (
-            <ModuleState>Assistant profile is unavailable.</ModuleState>
+            <ModuleState>Профіль недоступний.</ModuleState>
           )}
 
           {error && <ModuleState tone="error">{error}</ModuleState>}
           {success && <ModuleState tone="success">{success}</ModuleState>}
         </article>
       </section>
-    </main>
+    </DashboardShell>
   );
 };
 

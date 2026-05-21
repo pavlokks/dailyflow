@@ -3,6 +3,12 @@ import api from '../services/api.js';
 import { getApiErrorMessage } from '../utils/errors.js';
 import ModuleState from './ModuleState.jsx';
 
+const priorityLabels = {
+  high: 'високий',
+  low: 'низький',
+  medium: 'середній'
+};
+
 const AITaskGenerator = () => {
   const [goal, setGoal] = useState('');
   const [generatedTasks, setGeneratedTasks] = useState([]);
@@ -31,7 +37,7 @@ const AITaskGenerator = () => {
       setError(
         getApiErrorMessage(
           requestError,
-          'Could not generate tasks for this goal. Please try again.'
+          'Не вдалося згенерувати задачі. Спробуйте ще раз.'
         )
       );
     } finally {
@@ -60,7 +66,7 @@ const AITaskGenerator = () => {
         )
       );
 
-      setSuccess(`${generatedTasks.length} tasks added to your focus list.`);
+      setSuccess(`${generatedTasks.length} задач додано до списку.`);
       setGeneratedTasks([]);
       setGoal('');
       window.dispatchEvent(new Event('dailyflow:tasks-updated'));
@@ -68,7 +74,7 @@ const AITaskGenerator = () => {
       setError(
         getApiErrorMessage(
           requestError,
-          'Could not add generated tasks to your list. Please try again.'
+          'Не вдалося додати згенеровані задачі. Спробуйте ще раз.'
         )
       );
     } finally {
@@ -80,8 +86,8 @@ const AITaskGenerator = () => {
     <article className="dashboard-card ai-generator-card">
       <div className="card-heading">
         <div>
-          <h2>AI Task Generator</h2>
-          <p>Turn a goal into actionable focus tasks</p>
+          <h2>AI-генератор задач</h2>
+          <p>Перетворіть ціль на конкретний план дій</p>
         </div>
         <span>AI</span>
       </div>
@@ -94,7 +100,7 @@ const AITaskGenerator = () => {
           rows="4"
         />
         <button type="submit" disabled={isGenerating || !goal.trim()}>
-          {isGenerating ? 'Generating...' : 'Generate Tasks'}
+          {isGenerating ? 'Генеруємо...' : 'Згенерувати задачі'}
         </button>
       </form>
 
@@ -110,8 +116,8 @@ const AITaskGenerator = () => {
                 <p>{task.description}</p>
               </div>
               <div className="generated-task-meta">
-                <span>{task.priority}</span>
-                <span>{task.deadline || 'No deadline'}</span>
+                <span>{priorityLabels[task.priority] || 'середній'}</span>
+                <span>{task.deadline || 'Без дедлайну'}</span>
               </div>
             </div>
           ))}
@@ -122,7 +128,7 @@ const AITaskGenerator = () => {
             onClick={handleAddTasks}
             disabled={isAdding}
           >
-            {isAdding ? 'Adding...' : 'Add to Tasks'}
+            {isAdding ? 'Додаємо...' : 'Додати до задач'}
           </button>
         </div>
       )}

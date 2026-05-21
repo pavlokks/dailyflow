@@ -19,7 +19,7 @@ const WeatherCard = () => {
         setError(
           getApiErrorMessage(
             requestError,
-            'AI assistant could not load your weather context. Please try again.'
+            'Не вдалося завантажити погоду. Вкажіть місто у профілі або перевірте OPENWEATHER_API_KEY.'
           )
         );
       } finally {
@@ -37,8 +37,8 @@ const WeatherCard = () => {
     <article className="dashboard-card weather-card">
       <div className="weather-card-top">
         <div>
-          <p className="weather-label">Weather Context</p>
-          <h2>{weather?.city || 'Your city'}</h2>
+          <p className="weather-label">Погода</p>
+          <h2>{weather?.city || 'Ваше місто'}</h2>
         </div>
         {weather?.icon && (
           <img
@@ -49,14 +49,14 @@ const WeatherCard = () => {
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">AI is checking local conditions...</ModuleState>
+        <ModuleState tone="loading">Завантажуємо погоду...</ModuleState>
       ) : error ? (
         <ModuleState tone="error">{error}</ModuleState>
       ) : (
         <div className="weather-content">
-          <p className="weather-temperature">{roundedTemperature} deg C</p>
+          <p className="weather-temperature">{roundedTemperature}°C</p>
           <p className="weather-description">
-            {weather?.description || 'Weather context is unavailable'}
+            {weather?.description || 'Погода недоступна'}
           </p>
         </div>
       )}

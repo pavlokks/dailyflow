@@ -47,8 +47,8 @@ const LoginPage = () => {
 
   return (
     <AuthLayout
-      title="DailyFlow AI"
-      description="Персональний AI вебпомічник для задач, подій, погоди й щоденного фокусу."
+      title="DailyFlow"
+      description="Персональний вебпомічник для задач, подій, погоди та щоденного фокусу."
       switchText="Немає акаунта?"
       switchLabel="Зареєструватися"
       switchTo="/register"
@@ -77,7 +77,7 @@ const LoginPage = () => {
       {error && <p className="form-error">{error}</p>}
 
       <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Вхід...' : 'Увійти до помічника'}
+        {isSubmitting ? 'Вхід...' : 'Увійти'}
       </button>
     </AuthLayout>
   );

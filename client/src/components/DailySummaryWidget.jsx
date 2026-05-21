@@ -39,7 +39,7 @@ const DailySummaryWidget = () => {
     ]);
 
     if (tasksResponse.status === 'rejected' || eventsResponse.status === 'rejected') {
-      throw new Error('Could not load daily summary context.');
+      throw new Error('Не вдалося завантажити контекст дня.');
     }
 
     return [
@@ -53,7 +53,7 @@ const DailySummaryWidget = () => {
   }, []);
 
   const { error, isLoading, items, refresh } = useAsyncList({
-    fallbackError: 'Daily summary is unavailable right now.',
+    fallbackError: 'Підсумок дня зараз недоступний.',
     loadItems: loadSummaryContext
   });
 
@@ -71,14 +71,14 @@ const DailySummaryWidget = () => {
     <article className="dashboard-card daily-summary-card">
       <div className="card-heading">
         <div>
-          <h2>AI Daily Summary</h2>
-          <p>Short overview of your day</p>
+          <h2>AI-підсумок дня</h2>
+          <p>Короткий огляд поточного дня</p>
         </div>
         <span>AI</span>
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">Building your daily summary...</ModuleState>
+        <ModuleState tone="loading">Формуємо підсумок дня...</ModuleState>
       ) : error ? (
         <ModuleState tone="error">{error}</ModuleState>
       ) : (

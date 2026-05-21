@@ -36,7 +36,7 @@ const AssistantBrief = () => {
   }, []);
 
   const { error, isLoading, items } = useAsyncList({
-    fallbackError: 'AI brief is unavailable right now.',
+    fallbackError: 'AI-огляд зараз недоступний.',
     loadItems: loadAssistantContext
   });
 
@@ -49,14 +49,14 @@ const AssistantBrief = () => {
     <article className="dashboard-card assistant-card">
       <div className="card-heading">
         <div>
-          <h2>AI Assistant Brief</h2>
-          <p>Personal productivity snapshot</p>
+          <h2>AI-огляд</h2>
+          <p>Короткий знімок продуктивності</p>
         </div>
         <span>AI</span>
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">Preparing your AI brief...</ModuleState>
+        <ModuleState tone="loading">Готуємо AI-огляд...</ModuleState>
       ) : error ? (
         <ModuleState tone="error">{error}</ModuleState>
       ) : (
@@ -65,15 +65,15 @@ const AssistantBrief = () => {
 
           <div className="assistant-metrics">
             <div>
-              <p>Open tasks</p>
+              <p>Відкриті задачі</p>
               <strong>{openTasks}</strong>
             </div>
             <div>
-              <p>Completed</p>
+              <p>Виконано</p>
               <strong>{completedTasks}</strong>
             </div>
             <div>
-              <p>Events</p>
+              <p>Події</p>
               <strong>{context.events.length}</strong>
             </div>
           </div>

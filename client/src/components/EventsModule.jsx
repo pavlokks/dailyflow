@@ -26,7 +26,7 @@ const EventsModule = () => {
 
   const { error, isLoading, items: events, setError, setItems: setEvents } =
     useAsyncList({
-      fallbackError: 'AI assistant could not load your schedule. Please try again.',
+      fallbackError: 'Не вдалося завантажити події. Спробуйте ще раз.',
       loadItems: loadEvents
     });
 
@@ -60,7 +60,7 @@ const EventsModule = () => {
       setDate('');
     } catch (requestError) {
       setError(
-        getApiErrorMessage(requestError, 'Could not add this schedule item. Please try again.')
+        getApiErrorMessage(requestError, 'Не вдалося додати подію. Спробуйте ще раз.')
       );
     } finally {
       setIsCreating(false);
@@ -76,7 +76,7 @@ const EventsModule = () => {
       );
     } catch (requestError) {
       setError(
-        getApiErrorMessage(requestError, 'Could not remove this schedule item. Please try again.')
+        getApiErrorMessage(requestError, 'Не вдалося видалити подію. Спробуйте ще раз.')
       );
     }
   };
@@ -85,8 +85,8 @@ const EventsModule = () => {
     <article className="dashboard-card events-card">
       <div className="card-heading">
         <div>
-          <h2>Smart Schedule</h2>
-          <p>Upcoming calendar context</p>
+          <h2>Події</h2>
+          <p>Календарний контекст дня</p>
         </div>
         <span>{events.length}</span>
       </div>
@@ -96,7 +96,7 @@ const EventsModule = () => {
           type="text"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder="Schedule item"
+          placeholder="Назва події"
         />
         <input
           type="datetime-local"
@@ -106,11 +106,11 @@ const EventsModule = () => {
         <textarea
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          placeholder="Context for the assistant"
+          placeholder="Опис події"
           rows="3"
         />
         <button type="submit" disabled={isCreating || !title.trim() || !date}>
-          Add to schedule
+          Додати подію
         </button>
       </form>
 
@@ -118,9 +118,9 @@ const EventsModule = () => {
 
       <div className="event-list">
         {isLoading ? (
-          <ModuleState tone="loading">AI is reading your schedule...</ModuleState>
+          <ModuleState tone="loading">Завантажуємо події...</ModuleState>
         ) : events.length === 0 ? (
-          <ModuleState>No schedule items yet. Add one above.</ModuleState>
+          <ModuleState>Подій поки немає. Додайте подію або використайте демо-дані.</ModuleState>
         ) : (
           events.map((currentEvent) => (
             <div className="event-item" key={currentEvent._id}>
@@ -136,7 +136,7 @@ const EventsModule = () => {
                 type="button"
                 onClick={() => handleDeleteEvent(currentEvent._id)}
               >
-                Remove
+                Видалити
               </button>
             </div>
           ))

@@ -6,6 +6,7 @@ import DailySummaryWidget from '../components/DailySummaryWidget.jsx';
 import EventsModule from '../components/EventsModule.jsx';
 import FocusModeWidget from '../components/FocusModeWidget.jsx';
 import NewsModule from '../components/NewsModule.jsx';
+import ProductivityStatsWidget from '../components/ProductivityStatsWidget.jsx';
 import TasksModule from '../components/TasksModule.jsx';
 import WeatherCard from '../components/WeatherCard.jsx';
 
@@ -22,6 +23,7 @@ const DashboardPage = () => {
       <section className="dashboard-grid">
         <AssistantBrief />
         <DailySummaryWidget />
+        <ProductivityStatsWidget />
         <FocusModeWidget />
         <AITaskGenerator />
         <TasksModule />

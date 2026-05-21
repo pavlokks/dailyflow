@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
+import taskRoutes from './routes/taskRoutes.js';
 import testRoutes from './routes/testRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/tasks', taskRoutes);
 app.use('/api/test', testRoutes);
 
 app.get('/', (req, res) => {

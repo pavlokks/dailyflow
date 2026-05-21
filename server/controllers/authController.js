@@ -110,3 +110,27 @@ export const getCurrentUser = (req, res) => {
     user: toUserResponse(req.user)
   });
 };
+
+export const updateCurrentUser = async (req, res) => {
+  try {
+    const { city } = req.body;
+
+    if (city === undefined) {
+      return res.status(400).json({
+        message: 'City is required'
+      });
+    }
+
+    req.user.city = city.trim();
+    const updatedUser = await req.user.save();
+
+    return res.json({
+      user: toUserResponse(updatedUser)
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to update profile',
+      error: error.message
+    });
+  }
+};

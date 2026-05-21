@@ -8,11 +8,12 @@ The current assistant brief is powered by the app's own user context and product
 
 - JWT authentication with register, login and protected routes
 - Personal profile with city context for weather
-- Focus task management
+- Focus task management with descriptions, priorities and deadlines
 - Calendar event management
 - Weather context from OpenWeather
 - News brief from NewsAPI
 - AI Assistant Brief dashboard card
+- AI Task Generator with local template fallback
 - Loading states and basic error handling on the client
 - JSON 404/error responses on the server
 
@@ -115,6 +116,7 @@ http://localhost:5173
 - `/api/events` - authenticated event CRUD
 - `/api/weather` - weather for the user's profile city
 - `/api/news` - latest news headlines
+- `/api/ai/generate-tasks` - generate task suggestions from a user goal
 - `/api/health` - service health check
 
 ## DailyFlow AI Concept

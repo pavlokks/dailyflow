@@ -1,17 +1,66 @@
 import Task from '../models/Task.js';
 
+const allowedPriorities = ['low', 'medium', 'high'];
+
+const normalizeTaskPayload = ({ deadline, description, priority, title }) => {
+  const payload = {};
+
+  if (title !== undefined) {
+    payload.title = title.trim();
+  }
+
+  if (description !== undefined) {
+    payload.description = description.trim();
+  }
+
+  if (priority !== undefined) {
+    payload.priority = priority;
+  }
+
+  if (deadline !== undefined) {
+    payload.deadline = deadline ? new Date(deadline) : null;
+  }
+
+  return payload;
+};
+
+const validatePriority = (priority) => {
+  return priority === undefined || allowedPriorities.includes(priority);
+};
+
+const validateDeadline = (deadline) => {
+  return deadline === undefined || !deadline || !Number.isNaN(new Date(deadline).getTime());
+};
+
 export const createTask = async (req, res) => {
   try {
-    const { title } = req.body;
+    const { deadline, description, priority = 'medium', title } = req.body;
 
-    if (!title) {
+    if (!title?.trim()) {
       return res.status(400).json({
         message: 'Task title is required'
       });
     }
 
+    if (!validatePriority(priority)) {
+      return res.status(400).json({
+        message: 'Priority must be low, medium or high'
+      });
+    }
+
+    if (!validateDeadline(deadline)) {
+      return res.status(400).json({
+        message: 'Deadline must be a valid date'
+      });
+    }
+
     const task = await Task.create({
-      title,
+      ...normalizeTaskPayload({
+        deadline,
+        description,
+        priority,
+        title
+      }),
       user: req.user._id
     });
 
@@ -39,7 +88,7 @@ export const getUserTasks = async (req, res) => {
 
 export const updateTask = async (req, res) => {
   try {
-    const { title, completed } = req.body;
+    const { completed, deadline, description, priority, title } = req.body;
 
     const task = await Task.findOne({
       _id: req.params.id,
@@ -52,8 +101,45 @@ export const updateTask = async (req, res) => {
       });
     }
 
+    if (title !== undefined && !title.trim()) {
+      return res.status(400).json({
+        message: 'Task title cannot be empty'
+      });
+    }
+
+    if (!validatePriority(priority)) {
+      return res.status(400).json({
+        message: 'Priority must be low, medium or high'
+      });
+    }
+
+    if (!validateDeadline(deadline)) {
+      return res.status(400).json({
+        message: 'Deadline must be a valid date'
+      });
+    }
+
+    const taskPayload = normalizeTaskPayload({
+      deadline,
+      description,
+      priority,
+      title
+    });
+
     if (title !== undefined) {
-      task.title = title;
+      task.title = taskPayload.title;
+    }
+
+    if (description !== undefined) {
+      task.description = taskPayload.description;
+    }
+
+    if (priority !== undefined) {
+      task.priority = taskPayload.priority;
+    }
+
+    if (deadline !== undefined) {
+      task.deadline = taskPayload.deadline;
     }
 
     if (completed !== undefined) {

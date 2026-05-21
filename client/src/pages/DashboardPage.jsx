@@ -1,7 +1,10 @@
 import React from 'react';
+import AITaskGenerator from '../components/AITaskGenerator.jsx';
 import AppTopbar from '../components/AppTopbar.jsx';
 import AssistantBrief from '../components/AssistantBrief.jsx';
+import DailySummaryWidget from '../components/DailySummaryWidget.jsx';
 import EventsModule from '../components/EventsModule.jsx';
+import FocusModeWidget from '../components/FocusModeWidget.jsx';
 import NewsModule from '../components/NewsModule.jsx';
 import TasksModule from '../components/TasksModule.jsx';
 import WeatherCard from '../components/WeatherCard.jsx';
@@ -18,6 +21,9 @@ const DashboardPage = () => {
 
       <section className="dashboard-grid">
         <AssistantBrief />
+        <DailySummaryWidget />
+        <FocusModeWidget />
+        <AITaskGenerator />
         <TasksModule />
         <EventsModule />
         <WeatherCard />

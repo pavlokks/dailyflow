@@ -4,6 +4,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
+import aiRoutes from './routes/aiRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
@@ -22,6 +23,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use('/api/ai', aiRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/health', healthRoutes);

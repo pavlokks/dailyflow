@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Plus, WandSparkles } from 'lucide-react';
 import api from '../services/api.js';
 import { getApiErrorMessage } from '../utils/errors.js';
 import ModuleState from './ModuleState.jsx';
@@ -32,12 +33,12 @@ const AITaskGenerator = () => {
         goal: goal.trim()
       });
 
-      setGeneratedTasks(data.tasks || []);
+      setGeneratedTasks(Array.isArray(data) ? data : data.tasks || []);
     } catch (requestError) {
       setError(
         getApiErrorMessage(
           requestError,
-          'Не вдалося згенерувати задачі. Спробуйте ще раз.'
+          'Не вдалося підготувати список задач. Спробуйте ще раз.'
         )
       );
     } finally {
@@ -58,7 +59,6 @@ const AITaskGenerator = () => {
       await Promise.all(
         generatedTasks.map((task) =>
           api.post('/tasks', {
-            deadline: task.deadline || null,
             description: task.description || '',
             priority: task.priority || 'medium',
             title: task.title
@@ -66,7 +66,7 @@ const AITaskGenerator = () => {
         )
       );
 
-      setSuccess(`${generatedTasks.length} задач додано до списку.`);
+      setSuccess(`${generatedTasks.length} задач додано.`);
       setGeneratedTasks([]);
       setGoal('');
       window.dispatchEvent(new Event('dailyflow:tasks-updated'));
@@ -74,7 +74,7 @@ const AITaskGenerator = () => {
       setError(
         getApiErrorMessage(
           requestError,
-          'Не вдалося додати згенеровані задачі. Спробуйте ще раз.'
+          'Не вдалося додати задачі. Спробуйте ще раз.'
         )
       );
     } finally {
@@ -86,21 +86,20 @@ const AITaskGenerator = () => {
     <article className="dashboard-card ai-generator-card">
       <div className="card-heading">
         <div>
-          <h2>AI-генератор задач</h2>
-          <p>Перетворіть ціль на конкретний план дій</p>
+          <h2><WandSparkles size={18} /> План із цілі</h2>
+          <p>Опишіть ціль, а DailyFlow запропонує кілька конкретних кроків.</p>
         </div>
-        <span>AI</span>
       </div>
 
       <form className="ai-generator-form" onSubmit={handleGenerateTasks}>
         <textarea
           value={goal}
           onChange={(event) => setGoal(event.target.value)}
-          placeholder="Наприклад: Підготуватися до екзамену"
+          placeholder="Наприклад: підготуватися до екзамену"
           rows="4"
         />
         <button type="submit" disabled={isGenerating || !goal.trim()}>
-          {isGenerating ? 'Генеруємо...' : 'Згенерувати задачі'}
+          <WandSparkles size={16} /> {isGenerating ? 'Готуємо...' : 'Запропонувати задачі'}
         </button>
       </form>
 
@@ -117,7 +116,6 @@ const AITaskGenerator = () => {
               </div>
               <div className="generated-task-meta">
                 <span>{priorityLabels[task.priority] || 'середній'}</span>
-                <span>{task.deadline || 'Без дедлайну'}</span>
               </div>
             </div>
           ))}
@@ -128,7 +126,7 @@ const AITaskGenerator = () => {
             onClick={handleAddTasks}
             disabled={isAdding}
           >
-            {isAdding ? 'Додаємо...' : 'Додати до задач'}
+            <Plus size={16} /> {isAdding ? 'Додаємо...' : 'Додати до задач'}
           </button>
         </div>
       )}

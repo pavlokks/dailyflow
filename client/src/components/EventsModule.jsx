@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react';
+import { CalendarDays, Plus, Trash2 } from 'lucide-react';
 import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
 import { getApiErrorMessage } from '../utils/errors.js';
 import ModuleState from './ModuleState.jsx';
 
 const formatEventDate = (date) =>
-  new Intl.DateTimeFormat('en', {
+  new Intl.DateTimeFormat('uk-UA', {
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
@@ -18,6 +19,7 @@ const EventsModule = () => {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   const loadEvents = useCallback(async () => {
     const { data } = await api.get('/events');
@@ -81,12 +83,31 @@ const EventsModule = () => {
     }
   };
 
+  const handleClearEvents = async () => {
+    if (events.length === 0) {
+      return;
+    }
+
+    try {
+      setIsClearing(true);
+      setError('');
+      await Promise.all(events.map((event) => api.delete(`/events/${event._id}`)));
+      setEvents([]);
+    } catch (requestError) {
+      setError(
+        getApiErrorMessage(requestError, 'Не вдалося видалити всі події.')
+      );
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   return (
     <article className="dashboard-card events-card">
       <div className="card-heading">
         <div>
-          <h2>Події</h2>
-          <p>Календарний контекст дня</p>
+          <h2><CalendarDays size={18} /> Події</h2>
+          <p>Зустрічі, дедлайни та важливі дати.</p>
         </div>
         <span>{events.length}</span>
       </div>
@@ -109,9 +130,19 @@ const EventsModule = () => {
           placeholder="Опис події"
           rows="3"
         />
-        <button type="submit" disabled={isCreating || !title.trim() || !date}>
-          Додати подію
-        </button>
+        <div className="event-form-actions">
+          <button type="submit" disabled={isCreating || !title.trim() || !date}>
+            <Plus size={16} /> {isCreating ? 'Додаємо...' : 'Додати подію'}
+          </button>
+          <button
+            className="ghost-danger-button"
+            type="button"
+            disabled={isClearing || events.length === 0}
+            onClick={handleClearEvents}
+          >
+            <Trash2 size={16} /> {isClearing ? 'Очищення...' : 'Видалити всі'}
+          </button>
+        </div>
       </form>
 
       {error && <ModuleState tone="error">{error}</ModuleState>}
@@ -120,7 +151,7 @@ const EventsModule = () => {
         {isLoading ? (
           <ModuleState tone="loading">Завантажуємо події...</ModuleState>
         ) : events.length === 0 ? (
-          <ModuleState>Подій поки немає. Додайте подію або використайте демо-дані.</ModuleState>
+          <ModuleState>Подій поки немає. Додайте першу дату, щоб не тримати її в голові.</ModuleState>
         ) : (
           events.map((currentEvent) => (
             <div className="event-item" key={currentEvent._id}>
@@ -136,7 +167,7 @@ const EventsModule = () => {
                 type="button"
                 onClick={() => handleDeleteEvent(currentEvent._id)}
               >
-                Видалити
+                <Trash2 size={15} /> Видалити
               </button>
             </div>
           ))

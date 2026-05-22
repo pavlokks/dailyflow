@@ -35,6 +35,9 @@ export const getUserWeather = async (req, res) => {
     return res.json({
       city,
       temperature: weatherData.main.temp,
+      feelsLike: weatherData.main.feels_like,
+      humidity: weatherData.main.humidity,
+      windSpeed: weatherData.wind?.speed,
       description: weatherData.weather[0].description,
       icon: weatherData.weather[0].icon
     });

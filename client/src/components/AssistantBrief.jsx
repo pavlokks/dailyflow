@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { ClipboardList } from 'lucide-react';
 import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
 import ModuleState from './ModuleState.jsx';
@@ -6,16 +7,17 @@ import ModuleState from './ModuleState.jsx';
 const buildBrief = ({ events, tasks, user }) => {
   const openTasks = tasks.filter((task) => !task.completed).length;
   const nextEvent = events[0];
+  const name = user?.name || 'У вас';
 
   if (openTasks === 0 && !nextEvent) {
-    return `${user?.name || 'Ваш'} AI-помічник бачить спокійний день. Додайте задачу або подію, щоб сформувати фокус.`;
+    return `${name} сьогодні спокійний день. Додайте задачу або подію, коли з'явиться план.`;
   }
 
   if (nextEvent) {
-    return `AI-фокус: ${openTasks} відкритих задач, найближча подія - "${nextEvent.title}". Почніть із найважливішого пункту до календарного блоку.`;
+    return `${openTasks} відкритих задач. Найближча подія: "${nextEvent.title}".`;
   }
 
-  return `AI-фокус: ${openTasks} відкритих задач. Оберіть одну ключову справу й закрийте її першою.`;
+  return `${openTasks} відкритих задач. Оберіть одну головну і почніть з неї.`;
 };
 
 const AssistantBrief = () => {
@@ -36,7 +38,7 @@ const AssistantBrief = () => {
   }, []);
 
   const { error, isLoading, items } = useAsyncList({
-    fallbackError: 'AI-огляд зараз недоступний.',
+    fallbackError: 'Огляд зараз недоступний.',
     loadItems: loadAssistantContext
   });
 
@@ -49,14 +51,14 @@ const AssistantBrief = () => {
     <article className="dashboard-card assistant-card">
       <div className="card-heading">
         <div>
-          <h2>AI-огляд</h2>
-          <p>Короткий знімок продуктивності</p>
+          <h2><ClipboardList size={18} /> Огляд</h2>
+          <p>Поточний стан дня</p>
         </div>
-        <span>AI</span>
+        <span>{openTasks}</span>
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">Готуємо AI-огляд...</ModuleState>
+        <ModuleState tone="loading">Завантажуємо огляд...</ModuleState>
       ) : error ? (
         <ModuleState tone="error">{error}</ModuleState>
       ) : (
@@ -65,7 +67,7 @@ const AssistantBrief = () => {
 
           <div className="assistant-metrics">
             <div>
-              <p>Відкриті задачі</p>
+              <p>Відкриті</p>
               <strong>{openTasks}</strong>
             </div>
             <div>

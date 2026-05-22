@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { BarChart3 } from 'lucide-react';
 import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
 import ModuleState from './ModuleState.jsx';
@@ -34,7 +35,7 @@ const ProductivityStatsWidget = () => {
   }, []);
 
   const { error, isLoading, items, refresh } = useAsyncList({
-    fallbackError: 'Статистика продуктивності зараз недоступна.',
+    fallbackError: 'Статистика зараз недоступна.',
     loadItems: loadStatsContext
   });
 
@@ -61,21 +62,21 @@ const ProductivityStatsWidget = () => {
     <article className="dashboard-card productivity-stats-card">
       <div className="card-heading">
         <div>
-          <h2>Статистика продуктивності</h2>
-          <p>Прогрес задач і навантаження на сьогодні</p>
+          <h2><BarChart3 size={18} /> Статистика</h2>
+          <p>Коротко про задачі та події</p>
         </div>
         <span>{completionProgress}%</span>
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">Рахуємо статистику...</ModuleState>
+        <ModuleState tone="loading">Рахуємо...</ModuleState>
       ) : error ? (
         <ModuleState tone="error">{error}</ModuleState>
       ) : (
         <>
           <div className="stats-grid">
             <div>
-              <p>Усі задачі</p>
+              <p>Задачі</p>
               <strong>{totalTasks}</strong>
             </div>
             <div>
@@ -94,10 +95,10 @@ const ProductivityStatsWidget = () => {
 
           <div className="task-progress">
             <div>
-              <span>Виконання задач</span>
+              <span>Прогрес</span>
               <strong>{completionProgress}%</strong>
             </div>
-            <div className="progress-track" aria-label="Task completion progress">
+            <div className="progress-track" aria-label="Прогрес виконання задач">
               <span style={{ width: `${completionProgress}%` }} />
             </div>
           </div>

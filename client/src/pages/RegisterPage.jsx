@@ -49,8 +49,8 @@ const RegisterPage = () => {
 
   return (
     <AuthLayout
-      title="Створіть DailyFlow"
-      description="Налаштуйте персональний простір для задач, подій, погоди, новин і фокус-сесій."
+      title="Створити DailyFlow"
+      description="Налаштуйте особистий простір для задач, подій, погоди, новин і фокусу."
       switchText="Вже маєте акаунт?"
       switchLabel="Увійти"
       switchTo="/login"

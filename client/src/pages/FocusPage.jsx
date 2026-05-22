@@ -7,8 +7,8 @@ const FocusPage = () => {
   return (
     <DashboardShell>
       <AppTopbar
-        title="Фокус-режим"
-        subtitle="Запускайте 25-хвилинні Pomodoro-сесії та відстежуйте фокус."
+        title="Фокус"
+        subtitle="Запустіть 25-хвилинну сесію і працюйте без перемикань."
       />
 
       <section className="dashboard-grid module-page-grid">

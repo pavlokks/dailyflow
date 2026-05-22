@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { CloudSun } from 'lucide-react';
 import api from '../services/api.js';
 import { getApiErrorMessage } from '../utils/errors.js';
 import ModuleState from './ModuleState.jsx';
@@ -19,7 +20,7 @@ const WeatherCard = () => {
         setError(
           getApiErrorMessage(
             requestError,
-            'Не вдалося завантажити погоду. Вкажіть місто у профілі або перевірте OPENWEATHER_API_KEY.'
+            'Не вдалося завантажити погоду. Перевірте місто в профілі або API key.'
           )
         );
       } finally {
@@ -37,7 +38,7 @@ const WeatherCard = () => {
     <article className="dashboard-card weather-card">
       <div className="weather-card-top">
         <div>
-          <p className="weather-label">Погода</p>
+          <p className="weather-label"><CloudSun size={15} /> Погода</p>
           <h2>{weather?.city || 'Ваше місто'}</h2>
         </div>
         {weather?.icon && (
@@ -58,6 +59,11 @@ const WeatherCard = () => {
           <p className="weather-description">
             {weather?.description || 'Погода недоступна'}
           </p>
+          <div className="weather-details">
+            <span>Відчувається: {Math.round(weather?.feelsLike ?? roundedTemperature)}°C</span>
+            <span>Вологість: {weather?.humidity ?? '-'}%</span>
+            <span>Вітер: {weather?.windSpeed ?? '-'} м/с</span>
+          </div>
         </div>
       )}
     </article>

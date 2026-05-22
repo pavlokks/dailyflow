@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
 import { getApiErrorMessage } from '../utils/errors.js';
@@ -10,11 +11,7 @@ const priorityLabels = {
   medium: 'Середній'
 };
 
-const priorityOrder = {
-  high: 1,
-  medium: 2,
-  low: 3
-};
+const priorityOrder = { high: 1, medium: 2, low: 3 };
 
 const initialTaskForm = {
   deadline: '',
@@ -24,11 +21,9 @@ const initialTaskForm = {
 };
 
 const formatDeadline = (deadline) => {
-  if (!deadline) {
-    return 'Без дедлайну';
-  }
+  if (!deadline) return 'Без дедлайну';
 
-  return new Intl.DateTimeFormat('en', {
+  return new Intl.DateTimeFormat('uk-UA', {
     day: '2-digit',
     month: 'short',
     year: 'numeric'
@@ -45,9 +40,7 @@ const sortTasks = (tasks) => {
       priorityOrder[firstTask.priority || 'medium'] -
       priorityOrder[secondTask.priority || 'medium'];
 
-    if (priorityDifference !== 0) {
-      return priorityDifference;
-    }
+    if (priorityDifference !== 0) return priorityDifference;
 
     const firstDeadline = firstTask.deadline
       ? new Date(firstTask.deadline).getTime()
@@ -67,6 +60,7 @@ const notifyTasksUpdated = () => {
 const TasksModule = () => {
   const [formData, setFormData] = useState(initialTaskForm);
   const [isCreating, setIsCreating] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   const loadTasks = useCallback(async () => {
     const { data } = await api.get('/tasks');
@@ -82,28 +76,19 @@ const TasksModule = () => {
   useEffect(() => {
     window.addEventListener('dailyflow:tasks-updated', refresh);
 
-    return () => {
-      window.removeEventListener('dailyflow:tasks-updated', refresh);
-    };
+    return () => window.removeEventListener('dailyflow:tasks-updated', refresh);
   }, [refresh]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-
-    setFormData((currentData) => ({
-      ...currentData,
-      [name]: value
-    }));
+    setFormData((currentData) => ({ ...currentData, [name]: value }));
   };
 
   const handleCreateTask = async (event) => {
     event.preventDefault();
 
     const trimmedTitle = formData.title.trim();
-
-    if (!trimmedTitle) {
-      return;
-    }
+    if (!trimmedTitle) return;
 
     try {
       setIsCreating(true);
@@ -164,6 +149,24 @@ const TasksModule = () => {
     }
   };
 
+  const handleClearTasks = async () => {
+    if (tasks.length === 0) return;
+
+    try {
+      setIsClearing(true);
+      setError('');
+      await Promise.all(tasks.map((task) => api.delete(`/tasks/${task._id}`)));
+      setTasks([]);
+      notifyTasksUpdated();
+    } catch (requestError) {
+      setError(
+        getApiErrorMessage(requestError, 'Не вдалося видалити всі задачі.')
+      );
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   const completedCount = tasks.filter((task) => task.completed).length;
   const sortedTasks = sortTasks(tasks);
 
@@ -171,8 +174,8 @@ const TasksModule = () => {
     <article className="dashboard-card tasks-card">
       <div className="card-heading">
         <div>
-          <h2>Задачі</h2>
-          <p>Виконано {completedCount} з {tasks.length}</p>
+          <h2><CheckCircle2 size={18} /> Задачі</h2>
+          <p>Виконано {completedCount} з {tasks.length}. Тримайте список коротким і зрозумілим.</p>
         </div>
         <span>{tasks.length}</span>
       </div>
@@ -183,13 +186,13 @@ const TasksModule = () => {
           type="text"
           value={formData.title}
           onChange={handleChange}
-          placeholder="Додайте задачу"
+          placeholder="Назва задачі"
         />
         <textarea
           name="description"
           value={formData.description}
           onChange={handleChange}
-          placeholder="Опис або нотатки"
+          placeholder="Короткий опис або нотатки"
           rows="3"
         />
         <div className="task-form-row">
@@ -211,9 +214,19 @@ const TasksModule = () => {
             aria-label="Дедлайн задачі"
           />
         </div>
-        <button type="submit" disabled={isCreating || !formData.title.trim()}>
-          {isCreating ? 'Додаємо...' : 'Додати задачу'}
-        </button>
+        <div className="task-form-actions">
+          <button type="submit" disabled={isCreating || !formData.title.trim()}>
+            <Plus size={16} /> {isCreating ? 'Додаємо...' : 'Додати'}
+          </button>
+          <button
+            className="ghost-danger-button"
+            type="button"
+            disabled={isClearing || tasks.length === 0}
+            onClick={handleClearTasks}
+          >
+            <Trash2 size={16} /> {isClearing ? 'Очищення...' : 'Видалити всі'}
+          </button>
+        </div>
       </form>
 
       {error && <ModuleState tone="error">{error}</ModuleState>}
@@ -222,7 +235,7 @@ const TasksModule = () => {
         {isLoading ? (
           <ModuleState tone="loading">Завантажуємо задачі...</ModuleState>
         ) : sortedTasks.length === 0 ? (
-          <ModuleState>Задач поки немає. Додайте першу задачу або натисніть Load Demo Data на огляді.</ModuleState>
+          <ModuleState>Задач ще немає. Додайте перший крок або створіть план із цілі в розділі “Помічник”.</ModuleState>
         ) : (
           sortedTasks.map((task) => {
             const priority = task.priority || 'medium';
@@ -241,17 +254,14 @@ const TasksModule = () => {
                       {priorityLabels[priority]}
                     </span>
                   </div>
-
                   <p className="task-description">
                     {task.description || 'Опис не додано.'}
                   </p>
-
                   <div className="task-meta">
                     <span>{formatDeadline(task.deadline)}</span>
                     <span>{task.completed ? 'Виконано' : 'У процесі'}</span>
                   </div>
                 </div>
-
                 <div className="task-actions">
                   <label className="task-check">
                     <input
@@ -266,7 +276,7 @@ const TasksModule = () => {
                     type="button"
                     onClick={() => handleDeleteTask(task._id)}
                   >
-                    Видалити
+                    <Trash2 size={15} /> Видалити
                   </button>
                 </div>
               </div>

@@ -9,8 +9,8 @@ const AIAssistantPage = () => {
   return (
     <DashboardShell>
       <AppTopbar
-        title="AI-помічник"
-        subtitle="Генеруйте задачі з цілі та переглядайте поточний контекст продуктивності."
+        title="Помічник"
+        subtitle="Створіть план із цілі або перегляньте короткий контекст дня."
       />
 
       <section className="dashboard-grid module-page-grid">

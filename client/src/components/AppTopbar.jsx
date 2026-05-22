@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const AppTopbar = ({ title, subtitle, backLink, backLabel }) => {
+const AppTopbar = ({ title, subtitle, backLink, backLabel, actions }) => {
   return (
     <header className="dashboard-topbar">
       <div>
@@ -10,6 +10,7 @@ const AppTopbar = ({ title, subtitle, backLink, backLabel }) => {
         {subtitle && <p className="topbar-subtitle">{subtitle}</p>}
       </div>
       <div className="topbar-actions">
+        {actions}
         {backLink && (
           <Link className="secondary-button" to={backLink}>
             {backLabel}

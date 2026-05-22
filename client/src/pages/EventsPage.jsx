@@ -8,7 +8,7 @@ const EventsPage = () => {
     <DashboardShell>
       <AppTopbar
         title="Події"
-        subtitle="Тримайте календарний контекст поруч із задачами."
+        subtitle="Тримайте зустрічі, дедлайни та важливі дати поруч із задачами."
       />
 
       <section className="dashboard-grid module-page-grid">

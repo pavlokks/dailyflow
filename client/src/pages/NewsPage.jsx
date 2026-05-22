@@ -8,7 +8,7 @@ const NewsPage = () => {
     <DashboardShell>
       <AppTopbar
         title="Новини"
-        subtitle="Переглядайте заголовки, які можуть вплинути на планування дня."
+        subtitle="Короткий список заголовків, якщо потрібен контекст дня."
       />
 
       <section className="dashboard-grid module-page-grid">

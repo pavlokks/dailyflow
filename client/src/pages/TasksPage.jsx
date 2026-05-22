@@ -8,7 +8,7 @@ const TasksPage = () => {
     <DashboardShell>
       <AppTopbar
         title="Задачі"
-        subtitle="Керуйте задачами, пріоритетами, дедлайнами та статусом виконання."
+        subtitle="Створюйте задачі, задавайте пріоритет і відмічайте виконання."
       />
 
       <section className="dashboard-grid module-page-grid">

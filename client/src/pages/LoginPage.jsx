@@ -47,8 +47,8 @@ const LoginPage = () => {
 
   return (
     <AuthLayout
-      title="DailyFlow"
-      description="Персональний вебпомічник для задач, подій, погоди та щоденного фокусу."
+      title="Вхід у DailyFlow"
+      description="Ваші задачі, події та щоденний огляд в одному місці."
       switchText="Немає акаунта?"
       switchLabel="Зареєструватися"
       switchTo="/register"

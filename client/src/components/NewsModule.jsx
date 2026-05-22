@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { Newspaper } from 'lucide-react';
 import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
 import ModuleState from './ModuleState.jsx';
@@ -18,8 +19,8 @@ const NewsModule = () => {
     <article className="dashboard-card news-card">
       <div className="card-heading">
         <div>
-          <h2>Новини</h2>
-          <p>Актуальні заголовки для контексту</p>
+          <h2><Newspaper size={18} /> Новини</h2>
+          <p>Короткий контекст дня без зайвого шуму.</p>
         </div>
         <span>{articles.length}</span>
       </div>
@@ -30,15 +31,14 @@ const NewsModule = () => {
         {isLoading ? (
           <ModuleState tone="loading">Завантажуємо новини...</ModuleState>
         ) : articles.length === 0 ? (
-          <ModuleState>Новин зараз немає. Для демонстрації можна показати інші модулі.</ModuleState>
+          <ModuleState>Новин зараз немає. Можна спокійно повернутися до задач.</ModuleState>
         ) : (
           articles.map((article) => (
-            <div className="news-item" key={article.url}>
-              {article.image ? (
-                <img src={article.image} alt={article.title} />
-              ) : (
-                <div className="news-image-placeholder" />
-              )}
+            <div
+              className={article.image ? 'news-item' : 'news-item news-item-no-image'}
+              key={article.url}
+            >
+              {article.image && <img src={article.image} alt={article.title} />}
               <div className="news-content">
                 <p className="news-source">{article.source}</p>
                 <h3>{article.title}</h3>

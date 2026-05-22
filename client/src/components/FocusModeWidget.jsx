@@ -1,52 +1,24 @@
-import React, { useEffect, useMemo, useState } from 'react';
-
-const focusDuration = 25 * 60;
-
-const formatTime = (seconds) => {
-  const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const remainingSeconds = (seconds % 60).toString().padStart(2, '0');
-
-  return `${minutes}:${remainingSeconds}`;
-};
+import React from 'react';
+import { Pause, Play, RotateCcw, Timer } from 'lucide-react';
+import useFocusTimer, { formatFocusTime } from '../hooks/useFocusTimer.js';
 
 const FocusModeWidget = () => {
-  const [remainingSeconds, setRemainingSeconds] = useState(focusDuration);
-  const [isRunning, setIsRunning] = useState(false);
-  const [completedSessions, setCompletedSessions] = useState(0);
-
-  useEffect(() => {
-    if (!isRunning) {
-      return undefined;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setRemainingSeconds((currentSeconds) => {
-        if (currentSeconds <= 1) {
-          window.clearInterval(intervalId);
-          setIsRunning(false);
-          setCompletedSessions((currentSessions) => currentSessions + 1);
-          return focusDuration;
-        }
-
-        return currentSeconds - 1;
-      });
-    }, 1000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [isRunning]);
-
-  const progress = useMemo(() => {
-    return ((focusDuration - remainingSeconds) / focusDuration) * 100;
-  }, [remainingSeconds]);
+  const {
+    completedSessions,
+    isRunning,
+    pause,
+    progress,
+    remainingSeconds,
+    reset,
+    start
+  } = useFocusTimer();
 
   return (
     <article className="dashboard-card focus-mode-card">
       <div className="card-heading">
         <div>
-          <h2>Фокус-режим</h2>
-          <p>Pomodoro-сесія на 25 хвилин</p>
+          <h2><Timer size={18} /> Фокус</h2>
+          <p>25 хвилин роботи без перемикань.</p>
         </div>
         <span>{completedSessions}</span>
       </div>
@@ -55,36 +27,30 @@ const FocusModeWidget = () => {
         <div
           className="focus-progress"
           style={{
-            background: `conic-gradient(#2563eb ${progress}%, #dbeafe ${progress}%)`
+            background: `conic-gradient(#2563eb ${progress}%, #e5e7eb ${progress}%)`
           }}
         >
           <div>
-            <strong>{formatTime(remainingSeconds)}</strong>
-            <p>{isRunning ? 'Фокус триває' : 'Готово до фокусу'}</p>
+            <strong>{formatFocusTime(remainingSeconds)}</strong>
+            <p>{isRunning ? 'Сесія триває' : 'Готово до старту'}</p>
           </div>
         </div>
       </div>
 
       <div className="focus-actions">
-        <button type="button" onClick={() => setIsRunning(true)} disabled={isRunning}>
-          Старт
+        <button type="button" onClick={start} disabled={isRunning}>
+          <Play size={16} /> Старт
         </button>
-        <button type="button" onClick={() => setIsRunning(false)} disabled={!isRunning}>
-          Пауза
+        <button type="button" onClick={pause} disabled={!isRunning}>
+          <Pause size={16} /> Пауза
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            setIsRunning(false);
-            setRemainingSeconds(focusDuration);
-          }}
-        >
-          Скинути
+        <button type="button" onClick={reset}>
+          <RotateCcw size={16} /> Скинути
         </button>
       </div>
 
       <p className="focus-sessions">
-        Завершені фокус-сесії: <strong>{completedSessions}</strong>
+        Завершені сесії: <strong>{completedSessions}</strong>
       </p>
     </article>
   );

@@ -48,7 +48,7 @@ const ProfilePage = () => {
 
       setUser(data.user);
       setCity(data.user.city || '');
-      setSuccess('Контекст профілю оновлено.');
+      setSuccess('Профіль оновлено.');
     } catch (requestError) {
       setError(
         getApiErrorMessage(
@@ -65,7 +65,7 @@ const ProfilePage = () => {
     <DashboardShell>
       <AppTopbar
         title="Профіль"
-        subtitle="Персональний контекст для DailyFlow."
+        subtitle="Особисті дані та місто для погоди."
       />
 
       <section className="profile-shell">

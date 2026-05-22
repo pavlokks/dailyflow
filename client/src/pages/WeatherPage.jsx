@@ -8,7 +8,7 @@ const WeatherPage = () => {
     <DashboardShell>
       <AppTopbar
         title="Погода"
-        subtitle="Використовуйте локальні умови як частину щоденного планування."
+        subtitle="Локальні умови для щоденного планування."
       />
 
       <section className="dashboard-grid module-page-grid">

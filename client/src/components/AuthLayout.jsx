@@ -30,6 +30,9 @@ const AuthLayout = ({
           <p className="auth-switch">
             {switchText} <Link to={switchTo}>{switchLabel}</Link>
           </p>
+          <Link className="auth-home-link" to="/">
+            На головну
+          </Link>
         </form>
       </section>
     </main>

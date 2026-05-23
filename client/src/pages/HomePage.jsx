@@ -5,33 +5,31 @@ const HomePage = () => {
   const token = localStorage.getItem('dailyflowToken');
 
   return (
-    <main className="landing-page">
-      <header className="landing-nav">
-        <Link className="landing-brand" to="/">
+    <main className='landing-page'>
+      <header className='landing-nav'>
+        <Link className='brand' to='/'>
           <span>DF</span>
           <strong>DailyFlow</strong>
         </Link>
-        <div className="landing-actions">
-          <Link to={token ? '/dashboard' : '/login'}>
-            {token ? 'До кабінету' : 'Увійти'}
-          </Link>
+        <div className='landing-actions'>
+          <Link to={token ? '/dashboard' : '/login'}>{token ? 'До кабінету' : 'Увійти'}</Link>
         </div>
       </header>
 
-      <section className="landing-hero">
-        <p className="eyebrow">персональний вебпомічник</p>
+      <section className='landing-hero'>
+        <p className='eyebrow'>персональний вебпомічник</p>
         <h1>DailyFlow</h1>
         <p>
-          Простий простір для задач, подій, погоди, новин і фокус-сесій.
-          Без зайвого шуму: відкрили день, подивилися план, почали працювати.
+          Простий простір для задач, подій, погоди, новин і фокус-сесій. Без зайвого шуму: відкрили
+          день, подивилися план, почали працювати.
         </p>
-        <div className="landing-cta">
+        <div className='landing-cta'>
           <Link to={token ? '/dashboard' : '/register'}>Почати</Link>
-          <Link to="/login">Увійти</Link>
+          <Link to='/login'>Увійти</Link>
         </div>
       </section>
 
-      <section className="landing-features" aria-label="Можливості DailyFlow">
+      <section className='landing-features' aria-label='Можливості DailyFlow'>
         <article>
           <h2>План дня</h2>
           <p>Задачі, події та короткий підсумок в одному місці.</p>

@@ -52,36 +52,37 @@ const WeatherCard = () => {
 
   return (
     <article className="dashboard-card weather-card">
-      <div className="weather-card-top">
-        <div>
-          <p className="weather-label"><CloudSun size={15} /> Погода</p>
-          <h2>{weather?.city || 'Ваше місто'}</h2>
-        </div>
-        {weather?.icon && (
-          <img
-            src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
-            alt={weather.description || 'Погода'}
-          />
-        )}
-      </div>
-
       {isLoading ? (
         <ModuleState tone="loading">Завантажуємо погоду...</ModuleState>
       ) : error ? (
         <ModuleState tone="error">{error}</ModuleState>
       ) : (
         <div className="weather-content">
-          <p className="weather-temperature">{formatTemperature(weather?.temperature)}</p>
-          <p className="weather-description">
-            {weather?.description || 'Погода недоступна'}
-          </p>
-          <div className="weather-details">
-            {visibleDetails.map((item) => (
-              <span key={item.key}>
-                {item.label}: {item.render(weather[item.key])}
-              </span>
-            ))}
+          <div className="weather-card-top">
+            <div className="weather-main-info">
+              <p className="weather-label"><CloudSun size={15} /> Погода</p>
+              <h2>{weather?.city || 'Ваше місто'}</h2>
+              <p className="weather-temperature">{formatTemperature(weather?.temperature)}</p>
+              <p className="weather-description">
+                {weather?.description || 'Погода недоступна'}
+              </p>
+            </div>
+            {weather?.icon && (
+              <img
+                src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
+                alt={weather.description || 'Погода'}
+              />
+            )}
           </div>
+
+          <dl className="weather-details">
+            {visibleDetails.map((item) => (
+              <div className="weather-detail-card" key={item.key}>
+                <dt>{item.label}</dt>
+                <dd>{item.render(weather[item.key])}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       )}
     </article>

@@ -9,7 +9,7 @@ import {
   RotateCcw,
   Save,
   Trash2,
-  X
+  X,
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import useAsyncList from '../hooks/useAsyncList.js';
@@ -22,7 +22,7 @@ const collapsedProjectsKey = 'dailyflowCollapsedTaskProjects';
 const priorityLabels = {
   high: 'Високий',
   low: 'Низький',
-  medium: 'Середній'
+  medium: 'Середній',
 };
 
 const priorityOrder = { high: 1, medium: 2, low: 3 };
@@ -32,7 +32,7 @@ const initialTaskForm = {
   description: '',
   priority: 'medium',
   project: '',
-  title: ''
+  title: '',
 };
 
 const formatDeadline = (deadline) => {
@@ -41,7 +41,7 @@ const formatDeadline = (deadline) => {
   return new Intl.DateTimeFormat('uk-UA', {
     day: '2-digit',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
   }).format(new Date(deadline));
 };
 
@@ -160,11 +160,17 @@ const TasksModule = () => {
     }
   }, []);
 
-  const { error, isLoading, items: tasks, refresh, setError, setItems: setTasks } =
-    useAsyncList({
-      fallbackError: 'Не вдалося завантажити задачі. Спробуйте ще раз.',
-      loadItems: loadTasks
-    });
+  const {
+    error,
+    isLoading,
+    items: tasks,
+    refresh,
+    setError,
+    setItems: setTasks,
+  } = useAsyncList({
+    fallbackError: 'Не вдалося завантажити задачі. Спробуйте ще раз.',
+    loadItems: loadTasks,
+  });
 
   useEffect(() => {
     window.addEventListener('dailyflow:tasks-updated', refresh);
@@ -203,7 +209,7 @@ const TasksModule = () => {
       description: task.description || '',
       priority: task.priority || 'medium',
       project: getTaskProjectId(task),
-      title: task.title || ''
+      title: task.title || '',
     });
   };
 
@@ -226,16 +232,14 @@ const TasksModule = () => {
         description: formData.description.trim(),
         priority: formData.priority,
         project: formData.project || null,
-        title: trimmedTitle
+        title: trimmedTitle,
       });
 
       setTasks((currentTasks) => sortTasks([data, ...currentTasks]));
       setFormData(initialTaskForm);
       notifyTasksUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося додати задачу. Спробуйте ще раз.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося додати задачу. Спробуйте ще раз.'));
     } finally {
       setIsCreating(false);
     }
@@ -251,7 +255,7 @@ const TasksModule = () => {
       setIsSavingProject(true);
       setError('');
       const { data } = await api.post('/projects', {
-        name: trimmedName
+        name: trimmedName,
       });
 
       setProjects((currentProjects) => [data, ...currentProjects]);
@@ -260,9 +264,7 @@ const TasksModule = () => {
       setIsProjectFormOpen(false);
       notifyProjectsUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося створити проєкт. Спробуйте ще раз.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося створити проєкт. Спробуйте ще раз.'));
     } finally {
       setIsSavingProject(false);
     }
@@ -283,26 +285,24 @@ const TasksModule = () => {
       setIsSavingProject(true);
       setError('');
       const { data } = await api.put(`/projects/${renamingProjectId}`, {
-        name: trimmedName
+        name: trimmedName,
       });
 
       setProjects((currentProjects) =>
-        currentProjects.map((project) => (project._id === data._id ? data : project))
+        currentProjects.map((project) => (project._id === data._id ? data : project)),
       );
       setTasks((currentTasks) =>
         currentTasks.map((task) =>
           getTaskProjectId(task) === data._id
             ? { ...task, project: { ...task.project, name: data.name } }
-            : task
-        )
+            : task,
+        ),
       );
       setRenamingProjectId('');
       setRenamingProjectName('');
       notifyProjectsUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося перейменувати проєкт.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося перейменувати проєкт.'));
     } finally {
       setIsSavingProject(false);
     }
@@ -312,21 +312,17 @@ const TasksModule = () => {
     try {
       setError('');
       const { data } = await api.put(`/tasks/${task._id}`, {
-        completed: !task.completed
+        completed: !task.completed,
       });
 
       setTasks((currentTasks) =>
         sortTasks(
-          currentTasks.map((currentTask) =>
-            currentTask._id === data._id ? data : currentTask
-          )
-        )
+          currentTasks.map((currentTask) => (currentTask._id === data._id ? data : currentTask)),
+        ),
       );
       notifyTasksUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося оновити задачу. Спробуйте ще раз.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося оновити задачу. Спробуйте ще раз.'));
     }
   };
 
@@ -342,22 +338,18 @@ const TasksModule = () => {
         description: editFormData.description.trim(),
         priority: editFormData.priority,
         project: editFormData.project || null,
-        title: editFormData.title.trim()
+        title: editFormData.title.trim(),
       });
 
       setTasks((currentTasks) =>
         sortTasks(
-          currentTasks.map((currentTask) =>
-            currentTask._id === data._id ? data : currentTask
-          )
-        )
+          currentTasks.map((currentTask) => (currentTask._id === data._id ? data : currentTask)),
+        ),
       );
       closeEditTask();
       notifyTasksUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося оновити задачу. Спробуйте ще раз.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося оновити задачу. Спробуйте ще раз.'));
     }
   };
 
@@ -365,15 +357,11 @@ const TasksModule = () => {
     try {
       setError('');
       await api.delete(`/tasks/${taskId}`);
-      setTasks((currentTasks) =>
-        currentTasks.filter((currentTask) => currentTask._id !== taskId)
-      );
+      setTasks((currentTasks) => currentTasks.filter((currentTask) => currentTask._id !== taskId));
       loadTrashTasks();
       notifyTasksUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося видалити задачу. Спробуйте ще раз.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося видалити задачу. Спробуйте ще раз.'));
     }
   };
 
@@ -392,9 +380,7 @@ const TasksModule = () => {
       loadTrashTasks();
       notifyTasksUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося видалити всі задачі.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося видалити всі задачі.'));
     } finally {
       setIsClearing(false);
       setConfirmDeleteAllAction('');
@@ -406,14 +392,12 @@ const TasksModule = () => {
       setError('');
       const { data } = await api.put(`/tasks/${taskId}/restore`);
       setTrashTasks((currentTasks) =>
-        currentTasks.filter((currentTask) => currentTask._id !== taskId)
+        currentTasks.filter((currentTask) => currentTask._id !== taskId),
       );
       setTasks((currentTasks) => sortTasks([data, ...currentTasks]));
       notifyTasksUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося відновити задачу.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося відновити задачу.'));
     }
   };
 
@@ -422,13 +406,11 @@ const TasksModule = () => {
       setError('');
       await api.delete(`/tasks/${taskId}/permanent`);
       setTrashTasks((currentTasks) =>
-        currentTasks.filter((currentTask) => currentTask._id !== taskId)
+        currentTasks.filter((currentTask) => currentTask._id !== taskId),
       );
       notifyTasksUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося видалити задачу остаточно.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося видалити задачу остаточно.'));
     }
   };
 
@@ -446,19 +428,17 @@ const TasksModule = () => {
         setTrashTasks([]);
       } else {
         await Promise.all(
-          filteredTrashTasks.map((task) => api.delete(`/tasks/${task._id}/permanent`))
+          filteredTrashTasks.map((task) => api.delete(`/tasks/${task._id}/permanent`)),
         );
         setTrashTasks((currentTasks) =>
           currentTasks.filter(
-            (task) => !filteredTrashTasks.some((trashTask) => trashTask._id === task._id)
-          )
+            (task) => !filteredTrashTasks.some((trashTask) => trashTask._id === task._id),
+          ),
         );
       }
       notifyTasksUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося очистити кошик задач.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося очистити кошик задач.'));
     } finally {
       setConfirmDeleteAllAction('');
     }
@@ -493,6 +473,16 @@ const TasksModule = () => {
     return projectId === selectedProject;
   });
   const visibleCompletedCount = visibleTasks.filter((task) => task.completed).length;
+  const usedProjectIds = new Set(
+    [...tasks, ...trashTasks].map((task) => getTaskProjectId(task)).filter(Boolean),
+  );
+  const visibleProjects = projects.filter(
+    (project) =>
+      usedProjectIds.has(project._id) ||
+      formData.project === project._id ||
+      editFormData.project === project._id ||
+      renamingProjectId === project._id,
+  );
   const selectedProjectName =
     selectedProject === 'all'
       ? 'Усі задачі'
@@ -500,18 +490,18 @@ const TasksModule = () => {
         ? 'Без проєкту'
         : projects.find((project) => project._id === selectedProject)?.name || 'Проєкт';
   const projectGroups = [
-    ...projects.map((project) => ({
+    ...visibleProjects.map((project) => ({
       id: project._id,
       name: project.name,
       project,
-      tasks: visibleTasks.filter((task) => getTaskProjectId(task) === project._id)
+      tasks: visibleTasks.filter((task) => getTaskProjectId(task) === project._id),
     })),
     {
       id: 'no-project',
       name: 'Без проєкту',
       project: null,
-      tasks: visibleTasks.filter((task) => !getTaskProjectId(task))
-    }
+      tasks: visibleTasks.filter((task) => !getTaskProjectId(task)),
+    },
   ].filter((group) => {
     if (selectedProject === 'all') return group.tasks.length > 0 || group.id === 'no-project';
     return group.tasks.length > 0;
@@ -524,125 +514,101 @@ const TasksModule = () => {
   };
 
   return (
-    <article className="dashboard-card tasks-card">
-      <div className="card-heading">
+    <article className='dashboard-card tasks-card'>
+      <div className='card-heading'>
         <div>
-          <h2><CheckCircle2 size={18} /> Задачі</h2>
-          <p>Виконано {visibleCompletedCount} з {visibleTasks.length}. Поточний фільтр: {selectedProjectName}.</p>
+          <h2>
+            <CheckCircle2 size={18} /> Задачі
+          </h2>
+          <p>
+            Виконано {visibleCompletedCount} з {visibleTasks.length}. Поточний фільтр:{' '}
+            {selectedProjectName}.
+          </p>
         </div>
         <span>{visibleTasks.length}</span>
       </div>
 
-      <form className="task-form" onSubmit={handleCreateTask}>
+      <form className='task-form' onSubmit={handleCreateTask}>
         <input
-          name="title"
-          type="text"
+          name='title'
+          type='text'
           value={formData.title}
           onChange={handleChange}
-          placeholder="Назва задачі"
+          placeholder='Назва задачі'
         />
         <textarea
-          name="description"
+          name='description'
           value={formData.description}
           onChange={handleChange}
-          placeholder="Короткий опис або нотатки"
-          rows="3"
+          placeholder='Короткий опис або нотатки'
+          rows='3'
         />
-        <div className="task-form-row">
+        <div className='task-form-row'>
           <select
-            name="project"
+            name='project'
             value={formData.project}
             onChange={handleChange}
-            aria-label="Проєкт задачі"
+            aria-label='Проєкт задачі'
           >
-            <option value="">Без проєкту</option>
-            {projects.map((project) => (
+            <option value=''>Без проєкту</option>
+            {visibleProjects.map((project) => (
               <option key={project._id} value={project._id}>
                 {project.name}
               </option>
             ))}
           </select>
           <select
-            name="priority"
+            name='priority'
             value={formData.priority}
             onChange={handleChange}
-            aria-label="Пріоритет задачі"
+            aria-label='Пріоритет задачі'
           >
-            <option value="low">Низький пріоритет</option>
-            <option value="medium">Середній пріоритет</option>
-            <option value="high">Високий пріоритет</option>
+            <option value='low'>Низький пріоритет</option>
+            <option value='medium'>Середній пріоритет</option>
+            <option value='high'>Високий пріоритет</option>
           </select>
           <input
-            name="deadline"
-            type="date"
+            name='deadline'
+            type='date'
             value={formData.deadline}
             onChange={handleChange}
-            aria-label="Дедлайн задачі"
+            aria-label='Дедлайн задачі'
           />
         </div>
-        <div className="task-form-actions">
-          <button type="submit" disabled={isCreating || !formData.title.trim()}>
+        <div className='task-form-actions'>
+          <button type='submit' disabled={isCreating || !formData.title.trim()}>
             <Plus size={16} /> {isCreating ? 'Додаємо...' : 'Додати'}
           </button>
           <button
-            className="ghost-danger-button"
-            type="button"
+            className='ghost-danger-button'
+            type='button'
             disabled={isClearing || tasks.length === 0}
             onClick={handleClearTasks}
           >
-            <Trash2 size={16} /> {isClearing ? 'Очищення...' : confirmDeleteAllAction === 'tasks' ? 'Натисніть ще раз' : 'Видалити всі'}
+            <Trash2 size={16} />{' '}
+            {isClearing
+              ? 'Очищення...'
+              : confirmDeleteAllAction === 'tasks'
+                ? 'Натисніть ще раз'
+                : 'Видалити всі'}
           </button>
         </div>
       </form>
 
-      {error && <ModuleState tone="error">{error}</ModuleState>}
+      {error && <ModuleState tone='error'>{error}</ModuleState>}
 
-      <section className="projects-toolbar">
+      <section className='projects-toolbar'>
         <div>
-          <h3><Folder size={16} /> Проекти</h3>
-          <p>{formatProjectCount(projects.length)}</p>
+          <h3>
+            <Folder size={16} /> Проєкти
+          </h3>
+          <p>{formatProjectCount(visibleProjects.length)}</p>
         </div>
-        {isProjectFormOpen ? (
-          <div className="project-create-form">
-            <input
-              type="text"
-              value={newProjectName}
-              onChange={(event) => setNewProjectName(event.target.value)}
-              placeholder="Назва проєкту"
-              autoFocus
-            />
-            <button
-              type="button"
-              disabled={isSavingProject || !newProjectName.trim()}
-              onClick={handleCreateProject}
-            >
-              <Save size={15} /> Зберегти
-            </button>
-            <button
-              className="project-create-cancel"
-              type="button"
-              onClick={() => {
-                setIsProjectFormOpen(false);
-                setNewProjectName('');
-              }}
-            >
-              <X size={15} />
-            </button>
-          </div>
-        ) : (
-          <button
-            className="project-create-button"
-            type="button"
-            onClick={() => setIsProjectFormOpen(true)}
-          >
-            <Plus size={15} /> Створити проєкт
-          </button>
-        )}
       </section>
 
-      <div className="task-list">
+      <div className='task-list'>
         {isLoading ? (
-          <ModuleState tone="loading">Завантажуємо задачі...</ModuleState>
+          <ModuleState tone='loading'>Завантажуємо задачі...</ModuleState>
         ) : visibleTasks.length === 0 ? (
           <ModuleState>У цьому фільтрі задач ще немає.</ModuleState>
         ) : (
@@ -655,10 +621,10 @@ const TasksModule = () => {
               }
               key={group.id}
             >
-              <div className="task-project-heading">
+              <div className='task-project-heading'>
                 <button
-                  className="task-project-toggle"
-                  type="button"
+                  className='task-project-toggle'
+                  type='button'
                   onClick={() => toggleProjectCollapsed(group.id)}
                   aria-expanded={!collapsedProjects.includes(group.id)}
                 >
@@ -670,33 +636,35 @@ const TasksModule = () => {
                   <Folder size={16} />
                   <span>{group.name}</span>
                 </button>
-                <div className="task-project-meta">
+                <div className='task-project-meta'>
                   <p>{formatTaskCount(group.tasks.length)}</p>
                 </div>
-                {group.project && (
-                  renamingProjectId === group.project._id ? (
-                    <form className="project-rename-form" onSubmit={handleRenameProject}>
+                {group.project &&
+                  (renamingProjectId === group.project._id ? (
+                    <form className='project-rename-form' onSubmit={handleRenameProject}>
                       <input
-                        type="text"
+                        type='text'
                         value={renamingProjectName}
                         onChange={(event) => setRenamingProjectName(event.target.value)}
-                        aria-label="Нова назва проєкту"
+                        aria-label='Нова назва проєкту'
                       />
-                      <button type="submit" disabled={isSavingProject || !renamingProjectName.trim()}>
+                      <button
+                        type='submit'
+                        disabled={isSavingProject || !renamingProjectName.trim()}
+                      >
                         <Save size={14} />
                       </button>
                     </form>
                   ) : (
                     <button
-                      className="project-rename-button"
-                      type="button"
+                      className='project-rename-button'
+                      type='button'
                       aria-label={`Перейменувати проєкт ${group.project.name}`}
                       onClick={() => startRenamingProject(group.project)}
                     >
                       <Pencil size={14} />
                     </button>
-                  )
-                )}
+                  ))}
               </div>
 
               {group.tasks.length === 0 ? (
@@ -710,43 +678,43 @@ const TasksModule = () => {
                       className={task.completed ? 'task-item task-item-done' : 'task-item'}
                       key={task._id}
                     >
-                      <div className="task-card-main">
-                        <div className="task-card-topline">
+                      <label className='task-check'>
+                        <input
+                          type='checkbox'
+                          checked={task.completed}
+                          onChange={() => handleToggleTask(task)}
+                        />
+                        <i className='task-checkmark' aria-hidden='true' />
+                        <span className='task-check-label'>
+                          {task.completed ? 'Готово' : 'Виконати'}
+                        </span>
+                      </label>
+                      <div className='task-card-main'>
+                        <div className='task-card-topline'>
                           <h3 className={task.completed ? 'task-title done' : 'task-title'}>
                             {task.title}
                           </h3>
+                        </div>
+                        {task.description && <p className='task-description'>{task.description}</p>}
+                        <div className='task-meta'>
+                          <span>{getTaskProjectName(task)}</span>
+                          <span>{formatDeadline(task.deadline)}</span>
                           <span className={`task-priority task-priority-${priority}`}>
                             {priorityLabels[priority]}
                           </span>
                         </div>
-                        <p className="task-description">
-                          {task.description || 'Опис не додано.'}
-                        </p>
-                        <div className="task-meta">
-                          <span>{getTaskProjectName(task)}</span>
-                          <span>{formatDeadline(task.deadline)}</span>
-                          <span>{task.completed ? 'Виконано' : 'У процесі'}</span>
-                        </div>
                       </div>
-                      <div className="task-actions">
-                        <label className="task-check">
-                          <input
-                            type="checkbox"
-                            checked={task.completed}
-                            onChange={() => handleToggleTask(task)}
-                          />
-                          <span>{task.completed ? 'Готово' : 'Виконати'}</span>
-                        </label>
+                      <div className='task-actions'>
                         <button
-                          className="task-edit"
-                          type="button"
+                          className='task-edit'
+                          type='button'
                           onClick={() => openEditTask(task)}
                         >
                           <Pencil size={15} /> Редагувати
                         </button>
                         <button
-                          className="task-delete"
-                          type="button"
+                          className='task-delete'
+                          type='button'
                           onClick={() => handleDeleteTask(task._id)}
                         >
                           <Trash2 size={15} /> Видалити
@@ -761,11 +729,11 @@ const TasksModule = () => {
         )}
       </div>
 
-      <section className="trash-panel">
-        <div className="trash-panel-heading">
+      <section className='trash-panel'>
+        <div className='trash-panel-heading'>
           <button
-            className="trash-toggle-button"
-            type="button"
+            className='trash-toggle-button'
+            type='button'
             onClick={() => setIsTrashOpen((currentValue) => !currentValue)}
             aria-expanded={isTrashOpen}
           >
@@ -774,8 +742,8 @@ const TasksModule = () => {
             <small>{filteredTrashTasks.length} у кошику</small>
           </button>
           <button
-            className="ghost-danger-button"
-            type="button"
+            className='ghost-danger-button'
+            type='button'
             disabled={!isTrashOpen || filteredTrashTasks.length === 0}
             onClick={handleEmptyTaskTrash}
           >
@@ -783,26 +751,26 @@ const TasksModule = () => {
           </button>
         </div>
 
-        {isTrashOpen && (
-          isTrashLoading ? (
-            <ModuleState tone="loading">Завантажуємо кошик...</ModuleState>
+        {isTrashOpen &&
+          (isTrashLoading ? (
+            <ModuleState tone='loading'>Завантажуємо кошик...</ModuleState>
           ) : filteredTrashTasks.length === 0 ? (
             <ModuleState>Кошик задач порожній.</ModuleState>
           ) : (
-            <div className="trash-list">
+            <div className='trash-list'>
               {filteredTrashTasks.map((task) => (
-                <div className="trash-item" key={task._id}>
+                <div className='trash-item' key={task._id}>
                   <div>
                     <strong>{task.title}</strong>
                     <span>{getTaskProjectName(task)}</span>
                   </div>
-                  <div className="trash-actions">
-                    <button type="button" onClick={() => handleRestoreTask(task._id)}>
+                  <div className='trash-actions'>
+                    <button type='button' onClick={() => handleRestoreTask(task._id)}>
                       <RotateCcw size={14} /> Відновити
                     </button>
                     <button
-                      className="ghost-danger-button"
-                      type="button"
+                      className='ghost-danger-button'
+                      type='button'
                       onClick={() => handlePermanentlyDeleteTask(task._id)}
                     >
                       <Trash2 size={14} /> Видалити остаточно
@@ -811,80 +779,83 @@ const TasksModule = () => {
                 </div>
               ))}
             </div>
-          )
-        )}
+          ))}
       </section>
 
       {editTask && (
-        <div className="dashboard-modal-overlay" role="presentation">
-          <section className="dashboard-modal" role="dialog" aria-modal="true">
-            <div className="dashboard-modal-header">
+        <div className='dashboard-modal-overlay' role='presentation'>
+          <section className='dashboard-modal' role='dialog' aria-modal='true'>
+            <div className='dashboard-modal-header'>
               <div>
                 <h2>Редагувати задачу</h2>
                 <p>Оновіть назву, опис, дедлайн, проєкт або пріоритет.</p>
               </div>
               <button
-                className="modal-close-button"
-                type="button"
-                aria-label="Закрити"
+                className='modal-close-button'
+                type='button'
+                aria-label='Закрити'
                 onClick={closeEditTask}
               >
                 <X size={18} />
               </button>
             </div>
 
-            <form className="modal-edit-form" onSubmit={handleUpdateTask}>
+            <form className='modal-edit-form' onSubmit={handleUpdateTask}>
               <input
-                name="title"
-                type="text"
+                name='title'
+                type='text'
                 value={editFormData.title}
                 onChange={handleEditChange}
-                placeholder="Назва задачі"
+                placeholder='Назва задачі'
               />
               <textarea
-                name="description"
+                name='description'
                 value={editFormData.description}
                 onChange={handleEditChange}
-                placeholder="Опис"
-                rows="3"
+                placeholder='Опис'
+                rows='3'
               />
-              <div className="task-form-row">
+              <div className='task-form-row'>
                 <select
-                  name="project"
+                  name='project'
                   value={editFormData.project}
                   onChange={handleEditChange}
-                  aria-label="Проєкт задачі"
+                  aria-label='Проєкт задачі'
                 >
-                  <option value="">Без проєкту</option>
-                  {projects.map((project) => (
+                  <option value=''>Без проєкту</option>
+                  {visibleProjects.map((project) => (
                     <option key={project._id} value={project._id}>
                       {project.name}
                     </option>
                   ))}
                 </select>
                 <select
-                  name="priority"
+                  name='priority'
                   value={editFormData.priority}
                   onChange={handleEditChange}
-                  aria-label="Пріоритет задачі"
+                  aria-label='Пріоритет задачі'
                 >
-                  <option value="low">Низький</option>
-                  <option value="medium">Середній</option>
-                  <option value="high">Високий</option>
+                  <option value='low'>Низький</option>
+                  <option value='medium'>Середній</option>
+                  <option value='high'>Високий</option>
                 </select>
                 <input
-                  name="deadline"
-                  type="date"
+                  name='deadline'
+                  type='date'
                   value={editFormData.deadline}
                   onChange={handleEditChange}
-                  aria-label="Дедлайн"
+                  aria-label='Дедлайн'
                 />
               </div>
-              <div className="dashboard-modal-footer">
-                <button className="secondary-button" type="button" onClick={closeEditTask}>
+              <div className='dashboard-modal-footer'>
+                <button className='secondary-button' type='button' onClick={closeEditTask}>
                   Скасувати
                 </button>
-                <button className="add-generated-tasks" type="submit" disabled={!editFormData.title.trim()}>
+                <button
+                  className='add-generated-tasks'
+                  type='submit'
+                  disabled={!editFormData.title.trim()}
+                >
                   Зберегти
                 </button>
               </div>

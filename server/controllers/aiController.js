@@ -1,5 +1,6 @@
 import {
   generateDailySummaryWithAI,
+  generateNextActionWithAI,
   generateTasksWithAI
 } from '../services/aiService.js';
 
@@ -46,4 +47,23 @@ export const generateDailySummary = async (req, res) => {
   console.log('[AI] POST /api/ai/daily-summary completed');
 
   return res.json(summary);
+};
+
+export const generateNextAction = async (req, res) => {
+  const { events = [], tasks = [] } = req.body;
+
+  console.log('[AI] POST /api/ai/next-action', {
+    userId: req.user?._id?.toString(),
+    tasks: tasks.length,
+    events: events.length
+  });
+
+  const recommendation = await generateNextActionWithAI({
+    events,
+    tasks
+  });
+
+  console.log('[AI] POST /api/ai/next-action completed');
+
+  return res.json(recommendation);
 };

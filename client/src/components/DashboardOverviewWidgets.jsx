@@ -11,13 +11,13 @@ const formatEventDate = (date) =>
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
-    month: 'short'
+    month: 'short',
   }).format(new Date(date));
 
 const priorityLabels = {
   high: 'Високий',
   low: 'Низький',
-  medium: 'Середній'
+  medium: 'Середній',
 };
 
 const priorityOrder = { high: 1, medium: 2, low: 3 };
@@ -42,7 +42,7 @@ const formatTaskDeadline = (deadline) => {
 
   return new Intl.DateTimeFormat('uk-UA', {
     day: '2-digit',
-    month: 'short'
+    month: 'short',
   }).format(date);
 };
 
@@ -66,7 +66,7 @@ const sortDashboardTasks = (tasks) =>
 
 const initialQuickTask = {
   project: '',
-  title: ''
+  title: '',
 };
 
 const notifyTasksUpdated = () => {
@@ -85,9 +85,14 @@ export const TasksOverviewWidget = () => {
     return data;
   }, []);
 
-  const { error, isLoading, items: tasks, refresh } = useAsyncList({
+  const {
+    error,
+    isLoading,
+    items: tasks,
+    refresh,
+  } = useAsyncList({
     fallbackError: 'Не вдалося завантажити задачі.',
-    loadItems: loadTasks
+    loadItems: loadTasks,
   });
 
   useEffect(() => {
@@ -141,7 +146,7 @@ export const TasksOverviewWidget = () => {
         description: '',
         priority: 'medium',
         project: quickTask.project || null,
-        title
+        title,
       });
       setQuickTask(initialQuickTask);
       notifyTasksUpdated();
@@ -155,8 +160,9 @@ export const TasksOverviewWidget = () => {
   const handleCompleteTask = async (task) => {
     try {
       setActiveTaskId(task._id);
-      await api.patch(`/tasks/${task._id}`, {
-        completed: true
+      setQuickTaskError('');
+      await api.put(`/tasks/${task._id}`, {
+        completed: true,
       });
       notifyTasksUpdated();
     } catch {
@@ -169,39 +175,43 @@ export const TasksOverviewWidget = () => {
   const openTasks = tasks.filter((task) => !task.completed);
   const previewTasks = sortDashboardTasks(openTasks).slice(0, 4);
   const overdueTasks = openTasks.filter(
-    (task) => task.deadline && new Date(task.deadline).getTime() < Date.now()
+    (task) => task.deadline && new Date(task.deadline).getTime() < Date.now(),
   ).length;
-  const todayTasks = openTasks.filter((task) => formatTaskDeadline(task.deadline) === 'Сьогодні').length;
+  const todayTasks = openTasks.filter(
+    (task) => formatTaskDeadline(task.deadline) === 'Сьогодні',
+  ).length;
 
   return (
-    <article className="dashboard-card overview-widget tasks-overview-widget">
-      <div className="card-heading">
+    <article className='dashboard-card overview-widget tasks-overview-widget'>
+      <div className='card-heading'>
         <div>
-          <h2><Target size={18} /> Задачі на зараз</h2>
+          <h2>
+            <Target size={18} /> Задачі на зараз
+          </h2>
           <p>Найважливіші відкриті задачі за пріоритетом і дедлайном.</p>
         </div>
         <span>{openTasks.length}</span>
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">Завантажуємо задачі...</ModuleState>
+        <ModuleState tone='loading'>Завантажуємо задачі...</ModuleState>
       ) : error ? (
-        <ModuleState tone="error">{error}</ModuleState>
+        <ModuleState tone='error'>{error}</ModuleState>
       ) : openTasks.length === 0 ? (
         <ModuleState>Відкритих задач немає. Додайте першу прямо тут.</ModuleState>
       ) : (
-        <div className="overview-widget-content">
-          <div className="tasks-overview-stats">
+        <div className='overview-widget-content'>
+          <div className='tasks-overview-stats'>
             <span>{todayTasks} сьогодні</span>
             <span>{overdueTasks} прострочено</span>
           </div>
-          <ul className="overview-list tasks-overview-list">
+          <ul className='overview-list tasks-overview-list'>
             {previewTasks.map((task) => (
               <li key={task._id}>
                 <button
-                  className="task-overview-complete"
-                  type="button"
-                  aria-label="Позначити виконаною"
+                  className='task-overview-complete'
+                  type='button'
+                  aria-label='Позначити виконаною'
                   onClick={() => handleCompleteTask(task)}
                   disabled={activeTaskId === task._id}
                 >
@@ -219,35 +229,37 @@ export const TasksOverviewWidget = () => {
         </div>
       )}
 
-      <form className="dashboard-quick-task" onSubmit={handleQuickTaskSubmit}>
+      <form className='dashboard-quick-task' onSubmit={handleQuickTaskSubmit}>
         <input
-          name="title"
-          type="text"
+          name='title'
+          type='text'
           value={quickTask.title}
           onChange={handleQuickTaskChange}
-          placeholder="Швидко додати задачу..."
+          placeholder='Швидко додати задачу...'
         />
         <select
-          name="project"
+          name='project'
           value={quickTask.project}
           onChange={handleQuickTaskChange}
-          aria-label="Проєкт для задачі"
+          aria-label='Проєкт для задачі'
         >
-          <option value="">Без проєкту</option>
+          <option value=''>Без проєкту</option>
           {projects.map((project) => (
             <option key={project._id} value={project._id}>
               {project.name}
             </option>
           ))}
         </select>
-        <button type="submit" disabled={isCreatingTask || !quickTask.title.trim()}>
+        <button type='submit' disabled={isCreatingTask || !quickTask.title.trim()}>
           <Plus size={14} />
           Додати
         </button>
       </form>
-      {quickTaskError && <p className="dashboard-quick-task-error">{quickTaskError}</p>}
+      {quickTaskError && <p className='dashboard-quick-task-error'>{quickTaskError}</p>}
 
-      <Link className="overview-link" to="/tasks">Перейти до задач</Link>
+      <Link className='overview-link' to='/tasks'>
+        Перейти до задач
+      </Link>
     </article>
   );
 };
@@ -258,9 +270,13 @@ export const EventsOverviewWidget = () => {
     return data;
   }, []);
 
-  const { error, isLoading, items: events } = useAsyncList({
+  const {
+    error,
+    isLoading,
+    items: events,
+  } = useAsyncList({
     fallbackError: 'Не вдалося завантажити події.',
-    loadItems: loadEvents
+    loadItems: loadEvents,
   });
 
   const upcomingEvents = [...events]
@@ -269,23 +285,25 @@ export const EventsOverviewWidget = () => {
     .slice(0, 3);
 
   return (
-    <article className="dashboard-card overview-widget">
-      <div className="card-heading">
+    <article className='dashboard-card overview-widget'>
+      <div className='card-heading'>
         <div>
-          <h2><CalendarDays size={18} /> Найближчі події</h2>
+          <h2>
+            <CalendarDays size={18} /> Найближчі події
+          </h2>
           <p>Тільки наступні дати, без повного календаря.</p>
         </div>
         <span>{upcomingEvents.length}</span>
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">Завантажуємо події...</ModuleState>
+        <ModuleState tone='loading'>Завантажуємо події...</ModuleState>
       ) : error ? (
-        <ModuleState tone="error">{error}</ModuleState>
+        <ModuleState tone='error'>{error}</ModuleState>
       ) : upcomingEvents.length === 0 ? (
         <ModuleState>Найближчих подій немає. Створити подію можна в окремому розділі.</ModuleState>
       ) : (
-        <ul className="overview-list">
+        <ul className='overview-list'>
           {upcomingEvents.map((event) => (
             <li key={event._id}>
               <strong>{event.title}</strong>
@@ -295,7 +313,9 @@ export const EventsOverviewWidget = () => {
         </ul>
       )}
 
-      <Link className="overview-link" to="/events">Перейти до подій</Link>
+      <Link className='overview-link' to='/events'>
+        Перейти до подій
+      </Link>
     </article>
   );
 };
@@ -306,31 +326,37 @@ export const NewsOverviewWidget = () => {
     return data;
   }, []);
 
-  const { error, isLoading, items: articles } = useAsyncList({
+  const {
+    error,
+    isLoading,
+    items: articles,
+  } = useAsyncList({
     fallbackError: 'Не вдалося завантажити новини.',
-    loadItems: loadNews
+    loadItems: loadNews,
   });
 
   const previewArticles = articles.slice(0, 3);
 
   return (
-    <article className="dashboard-card overview-widget news-overview-widget">
-      <div className="card-heading">
+    <article className='dashboard-card overview-widget news-overview-widget'>
+      <div className='card-heading'>
         <div>
-          <h2><Newspaper size={18} /> Новини</h2>
+          <h2>
+            <Newspaper size={18} /> Новини
+          </h2>
           <p>Кілька заголовків, якщо потрібен контекст.</p>
         </div>
         <span>{articles.length}</span>
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">Завантажуємо новини...</ModuleState>
+        <ModuleState tone='loading'>Завантажуємо новини...</ModuleState>
       ) : error ? (
-        <ModuleState tone="error">{error}</ModuleState>
+        <ModuleState tone='error'>{error}</ModuleState>
       ) : previewArticles.length === 0 ? (
         <ModuleState>Новин зараз немає. Це не заважає планувати день.</ModuleState>
       ) : (
-        <ul className="overview-list">
+        <ul className='overview-list'>
           {previewArticles.map((article) => (
             <li key={article.url}>
               <strong>{article.title}</strong>
@@ -340,7 +366,9 @@ export const NewsOverviewWidget = () => {
         </ul>
       )}
 
-      <Link className="overview-link" to="/news">Перейти до новин</Link>
+      <Link className='overview-link' to='/news'>
+        Перейти до новин
+      </Link>
     </article>
   );
 };
@@ -353,30 +381,32 @@ export const WeatherOverviewWidget = () => {
 
   const { error, isLoading, items } = useAsyncList({
     fallbackError: 'Не вдалося завантажити погоду.',
-    loadItems: loadWeather
+    loadItems: loadWeather,
   });
 
   const weather = items[0];
 
   return (
-    <article className="dashboard-card overview-widget weather-overview-widget">
-      <div className="card-heading">
+    <article className='dashboard-card overview-widget weather-overview-widget'>
+      <div className='card-heading'>
         <div>
-          <h2><CloudSun size={18} /> Погода</h2>
+          <h2>
+            <CloudSun size={18} /> Погода
+          </h2>
           <p>Коротко для плану дня.</p>
         </div>
         <span>{formatTemperature(weather?.temperature)}</span>
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">Завантажуємо погоду...</ModuleState>
+        <ModuleState tone='loading'>Завантажуємо погоду...</ModuleState>
       ) : error ? (
-        <ModuleState tone="error">{error}</ModuleState>
+        <ModuleState tone='error'>{error}</ModuleState>
       ) : (
-        <div className="overview-weather">
+        <div className='overview-weather'>
           <strong>{weather?.city || 'Ваше місто'}</strong>
           <p>{weather?.description || 'Дані про погоду недоступні'}</p>
-          <dl className="overview-weather-details">
+          <dl className='overview-weather-details'>
             <div>
               <dt>Відчувається</dt>
               <dd>{formatTemperature(weather?.feelsLike)}</dd>
@@ -397,7 +427,9 @@ export const WeatherOverviewWidget = () => {
         </div>
       )}
 
-      <Link className="overview-link" to="/weather">Детальніше про погоду</Link>
+      <Link className='overview-link' to='/weather'>
+        Детальніше про погоду
+      </Link>
     </article>
   );
 };
@@ -406,32 +438,38 @@ export const FocusOverviewWidget = () => {
   const { completedSessions, isRunning, remainingSeconds, start } = useFocusTimer();
 
   return (
-    <article className="dashboard-card overview-widget focus-overview-widget">
-      <div className="card-heading">
+    <article className='dashboard-card overview-widget focus-overview-widget'>
+      <div className='card-heading'>
         <div>
-          <h2><Timer size={18} /> Фокус</h2>
+          <h2>
+            <Timer size={18} /> Фокус
+          </h2>
           <p>Стан поточної Pomodoro-сесії.</p>
         </div>
         <span>{completedSessions}</span>
       </div>
 
-      <div className="overview-focus">
+      <div className='overview-focus'>
         <strong>{formatFocusTime(remainingSeconds)}</strong>
-        <p>{isRunning ? 'Сесія триває. Таймер доступний у куті екрана.' : 'Таймер готовий до старту.'}</p>
+        <p>
+          {isRunning
+            ? 'Сесія триває. Таймер доступний у куті екрана.'
+            : 'Таймер готовий до старту.'}
+        </p>
       </div>
 
-      <div className="focus-overview-actions">
+      <div className='focus-overview-actions'>
         <button
-          className="overview-action-button"
-          type="button"
+          className='overview-action-button'
+          type='button'
           onClick={start}
           disabled={isRunning}
         >
           <Play size={14} />
           {isRunning ? 'Фокус триває' : 'Почати фокус'}
         </button>
-        <Link className="overview-link" to="/focus">
-          Відкрити Focus
+        <Link className='overview-link' to='/focus'>
+          Відкрити фокус
         </Link>
       </div>
     </article>

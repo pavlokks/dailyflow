@@ -1,4 +1,5 @@
 import React from 'react';
+import AINextActionWidget from '../components/AINextActionWidget.jsx';
 import AITaskGenerator from '../components/AITaskGenerator.jsx';
 import AppTopbar from '../components/AppTopbar.jsx';
 import AssistantBrief from '../components/AssistantBrief.jsx';
@@ -15,6 +16,7 @@ const AIAssistantPage = () => {
 
       <section className="dashboard-grid module-page-grid">
         <AssistantBrief />
+        <AINextActionWidget />
         <DailySummaryWidget />
         <AITaskGenerator />
       </section>

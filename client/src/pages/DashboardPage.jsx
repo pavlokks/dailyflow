@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, Settings2, X } from 'lucide-react';
+import AINextActionWidget from '../components/AINextActionWidget.jsx';
 import AppTopbar from '../components/AppTopbar.jsx';
 import AssistantBrief from '../components/AssistantBrief.jsx';
 import DailySummaryWidget from '../components/DailySummaryWidget.jsx';
@@ -9,7 +10,7 @@ import {
   FocusOverviewWidget,
   NewsOverviewWidget,
   TasksOverviewWidget,
-  WeatherOverviewWidget
+  WeatherOverviewWidget,
 } from '../components/DashboardOverviewWidgets.jsx';
 import ProductivityStatsWidget from '../components/ProductivityStatsWidget.jsx';
 import api from '../services/api.js';
@@ -23,7 +24,15 @@ const dashboardWidgets = [
     description: 'Короткий стан дня.',
     component: AssistantBrief,
     region: 'main',
-    visible: true
+    visible: true,
+  },
+  {
+    id: 'nextAction',
+    label: 'AI Next Action',
+    description: 'Одна практична порада, що робити зараз.',
+    component: AINextActionWidget,
+    region: 'main',
+    visible: true,
   },
   {
     id: 'dailySummary',
@@ -31,7 +40,7 @@ const dashboardWidgets = [
     description: 'Короткий підсумок дня.',
     component: DailySummaryWidget,
     region: 'main',
-    visible: true
+    visible: true,
   },
   {
     id: 'tasks',
@@ -39,7 +48,7 @@ const dashboardWidgets = [
     description: 'Короткий список відкритих задач.',
     component: TasksOverviewWidget,
     region: 'main',
-    visible: true
+    visible: true,
   },
   {
     id: 'events',
@@ -47,7 +56,7 @@ const dashboardWidgets = [
     description: 'Найближчі дати.',
     component: EventsOverviewWidget,
     region: 'main',
-    visible: true
+    visible: true,
   },
   {
     id: 'news',
@@ -55,7 +64,7 @@ const dashboardWidgets = [
     description: 'Кілька заголовків.',
     component: NewsOverviewWidget,
     region: 'main',
-    visible: false
+    visible: false,
   },
   {
     id: 'focus',
@@ -63,7 +72,7 @@ const dashboardWidgets = [
     description: 'Стан Pomodoro-таймера.',
     component: FocusOverviewWidget,
     region: 'side',
-    visible: true
+    visible: true,
   },
   {
     id: 'weather',
@@ -71,7 +80,7 @@ const dashboardWidgets = [
     description: 'Короткий прогноз.',
     component: WeatherOverviewWidget,
     region: 'side',
-    visible: true
+    visible: true,
   },
   {
     id: 'productivityStats',
@@ -79,8 +88,8 @@ const dashboardWidgets = [
     description: 'Прогрес задач і подій.',
     component: ProductivityStatsWidget,
     region: 'side',
-    visible: true
-  }
+    visible: true,
+  },
 ];
 
 const defaultSettings = dashboardWidgets.map(({ id, visible }) => ({ id, visible }));
@@ -96,7 +105,7 @@ const readSettings = () => {
     const knownIds = new Set(dashboardWidgets.map((widget) => widget.id));
     const validSavedSettings = savedSettings.filter((item) => knownIds.has(item.id));
     const missingSettings = defaultSettings.filter(
-      (item) => !validSavedSettings.some((savedItem) => savedItem.id === item.id)
+      (item) => !validSavedSettings.some((savedItem) => savedItem.id === item.id),
     );
 
     if (missingSettings.length > 0) {
@@ -116,14 +125,19 @@ const saveSettings = (settings) => {
   localStorage.setItem(storageKey, JSON.stringify(settings));
 };
 
+const getMillisecondsUntilNextMinute = () => {
+  const now = new Date();
+  return (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+};
+
 const formatDashboardDate = (date) => {
   const formattedDate = new Intl.DateTimeFormat('uk-UA', {
     day: 'numeric',
-    month: 'long'
+    month: 'long',
   }).format(date);
   const formattedTime = new Intl.DateTimeFormat('uk-UA', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   }).format(date);
 
   return `Сьогодні, ${formattedDate} · ${formattedTime}`;
@@ -181,11 +195,18 @@ const DashboardPage = () => {
   }, []);
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
+    let intervalId;
+    const timeoutId = window.setTimeout(() => {
       setCurrentDate(new Date());
-    }, 60000);
+      intervalId = window.setInterval(() => {
+        setCurrentDate(new Date());
+      }, 60000);
+    }, getMillisecondsUntilNextMinute());
 
-    return () => window.clearInterval(intervalId);
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.clearInterval(intervalId);
+    };
   }, []);
 
   const updateSettings = (updater) => {
@@ -199,8 +220,8 @@ const DashboardPage = () => {
   const toggleWidget = (widgetId) => {
     updateSettings((currentSettings) =>
       currentSettings.map((item) =>
-        item.id === widgetId ? { ...item, visible: !item.visible } : item
-      )
+        item.id === widgetId ? { ...item, visible: !item.visible } : item,
+      ),
     );
   };
 
@@ -214,7 +235,7 @@ const DashboardPage = () => {
       }
 
       const sameRegionSettings = currentSettings.filter(
-        (item) => widgetsById.get(item.id)?.region === currentWidget.region
+        (item) => widgetsById.get(item.id)?.region === currentWidget.region,
       );
       const regionIndex = sameRegionSettings.findIndex((item) => item.id === widgetId);
       const nextRegionItem = sameRegionSettings[regionIndex + direction];
@@ -227,7 +248,7 @@ const DashboardPage = () => {
       const nextSettings = [...currentSettings];
       [nextSettings[currentIndex], nextSettings[nextIndex]] = [
         nextSettings[nextIndex],
-        nextSettings[currentIndex]
+        nextSettings[currentIndex],
       ];
 
       return nextSettings;
@@ -241,17 +262,17 @@ const DashboardPage = () => {
     const sectionSettings = getSectionSettings(region);
 
     return (
-      <section className="customizer-section">
+      <section className='customizer-section'>
         <h3>{title}</h3>
-        <div className="customizer-list">
+        <div className='customizer-list'>
           {sectionSettings.map((item, index) => {
             const widget = widgetsById.get(item.id);
 
             return (
-              <div className="customizer-item" key={item.id}>
+              <div className='customizer-item' key={item.id}>
                 <label>
                   <input
-                    type="checkbox"
+                    type='checkbox'
                     checked={item.visible}
                     onChange={() => toggleWidget(item.id)}
                   />
@@ -260,9 +281,9 @@ const DashboardPage = () => {
                     <small>{widget.description}</small>
                   </span>
                 </label>
-                <div className="customizer-actions">
+                <div className='customizer-actions'>
                   <button
-                    type="button"
+                    type='button'
                     disabled={index === 0}
                     onClick={() => moveWidget(item.id, -1)}
                   >
@@ -270,7 +291,7 @@ const DashboardPage = () => {
                     Вгору
                   </button>
                   <button
-                    type="button"
+                    type='button'
                     disabled={index === sectionSettings.length - 1}
                     onClick={() => moveWidget(item.id, 1)}
                   >
@@ -302,26 +323,22 @@ const DashboardPage = () => {
         title={profileName ? `Привіт, ${profileName}` : 'Привіт'}
         subtitle={formatDashboardDate(currentDate)}
         actions={
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={() => setIsCustomizing(true)}
-          >
+          <button className='secondary-button' type='button' onClick={() => setIsCustomizing(true)}>
             <Settings2 size={15} />
-            Налаштувати Dashboard
+            Налаштувати панель
           </button>
         }
       />
 
-      <section className="dashboard-workspace">
-        <div className="dashboard-main-column">
+      <section className='dashboard-workspace'>
+        <div className='dashboard-main-column'>
           {visibleMainWidgets.map((item) => {
             const WidgetComponent = widgetsById.get(item.id)?.component;
             return WidgetComponent ? <WidgetComponent key={item.id} /> : null;
           })}
         </div>
 
-        <aside className="dashboard-side-column">
+        <aside className='dashboard-side-column'>
           {visibleSideWidgets.map((item) => {
             const WidgetComponent = widgetsById.get(item.id)?.component;
             return WidgetComponent ? <WidgetComponent key={item.id} /> : null;
@@ -331,8 +348,8 @@ const DashboardPage = () => {
 
       {isCustomizing && (
         <div
-          className="dashboard-modal-overlay"
-          role="presentation"
+          className='dashboard-modal-overlay'
+          role='presentation'
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               setIsCustomizing(false);
@@ -340,35 +357,35 @@ const DashboardPage = () => {
           }}
         >
           <section
-            className="dashboard-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="dashboard-modal-title"
+            className='dashboard-modal'
+            role='dialog'
+            aria-modal='true'
+            aria-labelledby='dashboard-modal-title'
           >
-            <div className="dashboard-modal-header">
+            <div className='dashboard-modal-header'>
               <div>
-                <h2 id="dashboard-modal-title">Налаштувати Dashboard</h2>
+                <h2 id='dashboard-modal-title'>Налаштувати Dashboard</h2>
                 <p>Покажіть тільки ті блоки, які потрібні на огляді дня.</p>
               </div>
               <button
-                className="modal-close-button"
-                type="button"
-                aria-label="Закрити"
+                className='modal-close-button'
+                type='button'
+                aria-label='Закрити'
                 onClick={() => setIsCustomizing(false)}
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="customizer-sections">
+            <div className='customizer-sections'>
               {renderCustomizerSection({ region: 'main', title: 'Main column' })}
               {renderCustomizerSection({ region: 'side', title: 'Sidebar widgets' })}
             </div>
 
-            <div className="dashboard-modal-footer">
+            <div className='dashboard-modal-footer'>
               <button
-                className="secondary-button"
-                type="button"
+                className='secondary-button'
+                type='button'
                 onClick={() => setIsCustomizing(false)}
               >
                 Close

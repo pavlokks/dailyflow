@@ -9,7 +9,7 @@ import {
   Newspaper,
   Target,
   Timer,
-  UserRound
+  UserRound,
 } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import api from '../services/api.js';
@@ -23,7 +23,7 @@ const navigationItems = [
   { icon: Timer, label: 'Фокус', to: '/focus' },
   { icon: Newspaper, label: 'Новини', to: '/news' },
   { icon: CloudSun, label: 'Погода', to: '/weather' },
-  { icon: UserRound, label: 'Профіль', to: '/profile' }
+  { icon: UserRound, label: 'Профіль', to: '/profile' },
 ];
 
 const DashboardShell = ({ children }) => {
@@ -34,8 +34,18 @@ const DashboardShell = ({ children }) => {
 
   const loadProjects = useCallback(async () => {
     try {
-      const { data } = await api.get('/projects');
-      setProjects(data);
+      const [projectsResponse, tasksResponse, trashResponse] = await Promise.all([
+        api.get('/projects'),
+        api.get('/tasks'),
+        api.get('/tasks?trash=true'),
+      ]);
+      const usedProjectIds = new Set(
+        [...tasksResponse.data, ...trashResponse.data]
+          .map((task) => task.project?._id || task.project || '')
+          .filter(Boolean),
+      );
+
+      setProjects(projectsResponse.data.filter((project) => usedProjectIds.has(project._id)));
     } catch {
       setProjects([]);
     }
@@ -44,14 +54,18 @@ const DashboardShell = ({ children }) => {
   useEffect(() => {
     loadProjects();
     window.addEventListener('dailyflow:projects-updated', loadProjects);
+    window.addEventListener('dailyflow:tasks-updated', loadProjects);
 
-    return () => window.removeEventListener('dailyflow:projects-updated', loadProjects);
+    return () => {
+      window.removeEventListener('dailyflow:projects-updated', loadProjects);
+      window.removeEventListener('dailyflow:tasks-updated', loadProjects);
+    };
   }, [loadProjects]);
 
   return (
-    <main className="dashboard-page">
-      <aside className="app-sidebar">
-        <Link className="sidebar-brand" to="/">
+    <main className='dashboard-page'>
+      <aside className='app-sidebar'>
+        <Link className='brand' to='/'>
           <span>DF</span>
           <div>
             <strong>DailyFlow</strong>
@@ -59,7 +73,7 @@ const DashboardShell = ({ children }) => {
           </div>
         </Link>
 
-        <nav className="sidebar-nav" aria-label="Основна навігація">
+        <nav className='sidebar-nav' aria-label='Основна навігація'>
           {navigationItems.map((item) => {
             const Icon = item.icon;
 
@@ -78,15 +92,15 @@ const DashboardShell = ({ children }) => {
           })}
         </nav>
 
-        <section className="sidebar-projects" aria-label="Проекти">
-          <p>Проекти</p>
+        <section className='sidebar-projects' aria-label='Проєкти'>
+          <p>Проєкти</p>
           <Link
             className={
               isTasksPage && selectedProject === 'all'
                 ? 'sidebar-project-link sidebar-project-link-active'
                 : 'sidebar-project-link'
             }
-            to="/tasks"
+            to='/tasks'
           >
             <ListTodo size={15} />
             <span>Усі задачі</span>
@@ -97,7 +111,7 @@ const DashboardShell = ({ children }) => {
                 ? 'sidebar-project-link sidebar-project-link-active'
                 : 'sidebar-project-link'
             }
-            to="/tasks?project=none"
+            to='/tasks?project=none'
           >
             <Folder size={15} />
             <span>Без проєкту</span>
@@ -118,10 +132,10 @@ const DashboardShell = ({ children }) => {
           ))}
         </section>
 
-        <div className="sidebar-footer" aria-hidden="true" />
+        <div className='sidebar-footer' aria-hidden='true' />
       </aside>
 
-      <div className="dashboard-main">{children}</div>
+      <div className='dashboard-main'>{children}</div>
       <FloatingFocusTimer />
     </main>
   );

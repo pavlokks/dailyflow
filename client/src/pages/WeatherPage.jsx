@@ -11,7 +11,7 @@ const WeatherPage = () => {
         subtitle="Локальні умови для щоденного планування."
       />
 
-      <section className="dashboard-grid module-page-grid">
+      <section className="dashboard-grid module-page-grid weather-page-grid">
         <WeatherCard />
       </section>
     </DashboardShell>

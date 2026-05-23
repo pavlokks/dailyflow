@@ -12,6 +12,7 @@ import {
   WeatherOverviewWidget
 } from '../components/DashboardOverviewWidgets.jsx';
 import ProductivityStatsWidget from '../components/ProductivityStatsWidget.jsx';
+import api from '../services/api.js';
 
 const storageKey = 'dailyflowDashboardWidgets';
 
@@ -115,9 +116,24 @@ const saveSettings = (settings) => {
   localStorage.setItem(storageKey, JSON.stringify(settings));
 };
 
+const formatDashboardDate = (date) => {
+  const formattedDate = new Intl.DateTimeFormat('uk-UA', {
+    day: 'numeric',
+    month: 'long'
+  }).format(date);
+  const formattedTime = new Intl.DateTimeFormat('uk-UA', {
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+
+  return `Сьогодні, ${formattedDate} · ${formattedTime}`;
+};
+
 const DashboardPage = () => {
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [settings, setSettings] = useState(readSettings);
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [profileName, setProfileName] = useState('');
 
   const widgetsById = useMemo(() => {
     return new Map(dashboardWidgets.map((widget) => [widget.id, widget]));
@@ -138,6 +154,39 @@ const DashboardPage = () => {
 
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isCustomizing]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadProfile = async () => {
+      try {
+        const { data } = await api.get('/auth/me');
+        const name = data?.user?.name?.trim();
+
+        if (isMounted && name) {
+          setProfileName(name);
+        }
+      } catch {
+        if (isMounted) {
+          setProfileName('');
+        }
+      }
+    };
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCurrentDate(new Date());
+    }, 60000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const updateSettings = (updater) => {
     setSettings((currentSettings) => {
@@ -250,8 +299,8 @@ const DashboardPage = () => {
   return (
     <DashboardShell>
       <AppTopbar
-        title="Сьогодні"
-        subtitle="План дня, задачі та кілька корисних деталей поруч."
+        title={profileName ? `Привіт, ${profileName}` : 'Привіт'}
+        subtitle={formatDashboardDate(currentDate)}
         actions={
           <button
             className="secondary-button"

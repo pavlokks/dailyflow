@@ -17,6 +17,8 @@ import api from '../services/api.js';
 import { getApiErrorMessage } from '../utils/errors.js';
 import ModuleState from './ModuleState.jsx';
 
+const collapsedProjectsKey = 'dailyflowCollapsedTaskProjects';
+
 const priorityLabels = {
   high: 'Високий',
   low: 'Низький',
@@ -104,6 +106,15 @@ const getTaskProjectId = (task) => task.project?._id || task.project || '';
 
 const getTaskProjectName = (task) => task.project?.name || 'Без проєкту';
 
+const readCollapsedProjects = () => {
+  try {
+    const savedProjects = JSON.parse(localStorage.getItem(collapsedProjectsKey));
+    return Array.isArray(savedProjects) ? savedProjects : [];
+  } catch {
+    return [];
+  }
+};
+
 const TasksModule = () => {
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState(initialTaskForm);
@@ -121,6 +132,7 @@ const TasksModule = () => {
   const [editTask, setEditTask] = useState(null);
   const [editFormData, setEditFormData] = useState(initialTaskForm);
   const [confirmDeleteAllAction, setConfirmDeleteAllAction] = useState('');
+  const [collapsedProjects, setCollapsedProjects] = useState(readCollapsedProjects);
 
   const loadTasks = useCallback(async () => {
     const { data } = await api.get('/tasks');
@@ -452,6 +464,17 @@ const TasksModule = () => {
     }
   };
 
+  const toggleProjectCollapsed = (projectId) => {
+    setCollapsedProjects((currentProjects) => {
+      const nextProjects = currentProjects.includes(projectId)
+        ? currentProjects.filter((currentProjectId) => currentProjectId !== projectId)
+        : [...currentProjects, projectId];
+
+      localStorage.setItem(collapsedProjectsKey, JSON.stringify(nextProjects));
+      return nextProjects;
+    });
+  };
+
   const completedCount = tasks.filter((task) => task.completed).length;
   const sortedTasks = sortTasks(tasks);
   const selectedProject = searchParams.get('project') || 'all';
@@ -633,8 +656,21 @@ const TasksModule = () => {
               key={group.id}
             >
               <div className="task-project-heading">
-                <div>
-                  <h3><Folder size={16} /> {group.name}</h3>
+                <button
+                  className="task-project-toggle"
+                  type="button"
+                  onClick={() => toggleProjectCollapsed(group.id)}
+                  aria-expanded={!collapsedProjects.includes(group.id)}
+                >
+                  {collapsedProjects.includes(group.id) ? (
+                    <ChevronRight size={15} />
+                  ) : (
+                    <ChevronDown size={15} />
+                  )}
+                  <Folder size={16} />
+                  <span>{group.name}</span>
+                </button>
+                <div className="task-project-meta">
                   <p>{formatTaskCount(group.tasks.length)}</p>
                 </div>
                 {group.project && (
@@ -665,7 +701,7 @@ const TasksModule = () => {
 
               {group.tasks.length === 0 ? (
                 <ModuleState>Задач без проєкту немає.</ModuleState>
-              ) : (
+              ) : collapsedProjects.includes(group.id) ? null : (
                 group.tasks.map((task) => {
                   const priority = task.priority || 'medium';
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { CalendarDays, CloudSun, Newspaper, Target, Timer } from 'lucide-react';
+import { CalendarDays, CloudSun, Newspaper, Play, Target, Timer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useAsyncList from '../hooks/useAsyncList.js';
 import useFocusTimer, { formatFocusTime } from '../hooks/useFocusTimer.js';
@@ -192,7 +192,7 @@ export const NewsOverviewWidget = () => {
   const previewArticles = articles.slice(0, 3);
 
   return (
-    <article className="dashboard-card overview-widget">
+    <article className="dashboard-card overview-widget news-overview-widget">
       <div className="card-heading">
         <div>
           <h2><Newspaper size={18} /> Новини</h2>
@@ -281,7 +281,7 @@ export const WeatherOverviewWidget = () => {
 };
 
 export const FocusOverviewWidget = () => {
-  const { completedSessions, isRunning, remainingSeconds } = useFocusTimer();
+  const { completedSessions, isRunning, remainingSeconds, start } = useFocusTimer();
 
   return (
     <article className="dashboard-card overview-widget focus-overview-widget">
@@ -298,9 +298,20 @@ export const FocusOverviewWidget = () => {
         <p>{isRunning ? 'Сесія триває. Таймер доступний у куті екрана.' : 'Таймер готовий до старту.'}</p>
       </div>
 
-      <Link className="overview-link" to="/focus">
-        {isRunning ? 'Відкрити таймер' : 'Почати фокус'}
-      </Link>
+      <div className="focus-overview-actions">
+        <button
+          className="overview-action-button"
+          type="button"
+          onClick={start}
+          disabled={isRunning}
+        >
+          <Play size={14} />
+          {isRunning ? 'Фокус триває' : 'Почати фокус'}
+        </button>
+        <Link className="overview-link" to="/focus">
+          Відкрити Focus
+        </Link>
+      </div>
     </article>
   );
 };

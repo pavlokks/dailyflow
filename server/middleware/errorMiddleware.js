@@ -1,6 +1,6 @@
 export const notFound = (req, res) => {
   return res.status(404).json({
-    message: `Route not found: ${req.originalUrl}`
+    message: `Шлях незнайдений: ${req.originalUrl}`,
   });
 };
 
@@ -12,6 +12,6 @@ export const errorHandler = (error, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
 
   return res.status(statusCode).json({
-    message: error.message || 'Unexpected server error'
+    message: error.message || 'Неочікувана серверна помилка',
   });
 };

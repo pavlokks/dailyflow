@@ -49,7 +49,7 @@ const validateProject = async (projectId, userId) => {
 
   const project = await Project.findOne({
     _id: projectId,
-    user: userId
+    user: userId,
   });
 
   return Boolean(project);
@@ -61,25 +61,25 @@ export const createTask = async (req, res) => {
 
     if (!title?.trim()) {
       return res.status(400).json({
-        message: 'Task title is required'
+        message: 'Назва задачі необхідна',
       });
     }
 
     if (!validatePriority(priority)) {
       return res.status(400).json({
-        message: 'Priority must be low, medium or high'
+        message: 'Пріоритет повинен бути низьким, середнім або високим',
       });
     }
 
     if (!validateDeadline(deadline)) {
       return res.status(400).json({
-        message: 'Deadline must be a valid date'
+        message: 'Дата терміну некоректна',
       });
     }
 
     if (!(await validateProject(project, req.user._id))) {
       return res.status(400).json({
-        message: 'Project is invalid'
+        message: 'Проєкт некоректний',
       });
     }
 
@@ -89,9 +89,9 @@ export const createTask = async (req, res) => {
         description,
         priority,
         project,
-        title
+        title,
       }),
-      user: req.user._id
+      user: req.user._id,
     });
 
     const populatedTask = await Task.findById(task._id).populate('project', 'name');
@@ -99,8 +99,8 @@ export const createTask = async (req, res) => {
     return res.status(201).json(populatedTask);
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to create task',
-      error: error.message
+      message: 'Створення задачі неуспішне',
+      error: error.message,
     });
   }
 };
@@ -110,7 +110,7 @@ export const getUserTasks = async (req, res) => {
     const showTrash = req.query.trash === 'true';
     const tasks = await Task.find({
       user: req.user._id,
-      deletedAt: showTrash ? { $ne: null } : null
+      deletedAt: showTrash ? { $ne: null } : null,
     })
       .populate('project', 'name')
       .sort({ createdAt: -1 });
@@ -118,8 +118,8 @@ export const getUserTasks = async (req, res) => {
     return res.json(tasks);
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to get tasks',
-      error: error.message
+      message: 'Отримання задач неуспішне',
+      error: error.message,
     });
   }
 };
@@ -131,36 +131,36 @@ export const updateTask = async (req, res) => {
     const task = await Task.findOne({
       _id: req.params.id,
       user: req.user._id,
-      deletedAt: null
+      deletedAt: null,
     });
 
     if (!task) {
       return res.status(404).json({
-        message: 'Task not found'
+        message: 'Задача незнайдена',
       });
     }
 
     if (title !== undefined && !title.trim()) {
       return res.status(400).json({
-        message: 'Task title cannot be empty'
+        message: 'Назва задачі порожня',
       });
     }
 
     if (!validatePriority(priority)) {
       return res.status(400).json({
-        message: 'Priority must be low, medium or high'
+        message: 'Пріоритет повинен бути низьким, середнім або високим',
       });
     }
 
     if (!validateDeadline(deadline)) {
       return res.status(400).json({
-        message: 'Deadline must be a valid date'
+        message: 'Дата терміну некоректна',
       });
     }
 
     if (!(await validateProject(project, req.user._id))) {
       return res.status(400).json({
-        message: 'Project is invalid'
+        message: 'Проєкт некоректний',
       });
     }
 
@@ -169,7 +169,7 @@ export const updateTask = async (req, res) => {
       description,
       priority,
       project,
-      title
+      title,
     });
 
     if (title !== undefined) {
@@ -202,8 +202,8 @@ export const updateTask = async (req, res) => {
     return res.json(updatedTask);
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to update task',
-      error: error.message
+      message: 'Оновлення задачі неуспішне',
+      error: error.message,
     });
   }
 };
@@ -213,12 +213,12 @@ export const deleteTask = async (req, res) => {
     const task = await Task.findOne({
       _id: req.params.id,
       user: req.user._id,
-      deletedAt: null
+      deletedAt: null,
     });
 
     if (!task) {
       return res.status(404).json({
-        message: 'Task not found'
+        message: 'Задача некоректна',
       });
     }
 
@@ -226,12 +226,12 @@ export const deleteTask = async (req, res) => {
     await task.save();
 
     return res.json({
-      message: 'Task moved to trash'
+      message: 'Задача переміщена у кошик',
     });
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to delete task',
-      error: error.message
+      message: 'Видалення задачі неуспішне',
+      error: error.message,
     });
   }
 };
@@ -241,12 +241,12 @@ export const restoreTask = async (req, res) => {
     const task = await Task.findOne({
       _id: req.params.id,
       user: req.user._id,
-      deletedAt: { $ne: null }
+      deletedAt: { $ne: null },
     });
 
     if (!task) {
       return res.status(404).json({
-        message: 'Task not found'
+        message: 'Задача незнайдена',
       });
     }
 
@@ -257,8 +257,8 @@ export const restoreTask = async (req, res) => {
     return res.json(restoredTask);
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to restore task',
-      error: error.message
+      message: 'Відновлення задачі неуспішне',
+      error: error.message,
     });
   }
 };
@@ -268,22 +268,22 @@ export const permanentlyDeleteTask = async (req, res) => {
     const task = await Task.findOneAndDelete({
       _id: req.params.id,
       user: req.user._id,
-      deletedAt: { $ne: null }
+      deletedAt: { $ne: null },
     });
 
     if (!task) {
       return res.status(404).json({
-        message: 'Task not found'
+        message: 'Задача незнайдена',
       });
     }
 
     return res.json({
-      message: 'Task permanently deleted'
+      message: 'Задача остаточно видалена',
     });
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to permanently delete task',
-      error: error.message
+      message: 'Видалення остаточно неуспішне',
+      error: error.message,
     });
   }
 };
@@ -292,16 +292,16 @@ export const emptyTaskTrash = async (req, res) => {
   try {
     await Task.deleteMany({
       user: req.user._id,
-      deletedAt: { $ne: null }
+      deletedAt: { $ne: null },
     });
 
     return res.json({
-      message: 'Task trash emptied'
+      message: 'Кошик задач порожній',
     });
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to empty task trash',
-      error: error.message
+      message: 'Видалення задач з кошика неуспішне',
+      error: error.message,
     });
   }
 };

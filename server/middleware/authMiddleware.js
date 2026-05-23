@@ -7,7 +7,7 @@ export const protect = async (req, res, next) => {
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
-        message: 'Authorization token is required'
+        message: 'Токен авторизації необхідний',
       });
     }
 
@@ -15,7 +15,7 @@ export const protect = async (req, res, next) => {
 
     if (!process.env.JWT_SECRET) {
       return res.status(500).json({
-        message: 'JWT_SECRET is not configured'
+        message: 'JWT_SECRET невизначений',
       });
     }
 
@@ -24,7 +24,7 @@ export const protect = async (req, res, next) => {
 
     if (!user) {
       return res.status(401).json({
-        message: 'User not found or token is invalid'
+        message: 'Користувач незнайдений або токен некоректний',
       });
     }
 
@@ -33,13 +33,13 @@ export const protect = async (req, res, next) => {
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
       return res.status(401).json({
-        message: 'Invalid or expired token'
+        message: 'Токен некоректний або закінчився',
       });
     }
 
     return res.status(500).json({
-      message: 'Authorization failed',
-      error: error.message
+      message: 'Авторизація неуспішна',
+      error: error.message,
     });
   }
 };

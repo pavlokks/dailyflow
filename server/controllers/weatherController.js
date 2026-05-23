@@ -17,30 +17,30 @@ export const getUserWeather = async (req, res) => {
 
     if (!city) {
       return res.status(400).json({
-        message: 'User city is required to get weather'
+        message: 'Місто необхідне для отримання прогнозу',
       });
     }
 
     if (!apiKey) {
       return res.status(500).json({
-        message: 'OPENWEATHER_API_KEY is not configured'
+        message: 'OPENWEATHER_API_KEY невизначений',
       });
     }
 
     const params = new URLSearchParams({
       q: city,
       appid: apiKey,
-      units: 'metric'
+      units: 'metric',
     });
 
     const weatherResponse = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?${params.toString()}`
+      `https://api.openweathermap.org/data/2.5/weather?${params.toString()}`,
     );
     const weatherData = await weatherResponse.json();
 
     if (!weatherResponse.ok) {
       return res.status(weatherResponse.status).json({
-        message: weatherData.message || 'Failed to get weather'
+        message: weatherData.message || 'Отримання прогнозу неуспішне',
       });
     }
 
@@ -59,12 +59,12 @@ export const getUserWeather = async (req, res) => {
       clouds: weatherData.clouds?.all ?? null,
       windGust: weatherData.wind?.gust ?? null,
       sunrise: formatWeatherTime(weatherData.sys?.sunrise, timezoneOffset),
-      sunset: formatWeatherTime(weatherData.sys?.sunset, timezoneOffset)
+      sunset: formatWeatherTime(weatherData.sys?.sunset, timezoneOffset),
     });
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to get weather',
-      error: error.message
+      message: 'Отримання прогнозу неуспішне',
+      error: error.message,
     });
   }
 };

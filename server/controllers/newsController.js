@@ -4,7 +4,7 @@ export const getLatestNews = async (req, res) => {
 
     if (!apiKey) {
       return res.status(500).json({
-        message: 'NEWS_API_KEY is not configured',
+        message: 'NEWS_API_KEY невизначений',
       });
     }
 
@@ -19,13 +19,13 @@ export const getLatestNews = async (req, res) => {
 
     if (!newsResponse.ok) {
       return res.status(newsResponse.status).json({
-        message: newsData.message || 'Failed to get news',
+        message: newsData.message || 'Отримання новин неуспішне',
       });
     }
 
     const articles = newsData.articles.map((article) => ({
       title: article.title,
-      source: article.source?.name || 'Unknown source',
+      source: article.source?.name || 'Невідомий ресурс',
       url: article.url,
       image: article.urlToImage,
     }));
@@ -33,7 +33,7 @@ export const getLatestNews = async (req, res) => {
     return res.json(articles);
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to get news',
+      message: 'Отримання новин неуспішне',
       error: error.message,
     });
   }

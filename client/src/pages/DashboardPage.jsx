@@ -379,16 +379,6 @@ const DashboardPage = () => {
               {renderCustomizerSection({ region: 'main', title: 'Головна колонка' })}
               {renderCustomizerSection({ region: 'side', title: 'Бічна панель' })}
             </div>
-
-            <div className='dashboard-modal-footer'>
-              <button
-                className='secondary-button'
-                type='button'
-                onClick={() => setIsCustomizing(false)}
-              >
-                Закрити
-              </button>
-            </div>
           </section>
         </div>
       )}

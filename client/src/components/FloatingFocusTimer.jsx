@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Grip, Pause, Play, RotateCcw, Timer } from 'lucide-react';
 import useFocusTimer, { formatFocusTime } from '../hooks/useFocusTimer.js';
+import { getUserStorageKey } from '../utils/userStorage.js';
 
 const positionKey = 'dailyflowFocusWidgetPosition';
 const defaultPosition = { x: 24, y: 24 };
@@ -9,7 +10,7 @@ const readPosition = () => {
   try {
     return {
       ...defaultPosition,
-      ...JSON.parse(localStorage.getItem(positionKey)),
+      ...JSON.parse(localStorage.getItem(getUserStorageKey(positionKey))),
     };
   } catch {
     return defaultPosition;
@@ -47,7 +48,7 @@ const FloatingFocusTimer = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(positionKey, JSON.stringify(position));
+    localStorage.setItem(getUserStorageKey(positionKey), JSON.stringify(position));
   }, [position]);
 
   if (!timer.isRunning && timer.remainingSeconds === timer.duration) {

@@ -26,6 +26,57 @@ const getModel = () => process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 const normalizeGoal = (goal) => goal.trim().replace(/\s+/g, ' ');
 
+const formatUserLocalTime = ({ localTime, timezone } = {}) => {
+  if (!localTime) return '';
+
+  const parsedDate = new Date(localTime);
+  if (Number.isNaN(parsedDate.getTime())) return localTime;
+
+  try {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat('en-CA', {
+        day: '2-digit',
+        hour: '2-digit',
+        hour12: false,
+        minute: '2-digit',
+        month: '2-digit',
+        timeZone: timezone || 'UTC',
+        year: 'numeric',
+      })
+        .formatToParts(parsedDate)
+        .filter((part) => part.type !== 'literal')
+        .map((part) => [part.type, part.value]),
+    );
+
+    return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
+  } catch {
+    try {
+      return new Intl.DateTimeFormat('uk-UA', {
+      day: '2-digit',
+      hour: '2-digit',
+      hour12: false,
+      minute: '2-digit',
+      month: '2-digit',
+      timeZone: timezone || 'UTC',
+      year: 'numeric',
+      })
+        .format(parsedDate)
+        .replace(',', '');
+    } catch {
+      return localTime;
+    }
+  }
+};
+
+const buildTimeInstruction = (userTime = {}) => {
+  const timezone = userTime.timezone || 'невідомий';
+  const localTime = formatUserLocalTime(userTime) || userTime.localTime || 'невідомий';
+
+  return `Поточний локальний час користувача: ${localTime}
+Часовий пояс: ${timezone}
+Gemini не повинен самостійно вгадувати поточний час. Усі AI-поради, підсумки та відповіді, пов'язані з датою або часом, мають використовувати цей локальний час користувача.`;
+};
+
 const buildFallbackProjectName = (goal) => {
   const normalizedGoal = normalizeGoal(goal);
   const shortGoal =
@@ -140,6 +191,7 @@ const sanitizeTasks = (tasks, goal) => {
     .map((task) => ({
       title: String(task.title).trim(),
       description: String(task.description || '').trim(),
+      deadline: task.deadline || null,
       priority: allowedPriorities.includes(task.priority) ? task.priority : 'medium',
     }));
 
@@ -160,11 +212,13 @@ const sanitizeTaskPlan = (taskPlan, goal) => {
   };
 };
 
-export const generateTasksWithAI = async (goal) => {
+export const generateTasksWithAI = async (goal, { userTime } = {}) => {
   const operation = 'generate-tasks';
 
   try {
     const prompt = `Ти допомагаєш користувачу DailyFlow розбити ціль на задачі.
+${buildTimeInstruction(userTime)}
+
 Згенеруй коротку нормальну назву проєкту і 4-6 практичних задач для цілі: "${normalizeGoal(goal)}".
 Поверни тільки JSON-об'єкт без markdown:
 {
@@ -173,6 +227,7 @@ export const generateTasksWithAI = async (goal) => {
     {
       "title": "коротка назва задачі українською",
       "description": "короткий опис українською",
+      "deadline": "YYYY-MM-DD або null",
       "priority": "low | medium | high"
     }
   ]
@@ -266,10 +321,17 @@ const pickFallbackTask = (tasks = []) => {
   })[0];
 };
 
-const fallbackNextAction = ({ events = [], tasks = [] }) => {
+const getUserReferenceTime = ({ userTime } = {}) => {
+  const parsedTime = userTime?.localTime ? new Date(userTime.localTime).getTime() : NaN;
+  return Number.isNaN(parsedTime) ? Date.now() : parsedTime;
+};
+
+const fallbackNextAction = (context = {}) => {
+  const { events = [], tasks = [] } = context;
   const task = pickFallbackTask(tasks);
+  const referenceTime = getUserReferenceTime(context);
   const nextEvent = [...events]
-    .filter((event) => new Date(event.date).getTime() >= Date.now())
+    .filter((event) => new Date(event.date).getTime() >= referenceTime)
     .sort((firstEvent, secondEvent) => new Date(firstEvent.date) - new Date(secondEvent.date))[0];
 
   if (!task) {
@@ -303,6 +365,8 @@ const sanitizeNextAction = (recommendation, context) => {
   }
 
   const focusMinutes = Number(recommendation.focusMinutes);
+  const knownTaskIds = new Set((context.tasks || []).map((task) => String(task._id || task.id)));
+  const taskId = recommendation.taskId ? String(recommendation.taskId) : null;
 
   return {
     action: String(recommendation.action).trim(),
@@ -310,7 +374,7 @@ const sanitizeNextAction = (recommendation, context) => {
       ? Math.min(Math.max(Math.round(focusMinutes), 5), 60)
       : 25,
     reason: String(recommendation.reason).trim(),
-    taskId: recommendation.taskId ? String(recommendation.taskId) : null,
+    taskId: taskId && knownTaskIds.has(taskId) ? taskId : null,
     title: String(recommendation.title).trim(),
   };
 };
@@ -320,6 +384,8 @@ export const generateDailySummaryWithAI = async (context) => {
 
   try {
     const prompt = `Ти лаконічний український помічник продуктивності.
+${buildTimeInstruction(context.userTime)}
+
 На основі JSON створи короткий підсумок дня:
 ${JSON.stringify(context)}
 
@@ -366,6 +432,8 @@ export const generateNextActionWithAI = async (context) => {
 
   try {
     const prompt = `Ти український AI-помічник DailyFlow. На основі задач і подій обери одну найкращу дію, яку користувачу варто зробити зараз.
+${buildTimeInstruction(context.userTime)}
+
 Відповідай коротко, практично, без мотиваційної води.
 Контекст:
 ${JSON.stringify(context)}
@@ -408,5 +476,63 @@ ${JSON.stringify(context)}
       error: error.message,
     });
     return fallbackNextAction(context);
+  }
+};
+
+const fallbackAssistantReply = ({ message, context }) => {
+  const openTasks = (context.tasks || []).filter((task) => !task.completed);
+  const nextTask = pickFallbackTask(context.tasks || []);
+
+  if (!openTasks.length) {
+    return {
+      reply:
+        'Зараз немає відкритих задач. Додайте одну конкретну задачу або попросіть мене розбити ціль на кроки.',
+    };
+  }
+
+  return {
+    reply: `Я бачу ${openTasks.length} відкритих задач. Почніть із "${nextTask?.title || openTasks[0].title}", а потім поверніться до запиту: ${message}`,
+  };
+};
+
+export const generateAssistantReplyWithAI = async ({ context, message }) => {
+  const operation = 'assistant-command';
+
+  try {
+    const prompt = `Ти український AI-помічник DailyFlow. Відповідай коротко і практично.
+${buildTimeInstruction(context.userTime)}
+
+Користувач може просити перепланувати день, пояснити що робити далі, знайти ризики або розбити роботу.
+Контекст:
+${JSON.stringify(context)}
+
+Запит користувача:
+${message}
+
+Поверни тільки JSON-об'єкт без markdown:
+{
+  "reply": "коротка корисна відповідь українською"
+}`;
+
+    const text = await generateJson({ operation, prompt });
+
+    if (!text) {
+      return fallbackAssistantReply({ context, message });
+    }
+
+    const parsedReply = parseJson(text);
+
+    if (!parsedReply?.reply) {
+      return fallbackAssistantReply({ context, message });
+    }
+
+    return {
+      reply: String(parsedReply.reply).trim(),
+    };
+  } catch (error) {
+    warnAI(`${operation}: Gemini request failed, using local fallback`, {
+      error: error.message,
+    });
+    return fallbackAssistantReply({ context, message });
   }
 };

@@ -2,7 +2,8 @@ import { Router } from 'express';
 import {
   generateDailySummary,
   generateNextAction,
-  generateTasks
+  generateTasks,
+  runAssistantCommand
 } from '../controllers/aiController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -13,5 +14,6 @@ router.use(protect);
 router.post('/generate-tasks', generateTasks);
 router.post('/daily-summary', generateDailySummary);
 router.post('/next-action', generateNextAction);
+router.post('/command', runAssistantCommand);
 
 export default router;

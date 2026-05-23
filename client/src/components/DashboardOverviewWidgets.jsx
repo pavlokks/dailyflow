@@ -106,10 +106,19 @@ export const TasksOverviewWidget = () => {
 
     const loadProjects = async () => {
       try {
-        const { data } = await api.get('/projects');
+        const [projectsResponse, tasksResponse, trashResponse] = await Promise.all([
+          api.get('/projects'),
+          api.get('/tasks'),
+          api.get('/tasks?trash=true'),
+        ]);
+        const usedProjectIds = new Set(
+          [...tasksResponse.data, ...trashResponse.data]
+            .map((task) => task.project?._id || task.project || '')
+            .filter(Boolean),
+        );
 
         if (isMounted) {
-          setProjects(data);
+          setProjects(projectsResponse.data.filter((project) => usedProjectIds.has(project._id)));
         }
       } catch {
         if (isMounted) {
@@ -120,10 +129,12 @@ export const TasksOverviewWidget = () => {
 
     loadProjects();
     window.addEventListener('dailyflow:projects-updated', loadProjects);
+    window.addEventListener('dailyflow:tasks-updated', loadProjects);
 
     return () => {
       isMounted = false;
       window.removeEventListener('dailyflow:projects-updated', loadProjects);
+      window.removeEventListener('dailyflow:tasks-updated', loadProjects);
     };
   }, []);
 

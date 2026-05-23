@@ -82,24 +82,6 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              <div className='profile-summary'>
-                <div>
-                  <UserRound size={16} />
-                  <p>Ім'я</p>
-                  <h2>{user.name}</h2>
-                </div>
-                <div>
-                  <Mail size={16} />
-                  <p>Email</p>
-                  <h2>{user.email}</h2>
-                </div>
-                <div>
-                  <MapPin size={16} />
-                  <p>Місто</p>
-                  <h2>{user.city || 'Не вказано'}</h2>
-                </div>
-              </div>
-
               <div className='profile-settings-grid'>
                 <form className='profile-form' onSubmit={handleUpdateCity}>
                   <div>

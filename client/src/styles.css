@@ -163,11 +163,19 @@ textarea:focus-visible {
 .task-form select,
 .task-form textarea,
 .event-form input,
+.event-form select,
 .event-form textarea,
 .modal-edit-form input,
 .modal-edit-form select,
 .modal-edit-form textarea,
 .ai-generator-form textarea,
+.ai-command-form textarea,
+.generated-project-name select,
+.generated-task-fields input,
+.generated-task-fields select,
+.generated-task-fields textarea,
+.task-filter-bar input,
+.task-filter-bar select,
 .project-rename-form input,
 .generated-project-name input,
 .dashboard-quick-task input,
@@ -190,8 +198,15 @@ textarea:focus-visible {
 .task-form input,
 .task-form select,
 .event-form input,
+.event-form select,
 .modal-edit-form input,
 .modal-edit-form select,
+.generated-project-name select,
+.generated-project-name input,
+.generated-task-fields input,
+.generated-task-fields select,
+.task-filter-bar input,
+.task-filter-bar select,
 .dashboard-quick-task input,
 .dashboard-quick-task select {
   min-height: 36px;
@@ -202,7 +217,9 @@ textarea:focus-visible {
 .task-form textarea,
 .event-form textarea,
 .modal-edit-form textarea,
-.ai-generator-form textarea {
+.ai-generator-form textarea,
+.ai-command-form textarea,
+.generated-task-fields textarea {
   min-height: 88px;
   padding: 10px 11px;
   resize: vertical;
@@ -215,11 +232,19 @@ textarea:focus-visible {
 .task-form select:focus,
 .task-form textarea:focus,
 .event-form input:focus,
+.event-form select:focus,
 .event-form textarea:focus,
 .modal-edit-form input:focus,
 .modal-edit-form select:focus,
 .modal-edit-form textarea:focus,
 .ai-generator-form textarea:focus,
+.ai-command-form textarea:focus,
+.generated-project-name select:focus,
+.generated-task-fields input:focus,
+.generated-task-fields select:focus,
+.generated-task-fields textarea:focus,
+.task-filter-bar input:focus,
+.task-filter-bar select:focus,
 .project-rename-form input:focus,
 .generated-project-name input:focus,
 .dashboard-quick-task input:focus,
@@ -231,7 +256,9 @@ textarea:focus-visible {
 .auth-form button,
 .profile-form button,
 .ai-generator-form button,
+.ai-command-form button,
 .add-generated-tasks,
+.generated-add-draft,
 .task-form button,
 .event-form button,
 .dashboard-quick-task button,
@@ -258,7 +285,9 @@ textarea:focus-visible {
 .auth-form button:hover:not(:disabled),
 .profile-form button:hover:not(:disabled),
 .ai-generator-form button:hover:not(:disabled),
+.ai-command-form button:hover:not(:disabled),
 .add-generated-tasks:hover:not(:disabled),
+.generated-add-draft:hover:not(:disabled),
 .task-form button:hover:not(:disabled),
 .event-form button:hover:not(:disabled),
 .dashboard-quick-task button:hover:not(:disabled),
@@ -271,6 +300,7 @@ button:disabled,
 .task-form button:disabled,
 .event-form button:disabled,
 .ai-generator-form button:disabled,
+.ai-command-form button:disabled,
 .add-generated-tasks:disabled {
   cursor: not-allowed;
   opacity: 0.58;
@@ -1097,6 +1127,7 @@ button:disabled,
 .task-form,
 .event-form,
 .ai-generator-form,
+.ai-command-form,
 .modal-edit-form,
 .profile-form {
   display: grid;
@@ -1107,10 +1138,52 @@ button:disabled,
   background: var(--df-soft);
 }
 
+.module-form-toggle {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  padding: 0 12px;
+  color: var(--df-heading);
+  background: var(--df-soft);
+  font-size: 0.88rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.module-form-toggle:hover {
+  border-color: var(--df-border-strong);
+  background: var(--df-surface);
+}
+
+.module-form-toggle svg {
+  color: var(--df-muted);
+}
+
 .task-form-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+
+.event-form-row,
+.task-filter-bar,
+.generated-project-grid,
+.generated-task-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.task-filter-bar {
+  grid-template-columns: minmax(180px, 1fr) minmax(120px, 160px) minmax(130px, 180px) minmax(130px, 180px);
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  padding: 10px;
+  background: var(--df-soft);
 }
 
 .task-form-actions,
@@ -1127,6 +1200,19 @@ button:disabled,
 .focus-mode-card,
 .ai-generator-card {
   align-content: start;
+}
+
+.ai-command-card {
+  grid-column: span 4;
+}
+
+.ai-command-reply {
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  padding: 12px;
+  color: var(--df-text);
+  background: var(--df-soft);
+  font-size: 0.9rem;
 }
 
 /* Tasks */
@@ -1259,7 +1345,7 @@ button:disabled,
 
 .task-item {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-columns: 0 28px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: start;
   border: 1px solid var(--df-border);
@@ -1268,9 +1354,43 @@ button:disabled,
   background: var(--df-surface);
 }
 
+.task-item-manual {
+  grid-template-columns: 22px 28px minmax(0, 1fr) auto;
+}
+
+.task-item-dragging {
+  opacity: 0.56;
+  border-color: var(--df-primary);
+}
+
+.task-drag-handle {
+  width: 22px;
+  min-height: 28px;
+  display: grid;
+  place-items: center;
+  color: #94a3b8;
+  cursor: grab;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.task-item-manual .task-drag-handle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.task-drag-handle:active {
+  cursor: grabbing;
+}
+
 .task-item:hover {
   border-color: var(--df-border-strong);
   background: var(--df-soft);
+}
+
+.task-item-highlighted {
+  border-color: var(--df-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .task-item-done {
@@ -1712,7 +1832,36 @@ button:disabled,
 /* AI Generator */
 .generated-task-list {
   display: grid;
-  gap: 8px;
+  gap: 10px;
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  padding: 20px;
+  background: var(--df-surface);
+  box-shadow: var(--df-shadow);
+}
+
+.generated-task-list-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.generated-task-list-header svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--df-primary);
+}
+
+.generated-task-list-header h3 {
+  color: var(--df-heading);
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+
+.generated-task-list-header p {
+  margin-top: 4px;
+  font-size: 0.86rem;
 }
 
 .generated-project-name {
@@ -1721,6 +1870,163 @@ button:disabled,
   color: #374151;
   font-size: 0.84rem;
   font-weight: 700;
+}
+
+.generated-task-editor {
+  grid-template-columns: 22px minmax(0, 1fr) 32px;
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+}
+
+.generated-task-fields {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  align-items: stretch;
+}
+
+.generated-task-title-input,
+.generated-task-description-input {
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.generated-task-title-input {
+  min-height: 24px !important;
+  color: var(--df-heading);
+  font-size: 0.92rem;
+  font-weight: 760;
+  line-height: 1.3;
+}
+
+.generated-task-description-input {
+  min-height: 44px !important;
+  color: var(--df-muted);
+  line-height: 1.5;
+  overflow: hidden;
+  resize: none;
+}
+
+.generated-task-controls {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.generated-task-grip {
+  min-height: 32px;
+  display: grid;
+  place-items: center;
+  color: #94a3b8;
+  cursor: grab;
+}
+
+.generated-task-grip:active {
+  cursor: grabbing;
+}
+
+.generated-task-editor-dragging {
+  opacity: 0.56;
+  border-color: var(--df-primary);
+}
+
+.generated-priority,
+.generated-date-field {
+  width: auto;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  border-radius: var(--df-radius);
+  padding: 0 10px;
+  background: var(--df-surface);
+}
+
+.generated-priority {
+  flex: 0 1 142px;
+}
+
+.generated-date-field {
+  flex: 0 1 138px;
+}
+
+.generated-priority span {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--df-primary);
+}
+
+.generated-priority-high span {
+  background: #ef4444;
+}
+
+.generated-priority-medium span {
+  background: #2563eb;
+}
+
+.generated-priority-low span {
+  background: #f59e0b;
+}
+
+.generated-priority select,
+.generated-date-field input {
+  width: 100%;
+  min-height: 32px !important;
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.generated-date-field svg {
+  color: var(--df-heading);
+}
+
+.generated-task-remove {
+  width: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  align-self: start;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--df-radius);
+  color: var(--df-danger);
+  background: transparent;
+  cursor: pointer;
+}
+
+.generated-task-remove:hover {
+  background: var(--df-danger-soft);
+}
+
+.generated-add-draft {
+  width: 100%;
+  min-height: 44px;
+  border-color: #bfdbfe;
+  color: var(--df-primary);
+  background: var(--df-surface);
+  font-size: 0.9rem;
+}
+
+.generated-add-draft:hover:not(:disabled) {
+  border-color: #93c5fd;
+  color: var(--df-primary);
+  background: var(--df-primary-soft);
+}
+
+.generated-task-list > .add-generated-tasks {
+  width: 100%;
+  min-height: 44px;
+  font-size: 0.9rem;
 }
 
 .generated-task-meta {
@@ -1745,7 +2051,9 @@ button:disabled,
 }
 
 .profile-card {
+  width: min(100%, 860px);
   max-width: 860px;
+  margin-inline: auto;
 }
 
 .profile-overview {
@@ -1801,48 +2109,21 @@ button:disabled,
   line-height: 1.35;
 }
 
-.profile-summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.profile-summary div,
 .profile-logout-panel {
   border: 1px solid var(--df-border);
   border-radius: var(--df-radius);
   padding: 12px;
   background: var(--df-soft);
 }
-
-.profile-summary div {
-  min-width: 0;
-  display: grid;
-  gap: 4px;
-}
-
-.profile-summary svg {
-  color: var(--df-muted);
-}
-
-.profile-summary p,
 .profile-logout-panel p {
   color: var(--df-muted);
   font-size: 0.78rem;
   font-weight: 700;
 }
-
-.profile-summary h2,
 .profile-logout-panel h2 {
   margin-top: 4px;
   color: var(--df-heading);
   font-size: 1rem;
-}
-
-.profile-summary h2 {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .profile-settings-grid {
@@ -2078,7 +2359,6 @@ input[type='checkbox']:checked {
 @media (max-width: 820px) {
   .auth-panel,
   .landing-features,
-  .profile-summary,
   .profile-settings-grid {
     grid-template-columns: 1fr;
   }
@@ -2099,6 +2379,17 @@ input[type='checkbox']:checked {
   }
 }
 
+@media (max-width: 900px) {
+  .generated-task-controls {
+    width: 100%;
+  }
+
+  .generated-priority,
+  .generated-date-field {
+    flex: 1 1 180px;
+  }
+}
+
 @media (max-width: 760px) {
   .dashboard-topbar,
   .card-heading,
@@ -2110,6 +2401,9 @@ input[type='checkbox']:checked {
 
   .dashboard-side-column,
   .task-form-row,
+  .event-form-row,
+  .task-filter-bar,
+  .generated-project-grid,
   .weather-details,
   .dashboard-quick-task,
   .weather-card-top {
@@ -2117,7 +2411,11 @@ input[type='checkbox']:checked {
   }
 
   .task-item {
-    grid-template-columns: 28px minmax(0, 1fr);
+    grid-template-columns: 0 28px minmax(0, 1fr);
+  }
+
+  .task-item-manual {
+    grid-template-columns: 22px 28px minmax(0, 1fr);
   }
 
   .task-check {
@@ -2125,7 +2423,7 @@ input[type='checkbox']:checked {
   }
 
   .task-actions {
-    grid-column: 2;
+    grid-column: 3;
     justify-content: flex-start;
     padding-top: 0;
   }
@@ -2165,6 +2463,28 @@ input[type='checkbox']:checked {
   .weather-page-grid .weather-card {
     width: 100%;
     padding: 16px;
+  }
+}
+
+@media (max-width: 700px) {
+  .generated-task-list {
+    padding: 14px;
+  }
+
+  .generated-task-editor {
+    grid-template-columns: 20px minmax(0, 1fr) 30px;
+    gap: 8px;
+  }
+
+  .generated-task-controls {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .generated-priority,
+  .generated-date-field {
+    width: 100%;
+    flex: none;
   }
 }
 

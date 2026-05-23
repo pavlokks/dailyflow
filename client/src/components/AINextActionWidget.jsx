@@ -2,13 +2,16 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Brain, Timer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api.js';
+import { getClientAIContext, getClientLocalTimeParts } from '../utils/aiContext.js';
+import { getUserStorageKey } from '../utils/userStorage.js';
 import ModuleState from './ModuleState.jsx';
 
 const cacheKey = 'dailyflowAiNextActionCache';
 const autoRefreshDelay = 2500;
-let nextActionRequestPromise = null;
+const nextActionRequestPromises = new Map();
 
 const buildContextSignature = ({ events, tasks }) => {
+  const localTimeParts = getClientLocalTimeParts();
   const taskSignature = tasks
     .map((task) => ({
       completed: Boolean(task.completed),
@@ -30,19 +33,23 @@ const buildContextSignature = ({ events, tasks }) => {
   return JSON.stringify({
     events: eventSignature,
     tasks: taskSignature,
+    userTime: {
+      hour: localTimeParts.hour,
+      timezone: localTimeParts.timezone,
+    },
   });
 };
 
 const readCache = () => {
   try {
-    return JSON.parse(localStorage.getItem(cacheKey));
+    return JSON.parse(localStorage.getItem(getUserStorageKey(cacheKey)));
   } catch {
     return null;
   }
 };
 
 const writeCache = (value) => {
-  localStorage.setItem(cacheKey, JSON.stringify(value));
+  localStorage.setItem(getUserStorageKey(cacheKey), JSON.stringify(value));
 };
 
 const loadContext = async () => {
@@ -57,14 +64,18 @@ const loadContext = async () => {
   };
 };
 
-const runSingleRequest = async (context) => {
-  if (!nextActionRequestPromise) {
-    nextActionRequestPromise = api.post('/ai/next-action', context).finally(() => {
-      nextActionRequestPromise = null;
+const runSingleRequest = async () => {
+  const requestKey = getUserStorageKey(cacheKey);
+
+  if (!nextActionRequestPromises.has(requestKey)) {
+    const requestPromise = api.post('/ai/next-action', getClientAIContext()).finally(() => {
+      nextActionRequestPromises.delete(requestKey);
     });
+
+    nextActionRequestPromises.set(requestKey, requestPromise);
   }
 
-  return nextActionRequestPromise;
+  return nextActionRequestPromises.get(requestKey);
 };
 
 const formatUpdatedAt = (date) => {
@@ -105,7 +116,7 @@ const AINextActionWidget = () => {
         return;
       }
 
-      const { data } = await runSingleRequest(context);
+      const { data } = await runSingleRequest();
       const nextValue = {
         ...data,
         signature,
@@ -206,7 +217,10 @@ const AINextActionWidget = () => {
                 </span>
                 <small>{recommendation.reason}</small>
               </div>
-              <Link className='overview-link' to='/tasks'>
+              <Link
+                className='overview-link'
+                to={recommendation.taskId ? `/tasks?task=${recommendation.taskId}` : '/tasks'}
+              >
                 Перейти до задач
               </Link>
             </div>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getUserStorageKey } from '../utils/userStorage.js';
 
 const duration = 25 * 60;
 const storageKey = 'dailyflowFocusTimer';
@@ -14,7 +15,7 @@ const readState = () => {
   try {
     return {
       ...defaultState,
-      ...JSON.parse(localStorage.getItem(storageKey))
+      ...JSON.parse(localStorage.getItem(getUserStorageKey(storageKey)))
     };
   } catch {
     return defaultState;
@@ -22,7 +23,7 @@ const readState = () => {
 };
 
 const writeState = (state) => {
-  localStorage.setItem(storageKey, JSON.stringify(state));
+  localStorage.setItem(getUserStorageKey(storageKey), JSON.stringify(state));
   window.dispatchEvent(new Event('dailyflow:focus-updated'));
 };
 

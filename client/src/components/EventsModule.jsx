@@ -1,8 +1,18 @@
-import React, { useCallback, useState } from 'react';
-import { CalendarDays, Pencil, Plus, RotateCcw, Trash2, X } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Trash2,
+  X,
+} from 'lucide-react';
 import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
 import { getApiErrorMessage } from '../utils/errors.js';
+import { getUserStorageKey } from '../utils/userStorage.js';
 import ModuleState from './ModuleState.jsx';
 
 const formatEventDate = (date) =>
@@ -26,6 +36,16 @@ const notifyEventsUpdated = () => {
   window.dispatchEvent(new Event('dailyflow:events-updated'));
 };
 
+const eventFormOpenKey = 'dailyflowEventFormOpen';
+
+const readSessionFlag = (key) => {
+  try {
+    return sessionStorage.getItem(getUserStorageKey(key)) === 'true';
+  } catch {
+    return false;
+  }
+};
+
 const EventsModule = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -39,6 +59,7 @@ const EventsModule = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editDate, setEditDate] = useState('');
   const [confirmDeleteAllAction, setConfirmDeleteAllAction] = useState('');
+  const [isEventFormOpen, setIsEventFormOpen] = useState(() => readSessionFlag(eventFormOpenKey));
 
   const loadEvents = useCallback(async () => {
     const { data } = await api.get('/events');
@@ -68,9 +89,25 @@ const EventsModule = () => {
     loadItems: loadEvents,
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadTrashEvents();
   }, [loadTrashEvents]);
+
+  useEffect(() => {
+    if (!editEvent) {
+      return undefined;
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        closeEditEvent();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [editEvent]);
 
   const openEditEvent = (event) => {
     setEditEvent(event);
@@ -236,6 +273,18 @@ const EventsModule = () => {
     }
   };
 
+  const toggleEventForm = () => {
+    setIsEventFormOpen((currentValue) => {
+      const nextValue = !currentValue;
+      try {
+        sessionStorage.setItem(getUserStorageKey(eventFormOpenKey), String(nextValue));
+      } catch {
+        // Keep the UI state even if sessionStorage is unavailable.
+      }
+      return nextValue;
+    });
+  };
+
   return (
     <article className='dashboard-card events-card'>
       <div className='card-heading'>
@@ -248,7 +297,19 @@ const EventsModule = () => {
         <span>{events.length}</span>
       </div>
 
-      <form className='event-form' onSubmit={handleCreateEvent}>
+      <button
+        className='module-form-toggle'
+        type='button'
+        onClick={toggleEventForm}
+        aria-expanded={isEventFormOpen}
+        aria-controls='event-create-form'
+      >
+        {isEventFormOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+        <span>{isEventFormOpen ? 'Сховати форму' : 'Додати подію'}</span>
+      </button>
+
+      {isEventFormOpen && (
+      <form className='event-form' id='event-create-form' onSubmit={handleCreateEvent}>
         <input
           type='text'
           value={title}
@@ -289,6 +350,7 @@ const EventsModule = () => {
           </button>
         </div>
       </form>
+      )}
 
       {error && <ModuleState tone='error'>{error}</ModuleState>}
 
@@ -381,7 +443,15 @@ const EventsModule = () => {
       </section>
 
       {editEvent && (
-        <div className='dashboard-modal-overlay' role='presentation'>
+        <div
+          className='dashboard-modal-overlay'
+          role='presentation'
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeEditEvent();
+            }
+          }}
+        >
           <section className='dashboard-modal' role='dialog' aria-modal='true'>
             <div className='dashboard-modal-header'>
               <div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, Settings2, X } from 'lucide-react';
+import AICommandCenter from '../components/AICommandCenter.jsx';
 import AINextActionWidget from '../components/AINextActionWidget.jsx';
 import AppTopbar from '../components/AppTopbar.jsx';
 import AssistantBrief from '../components/AssistantBrief.jsx';
@@ -14,6 +15,7 @@ import {
 } from '../components/DashboardOverviewWidgets.jsx';
 import ProductivityStatsWidget from '../components/ProductivityStatsWidget.jsx';
 import api from '../services/api.js';
+import { getUserStorageKey } from '../utils/userStorage.js';
 
 const storageKey = 'dailyflowDashboardWidgets';
 
@@ -41,6 +43,14 @@ const dashboardWidgets = [
     component: DailySummaryWidget,
     region: 'main',
     visible: true,
+  },
+  {
+    id: 'aiCommand',
+    label: 'Командний центр',
+    description: 'Запитання до помічника.',
+    component: AICommandCenter,
+    region: 'main',
+    visible: false,
   },
   {
     id: 'tasks',
@@ -96,7 +106,7 @@ const defaultSettings = dashboardWidgets.map(({ id, visible }) => ({ id, visible
 
 const readSettings = () => {
   try {
-    const savedSettings = JSON.parse(localStorage.getItem(storageKey));
+    const savedSettings = JSON.parse(localStorage.getItem(getUserStorageKey(storageKey)));
 
     if (!Array.isArray(savedSettings)) {
       return defaultSettings;
@@ -122,7 +132,7 @@ const readSettings = () => {
 };
 
 const saveSettings = (settings) => {
-  localStorage.setItem(storageKey, JSON.stringify(settings));
+  localStorage.setItem(getUserStorageKey(storageKey), JSON.stringify(settings));
 };
 
 const getMillisecondsUntilNextMinute = () => {

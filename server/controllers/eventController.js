@@ -61,7 +61,7 @@ export const updateEvent = async (req, res) => {
 
     if (!event) {
       return res.status(404).json({
-        message: 'Подія незнайдена',
+        message: 'Подія не знайдена',
       });
     }
 
@@ -98,7 +98,7 @@ export const deleteEvent = async (req, res) => {
 
     if (!event) {
       return res.status(404).json({
-        message: 'Подія незнайдена',
+        message: 'Подія не знайдена',
       });
     }
 
@@ -126,7 +126,7 @@ export const restoreEvent = async (req, res) => {
 
     if (!event) {
       return res.status(404).json({
-        message: 'Подія незнайдена',
+        message: 'Подія не знайдена',
       });
     }
 
@@ -152,7 +152,7 @@ export const permanentlyDeleteEvent = async (req, res) => {
 
     if (!event) {
       return res.status(404).json({
-        message: 'Подія незнайдена',
+        message: 'Подія не знайдена',
       });
     }
 

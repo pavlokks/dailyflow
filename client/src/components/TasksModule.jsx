@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronRight,
   Folder,
+  GripVertical,
   Pencil,
   Plus,
   RotateCcw,
@@ -15,9 +16,12 @@ import { useSearchParams } from 'react-router-dom';
 import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
 import { getApiErrorMessage } from '../utils/errors.js';
+import { getUserStorageKey } from '../utils/userStorage.js';
 import ModuleState from './ModuleState.jsx';
 
 const collapsedProjectsKey = 'dailyflowCollapsedTaskProjects';
+const taskFormOpenKey = 'dailyflowTaskFormOpen';
+const taskSortModeKey = 'dailyflowTaskSortMode';
 
 const priorityLabels = {
   high: 'Високий',
@@ -71,17 +75,29 @@ const formatTaskCount = (count) => {
   return `${count} задач`;
 };
 
-const sortTasks = (tasks) => {
+const sortTasks = (tasks, mode = 'deadline') => {
   return [...tasks].sort((firstTask, secondTask) => {
     if (firstTask.completed !== secondTask.completed) {
       return firstTask.completed ? 1 : -1;
+    }
+
+    if (mode === 'manual') {
+      const firstPosition = Number(firstTask.position) > 0
+        ? Number(firstTask.position)
+        : Number.MAX_SAFE_INTEGER;
+      const secondPosition = Number(secondTask.position) > 0
+        ? Number(secondTask.position)
+        : Number.MAX_SAFE_INTEGER;
+
+      if (firstPosition !== secondPosition) return firstPosition - secondPosition;
+      return new Date(secondTask.createdAt) - new Date(firstTask.createdAt);
     }
 
     const priorityDifference =
       priorityOrder[firstTask.priority || 'medium'] -
       priorityOrder[secondTask.priority || 'medium'];
 
-    if (priorityDifference !== 0) return priorityDifference;
+    if (mode === 'priority' && priorityDifference !== 0) return priorityDifference;
 
     const firstDeadline = firstTask.deadline
       ? new Date(firstTask.deadline).getTime()
@@ -90,7 +106,10 @@ const sortTasks = (tasks) => {
       ? new Date(secondTask.deadline).getTime()
       : Number.MAX_SAFE_INTEGER;
 
-    return firstDeadline - secondDeadline;
+    const deadlineDifference = firstDeadline - secondDeadline;
+    if (deadlineDifference !== 0) return deadlineDifference;
+
+    return priorityDifference;
   });
 };
 
@@ -108,10 +127,27 @@ const getTaskProjectName = (task) => task.project?.name || 'Без проєкт�
 
 const readCollapsedProjects = () => {
   try {
-    const savedProjects = JSON.parse(localStorage.getItem(collapsedProjectsKey));
+    const savedProjects = JSON.parse(localStorage.getItem(getUserStorageKey(collapsedProjectsKey)));
     return Array.isArray(savedProjects) ? savedProjects : [];
   } catch {
     return [];
+  }
+};
+
+const readSessionFlag = (key) => {
+  try {
+    return sessionStorage.getItem(getUserStorageKey(key)) === 'true';
+  } catch {
+    return false;
+  }
+};
+
+const readTaskSortMode = () => {
+  try {
+    const savedMode = localStorage.getItem(getUserStorageKey(taskSortModeKey));
+    return ['deadline', 'priority', 'manual'].includes(savedMode) ? savedMode : 'deadline';
+  } catch {
+    return 'deadline';
   }
 };
 
@@ -133,6 +169,12 @@ const TasksModule = () => {
   const [editFormData, setEditFormData] = useState(initialTaskForm);
   const [confirmDeleteAllAction, setConfirmDeleteAllAction] = useState('');
   const [collapsedProjects, setCollapsedProjects] = useState(readCollapsedProjects);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(() => readSessionFlag(taskFormOpenKey));
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [sortMode, setSortMode] = useState(readTaskSortMode);
+  const [draggingTaskId, setDraggingTaskId] = useState('');
 
   const loadTasks = useCallback(async () => {
     const { data } = await api.get('/tasks');
@@ -218,6 +260,22 @@ const TasksModule = () => {
     setEditFormData(initialTaskForm);
   };
 
+  useEffect(() => {
+    if (!editTask) {
+      return undefined;
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        closeEditTask();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [editTask]);
+
   const handleCreateTask = async (event) => {
     event.preventDefault();
 
@@ -235,7 +293,7 @@ const TasksModule = () => {
         title: trimmedTitle,
       });
 
-      setTasks((currentTasks) => sortTasks([data, ...currentTasks]));
+      setTasks((currentTasks) => sortTasks([data, ...currentTasks], sortMode));
       setFormData(initialTaskForm);
       notifyTasksUpdated();
     } catch (requestError) {
@@ -318,6 +376,7 @@ const TasksModule = () => {
       setTasks((currentTasks) =>
         sortTasks(
           currentTasks.map((currentTask) => (currentTask._id === data._id ? data : currentTask)),
+          sortMode,
         ),
       );
       notifyTasksUpdated();
@@ -344,6 +403,7 @@ const TasksModule = () => {
       setTasks((currentTasks) =>
         sortTasks(
           currentTasks.map((currentTask) => (currentTask._id === data._id ? data : currentTask)),
+          sortMode,
         ),
       );
       closeEditTask();
@@ -394,7 +454,7 @@ const TasksModule = () => {
       setTrashTasks((currentTasks) =>
         currentTasks.filter((currentTask) => currentTask._id !== taskId),
       );
-      setTasks((currentTasks) => sortTasks([data, ...currentTasks]));
+      setTasks((currentTasks) => sortTasks([data, ...currentTasks], sortMode));
       notifyTasksUpdated();
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, 'Не вдалося відновити задачу.'));
@@ -450,20 +510,97 @@ const TasksModule = () => {
         ? currentProjects.filter((currentProjectId) => currentProjectId !== projectId)
         : [...currentProjects, projectId];
 
-      localStorage.setItem(collapsedProjectsKey, JSON.stringify(nextProjects));
+      localStorage.setItem(getUserStorageKey(collapsedProjectsKey), JSON.stringify(nextProjects));
       return nextProjects;
     });
   };
 
+  const toggleTaskForm = () => {
+    setIsTaskFormOpen((currentValue) => {
+      const nextValue = !currentValue;
+      try {
+        sessionStorage.setItem(getUserStorageKey(taskFormOpenKey), String(nextValue));
+      } catch {
+        // Keep the UI state even if sessionStorage is unavailable.
+      }
+      return nextValue;
+    });
+  };
+
+  const handleSortModeChange = (event) => {
+    const nextMode = event.target.value;
+    setSortMode(nextMode);
+    try {
+      localStorage.setItem(getUserStorageKey(taskSortModeKey), nextMode);
+    } catch {
+      // Sorting still works for the current session.
+    }
+  };
+
+  const moveTaskManually = async ({ fromTaskId, toTaskId, groupTasks }) => {
+    if (!fromTaskId || !toTaskId || fromTaskId === toTaskId || sortMode !== 'manual') return;
+
+    const fromIndex = groupTasks.findIndex((task) => task._id === fromTaskId);
+    const toIndex = groupTasks.findIndex((task) => task._id === toTaskId);
+    if (fromIndex < 0 || toIndex < 0) return;
+
+    const nextGroupTasks = [...groupTasks];
+    const [movedTask] = nextGroupTasks.splice(fromIndex, 1);
+    nextGroupTasks.splice(toIndex, 0, movedTask);
+
+    const groupTaskIds = new Set(nextGroupTasks.map((task) => task._id));
+    const nextTasks = tasks.map((task) => {
+      const nextIndex = nextGroupTasks.findIndex((groupTask) => groupTask._id === task._id);
+      return nextIndex >= 0 ? { ...task, position: nextIndex + 1 } : task;
+    });
+
+    setTasks(nextTasks);
+    setDraggingTaskId('');
+
+    try {
+      const allManualTasks = sortTasks(nextTasks, 'manual');
+      let nextGroupIndex = 0;
+      const mergedTaskIds = allManualTasks.map((task) => {
+        if (!groupTaskIds.has(task._id)) return task._id;
+        const nextGroupTask = nextGroupTasks[nextGroupIndex];
+        nextGroupIndex += 1;
+        return nextGroupTask._id;
+      });
+      const { data } = await api.put('/tasks/reorder', {
+        taskIds: mergedTaskIds,
+      });
+      setTasks(data);
+      notifyTasksUpdated();
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, 'Не вдалося зберегти порядок задач.'));
+      refresh();
+    }
+  };
+
   const completedCount = tasks.filter((task) => task.completed).length;
-  const sortedTasks = sortTasks(tasks);
+  const sortedTasks = sortTasks(tasks, sortMode);
   const selectedProject = searchParams.get('project') || 'all';
+  const highlightedTaskId = searchParams.get('task') || '';
   const visibleTasks = sortedTasks.filter((task) => {
     const projectId = getTaskProjectId(task);
 
     if (selectedProject === 'all') return true;
     if (selectedProject === 'none') return !projectId;
     return projectId === selectedProject;
+  }).filter((task) => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const matchesSearch =
+      !normalizedQuery ||
+      task.title?.toLowerCase().includes(normalizedQuery) ||
+      task.description?.toLowerCase().includes(normalizedQuery) ||
+      getTaskProjectName(task).toLowerCase().includes(normalizedQuery);
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'open' && !task.completed) ||
+      (statusFilter === 'done' && task.completed);
+    const matchesPriority = priorityFilter === 'all' || (task.priority || 'medium') === priorityFilter;
+
+    return matchesSearch && matchesStatus && matchesPriority;
   });
   const filteredTrashTasks = trashTasks.filter((task) => {
     const projectId = getTaskProjectId(task);
@@ -513,6 +650,25 @@ const TasksModule = () => {
     return group.id === selectedProject;
   };
 
+  useEffect(() => {
+    if (!highlightedTaskId || visibleTasks.length === 0) return;
+
+    const highlightedTask = visibleTasks.find((task) => task._id === highlightedTaskId);
+    const highlightedGroupId = highlightedTask ? getTaskProjectId(highlightedTask) || 'no-project' : '';
+
+    if (highlightedGroupId && collapsedProjects.includes(highlightedGroupId)) {
+      setCollapsedProjects((currentProjects) => {
+        const nextProjects = currentProjects.filter((projectId) => projectId !== highlightedGroupId);
+        localStorage.setItem(getUserStorageKey(collapsedProjectsKey), JSON.stringify(nextProjects));
+        return nextProjects;
+      });
+      return;
+    }
+
+    const taskElement = document.querySelector(`[data-task-id="${highlightedTaskId}"]`);
+    taskElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [collapsedProjects, highlightedTaskId, visibleTasks]);
+
   return (
     <article className='dashboard-card tasks-card'>
       <div className='card-heading'>
@@ -528,7 +684,19 @@ const TasksModule = () => {
         <span>{visibleTasks.length}</span>
       </div>
 
-      <form className='task-form' onSubmit={handleCreateTask}>
+      <button
+        className='module-form-toggle'
+        type='button'
+        onClick={toggleTaskForm}
+        aria-expanded={isTaskFormOpen}
+        aria-controls='task-create-form'
+      >
+        {isTaskFormOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+        <span>{isTaskFormOpen ? 'Сховати форму' : 'Додати задачу'}</span>
+      </button>
+
+      {isTaskFormOpen && (
+      <form className='task-form' id='task-create-form' onSubmit={handleCreateTask}>
         <input
           name='title'
           type='text'
@@ -598,8 +766,34 @@ const TasksModule = () => {
           </button>
         </div>
       </form>
+      )}
 
       {error && <ModuleState tone='error'>{error}</ModuleState>}
+
+      <section className='task-filter-bar' aria-label='Фільтри задач'>
+        <input
+          type='search'
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder='Пошук задач'
+        />
+        <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+          <option value='all'>Усі статуси</option>
+          <option value='open'>Відкриті</option>
+          <option value='done'>Виконані</option>
+        </select>
+        <select value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value)}>
+          <option value='all'>Усі пріоритети</option>
+          <option value='high'>Високий</option>
+          <option value='medium'>Середній</option>
+          <option value='low'>Низький</option>
+        </select>
+        <select value={sortMode} onChange={handleSortModeChange} aria-label='Сортування задач'>
+          <option value='deadline'>За дедлайном</option>
+          <option value='priority'>За пріоритетом</option>
+          <option value='manual'>Власний порядок</option>
+        </select>
+      </section>
 
       <section className='projects-toolbar'>
         <div>
@@ -679,9 +873,45 @@ const TasksModule = () => {
 
                   return (
                     <div
-                      className={task.completed ? 'task-item task-item-done' : 'task-item'}
+                      className={
+                        [
+                          task.completed ? 'task-item task-item-done' : 'task-item',
+                          task._id === highlightedTaskId ? 'task-item-highlighted' : '',
+                          sortMode === 'manual' ? 'task-item-manual' : '',
+                          draggingTaskId === task._id ? 'task-item-dragging' : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')
+                      }
+                      data-task-id={task._id}
+                      draggable={sortMode === 'manual'}
                       key={task._id}
+                      onDragStart={(event) => {
+                        if (sortMode !== 'manual') return;
+                        setDraggingTaskId(task._id);
+                        event.dataTransfer.effectAllowed = 'move';
+                        event.dataTransfer.setData('text/plain', task._id);
+                      }}
+                      onDragOver={(event) => {
+                        if (sortMode !== 'manual') return;
+                        event.preventDefault();
+                        event.dataTransfer.dropEffect = 'move';
+                      }}
+                      onDrop={(event) => {
+                        if (sortMode !== 'manual') return;
+                        event.preventDefault();
+                        const fromTaskId = event.dataTransfer.getData('text/plain') || draggingTaskId;
+                        moveTaskManually({
+                          fromTaskId,
+                          groupTasks: group.tasks,
+                          toTaskId: task._id,
+                        });
+                      }}
+                      onDragEnd={() => setDraggingTaskId('')}
                     >
+                      <span className='task-drag-handle' aria-hidden='true'>
+                        <GripVertical size={15} />
+                      </span>
                       <label className='task-check'>
                         <input
                           type='checkbox'
@@ -791,7 +1021,15 @@ const TasksModule = () => {
       </section>
 
       {editTask && (
-        <div className='dashboard-modal-overlay' role='presentation'>
+        <div
+          className='dashboard-modal-overlay'
+          role='presentation'
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeEditTask();
+            }
+          }}
+        >
           <section className='dashboard-modal' role='dialog' aria-modal='true'>
             <div className='dashboard-modal-header'>
               <div>

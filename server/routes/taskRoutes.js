@@ -5,6 +5,7 @@ import {
   emptyTaskTrash,
   getUserTasks,
   permanentlyDeleteTask,
+  reorderTasks,
   restoreTask,
   updateTask
 } from '../controllers/taskController.js';
@@ -15,6 +16,7 @@ const router = Router();
 router.use(protect);
 
 router.route('/').get(getUserTasks).post(createTask);
+router.put('/reorder', reorderTasks);
 router.delete('/trash', emptyTaskTrash);
 router.put('/:id/restore', restoreTask);
 router.delete('/:id/permanent', permanentlyDeleteTask);

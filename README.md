@@ -1,53 +1,75 @@
 # DailyFlow AI
 
-DailyFlow AI is a MERN-stack personal productivity assistant. It keeps authentication, focus tasks, calendar events, local weather and news in one workspace, then presents them as an AI-style daily brief for planning the next useful action.
+**DailyFlow AI** - персональний вебпомічник для продуктивності, який збирає задачі, події, погоду, новини, фокус-сесії та AI-поради в одному робочому просторі. Це не просто todo-list, а невеликий командний центр дня: що заплановано, що горить, на чому сфокусуватися зараз і як швидко перетворити ціль на конкретний план.
 
-The current assistant brief is powered by the app's own user context and productivity data, so it works without adding a paid AI provider. The structure is ready to extend later with an LLM API if needed.
+Проєкт побудований на MERN-стеку з JWT-авторизацією, ізоляцією даних між користувачами та AI-функціями на базі Gemini з локальними fallback-сценаріями.
 
-## Features
+## Що вміє
 
-- JWT authentication with register, login and protected routes
-- Personal profile with city context for weather
-- Focus task management with descriptions, priorities and deadlines
-- Calendar event management
-- Weather context from OpenWeather
-- News brief from NewsAPI
-- AI Assistant Brief dashboard card
-- AI Task Generator with local template fallback
-- Loading states and basic error handling on the client
-- JSON 404/error responses on the server
+- **Авторизація та профіль**
+  Реєстрація, вхід, захищені маршрути, персональне місто для погодного контексту.
 
-## Tech Stack
+- **Задачі та проєкти**
+  CRUD задач, пріоритети, дедлайни, описи, проєкти, кошик, відновлення, ручне сортування, фільтри та пошук.
 
-- MongoDB + Mongoose
-- Express.js
-- React + Vite
-- Node.js
-- Axios
-- dotenv
+- **Події**
+  Особистий календар подій з редагуванням, видаленням у кошик і відновленням.
 
-## Project Structure
+- **AI-планування**
+  Генерація задач із цілі, редагування чернеток перед додаванням, вибір проєкту, дедлайни та пріоритети.
+
+- **AI-підсумок дня**
+  Короткий підсумок на основі реальних задач, подій, часу користувача і погоди.
+
+- **AI-наступна дія**
+  Рекомендація, що робити прямо зараз, з урахуванням контексту дня.
+
+- **AI Command Center**
+  Швидкі запити до помічника щодо власного плану, задач і подій.
+
+- **Pomodoro**
+  Таймер фокусу, лічильник завершених сесій і floating-віджет.
+
+- **Dashboard**
+  Налаштовувана панель віджетів: можна міняти видимість і порядок блоків.
+
+- **Погода та новини**
+  OpenWeather для погоди за містом профілю та NewsAPI для короткого новинного блоку.
+
+## Технології
+
+| Частина      | Стек                                              |
+| ------------ | ------------------------------------------------- |
+| Frontend     | React 19, Vite, React Router, Axios, lucide-react |
+| Backend      | Node.js, Express, Mongoose                        |
+| База даних   | MongoDB                                           |
+| Авторизація  | JWT, bcrypt                                       |
+| AI           | Google Gemini через `@google/genai`               |
+| Зовнішні API | OpenWeather, NewsAPI                              |
+
+## Структура
 
 ```text
 DailyFlow/
   client/
     src/
-      components/
-      hooks/
-      pages/
-      services/
-      utils/
+      components/      # віджети, модулі, shell, форми
+      hooks/           # reusable React hooks
+      pages/           # сторінки маршрутизації
+      services/        # axios API client
+      utils/           # helpers, AI context, user-scoped storage
   server/
-    config/
-    controllers/
-    middleware/
-    models/
-    routes/
+    config/            # MongoDB connection
+    controllers/       # бізнес-логіка API
+    middleware/        # auth/error middleware
+    models/            # Mongoose models
+    routes/            # Express routes
+    services/          # AI service layer
 ```
 
-## Getting Started
+## Швидкий старт
 
-### 1. Install dependencies
+### 1. Встановити залежності
 
 ```bash
 cd server
@@ -57,75 +79,158 @@ cd ../client
 npm install
 ```
 
-### 2. Configure environment variables
+### 2. Налаштувати backend env
 
-Create `server/.env`:
+Створи файл `server/.env`:
 
 ```env
 PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/dailyflow
-JWT_SECRET=replace-with-your-secret
-OPENWEATHER_API_KEY=replace-with-your-openweather-key
-NEWS_API_KEY=replace-with-your-newsapi-key
+JWT_SECRET=replace-with-long-random-secret
+
+GEMINI_API_KEY=replace-with-gemini-key
+GEMINI_MODEL=gemini-2.5-flash
+
+OPENWEATHER_API_KEY=replace-with-openweather-key
+NEWS_API_KEY=replace-with-newsapi-key
 ```
 
-Optional client API override:
+Мінімально для авторизації та базових CRUD потрібні:
+
+```env
+MONGO_URI=mongodb://127.0.0.1:27017/dailyflow
+JWT_SECRET=replace-with-long-random-secret
+```
+
+Якщо `GEMINI_API_KEY`, `OPENWEATHER_API_KEY` або `NEWS_API_KEY` не задані, відповідні AI/API-функції або повернуть fallback, або покажуть зрозумілу помилку в інтерфейсі.
+
+### 3. Налаштувати frontend env, якщо треба
+
+За замовчуванням клієнт ходить на `http://localhost:5000/api`.
+
+Якщо API запускається на іншій адресі, створи `client/.env`:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
 
-### 3. Run the backend
+### 4. Запустити сервер
 
 ```bash
 cd server
 npm run dev
 ```
 
-The API runs at:
+API буде доступне на:
 
 ```text
 http://localhost:5000
 ```
 
-Health check:
+### 5. Запустити клієнт
 
-```text
-http://localhost:5000/api/health
-```
-
-### 4. Run the frontend
-
-Open another terminal:
+В іншому терміналі:
 
 ```bash
 cd client
 npm run dev
 ```
 
-The frontend runs at the URL shown by Vite, usually:
+Vite покаже локальну адресу, зазвичай:
 
 ```text
 http://localhost:5173
 ```
 
-## Core API Areas
+## Основні маршрути
 
-- `/api/auth` - register, login, current user, profile update
-- `/api/tasks` - authenticated task CRUD
-- `/api/events` - authenticated event CRUD
-- `/api/weather` - weather for the user's profile city
-- `/api/news` - latest news headlines
-- `/api/ai/generate-tasks` - generate task suggestions from a user goal
-- `/api/health` - service health check
+### Frontend
 
-## DailyFlow AI Concept
+| Route           | Опис                          |
+| --------------- | ----------------------------- |
+| `/`             | Головна сторінка              |
+| `/login`        | Вхід                          |
+| `/register`     | Реєстрація                    |
+| `/dashboard`    | Огляд дня та віджети          |
+| `/tasks`        | Задачі та проєкти             |
+| `/events`       | Події                         |
+| `/ai-assistant` | AI-помічник і генератор задач |
+| `/focus`        | Pomodoro                      |
+| `/news`         | Новини                        |
+| `/weather`      | Погода                        |
+| `/profile`      | Профіль                       |
 
-DailyFlow AI is positioned as a personal web assistant rather than a plain dashboard. The assistant brief combines existing project data into a productivity snapshot:
+### Backend API
 
-- how many tasks are still open
-- how many tasks are complete
-- what schedule context is coming next
-- what the user should focus on first
+| Endpoint                 | Опис                                            |
+| ------------------------ | ----------------------------------------------- |
+| `/api/auth`              | Реєстрація, логін, поточний користувач, профіль |
+| `/api/tasks`             | CRUD задач, кошик, reorder                      |
+| `/api/projects`          | Створення й оновлення проєктів                  |
+| `/api/events`            | CRUD подій і кошик                              |
+| `/api/ai/generate-tasks` | Генерація задач із цілі                         |
+| `/api/ai/daily-summary`  | AI-підсумок дня                                 |
+| `/api/ai/next-action`    | Рекомендована наступна дія                      |
+| `/api/ai/command`        | Відповідь AI-помічника                          |
+| `/api/weather`           | Погода за містом користувача                    |
+| `/api/news`              | Новини                                          |
 
-This keeps the original MERN coursework functionality intact while making the product feel like an AI-powered productivity assistant.
+## Скрипти
+
+### Client
+
+```bash
+npm run dev      # dev server Vite
+npm run build    # production build
+npm run preview  # preview production build
+```
+
+### Server
+
+```bash
+npm run dev      # nodemon
+npm start        # node server.js
+```
+
+## Приватність даних
+
+DailyFlow розділяє дані за користувачем на двох рівнях:
+
+- на backend усі задачі, події, проєкти й AI-контекст фільтруються через `req.user._id`;
+- на frontend локальні кеші та UI-налаштування зберігаються в user-scoped ключах, щоб один акаунт не бачив Pomodoro-сесії, AI-підсумки чи налаштування панелі іншого акаунта в тому самому браузері.
+
+## AI-логіка
+
+AI-функції не працюють у вакуумі. Перед запитом DailyFlow збирає контекст користувача:
+
+- відкриті та виконані задачі;
+- дедлайни, пріоритети й проєкти;
+- найближчі події;
+- локальний час і timezone;
+- погоду, якщо вона доступна;
+- місто та ім'я користувача з профілю.
+
+Завдяки цьому підсумок дня і наступна дія виглядають як персональна порада, а не як випадковий текст від чатбота.
+
+## Production build
+
+Перевірити клієнтську збірку:
+
+```bash
+cd client
+npm run build
+```
+
+Запустити backend у production-режимі:
+
+```bash
+cd server
+npm start
+```
+
+## Ідеї для розвитку
+
+- інтеграція Google Calendar
+- push/email-нагадування про дедлайни;
+- календарний тижневий вигляд;
+- темна тема;

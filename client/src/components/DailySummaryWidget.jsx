@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ListChecks, RefreshCw } from 'lucide-react';
 import api from '../services/api.js';
+import { getClientAIContext, getClientLocalTimeParts } from '../utils/aiContext.js';
+import { getUserStorageKey } from '../utils/userStorage.js';
 import ModuleState from './ModuleState.jsx';
 
 const summaryCacheKey = 'dailyflowAiSummaryCache';
-let summaryRequestPromise = null;
+const summaryRequestPromises = new Map();
 
 const buildFallbackSummary = ({ events, tasks, weather }) => {
   const temperature =
@@ -26,6 +28,7 @@ const buildFallbackSummary = ({ events, tasks, weather }) => {
 };
 
 const buildSummarySignature = ({ events, tasks }) => {
+  const localTimeParts = getClientLocalTimeParts();
   const taskSignature = tasks
     .map((task) => ({
       completed: Boolean(task.completed),
@@ -48,29 +51,40 @@ const buildSummarySignature = ({ events, tasks }) => {
   return JSON.stringify({
     events: eventSignature,
     tasks: taskSignature,
+    userTime: {
+      date: localTimeParts.date,
+      timezone: localTimeParts.timezone,
+    },
   });
 };
 
 const readSummaryCache = () => {
   try {
-    return JSON.parse(localStorage.getItem(summaryCacheKey));
+    return JSON.parse(localStorage.getItem(getUserStorageKey(summaryCacheKey)));
   } catch {
     return null;
   }
 };
 
 const writeSummaryCache = (summary) => {
-  localStorage.setItem(summaryCacheKey, JSON.stringify(summary));
+  localStorage.setItem(getUserStorageKey(summaryCacheKey), JSON.stringify(summary));
 };
 
 const runSingleSummaryRequest = async (context) => {
-  if (!summaryRequestPromise) {
-    summaryRequestPromise = api.post('/ai/daily-summary', context).finally(() => {
-      summaryRequestPromise = null;
+  const requestKey = getUserStorageKey(summaryCacheKey);
+
+  if (!summaryRequestPromises.has(requestKey)) {
+    const requestPromise = api.post('/ai/daily-summary', {
+      ...getClientAIContext(),
+      weather: context.weather || {},
+    }).finally(() => {
+      summaryRequestPromises.delete(requestKey);
     });
+
+    summaryRequestPromises.set(requestKey, requestPromise);
   }
 
-  return summaryRequestPromise;
+  return summaryRequestPromises.get(requestKey);
 };
 
 const formatUpdatedAt = (date) => {

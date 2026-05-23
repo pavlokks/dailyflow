@@ -2984,6 +2984,36 @@ textarea {
   font-size: 0.92rem;
 }
 
+.summary-refresh-button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0 10px;
+  color: #374151;
+  background: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.summary-refresh-button:hover:not(:disabled) {
+  color: #2563eb;
+  background: #f8f8f7;
+}
+
+.summary-refresh-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.daily-summary-card .card-heading {
+  display: flex;
+}
+
 .overview-widget {
   padding-bottom: 16px !important;
   border-bottom: 1px solid #eeeeee !important;

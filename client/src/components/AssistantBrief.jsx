@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { ClipboardList } from 'lucide-react';
 import useAsyncList from '../hooks/useAsyncList.js';
 import api from '../services/api.js';
@@ -37,10 +37,20 @@ const AssistantBrief = () => {
     ];
   }, []);
 
-  const { error, isLoading, items } = useAsyncList({
+  const { error, isLoading, items, refresh } = useAsyncList({
     fallbackError: 'Огляд зараз недоступний.',
     loadItems: loadAssistantContext
   });
+
+  useEffect(() => {
+    window.addEventListener('dailyflow:tasks-updated', refresh);
+    window.addEventListener('dailyflow:events-updated', refresh);
+
+    return () => {
+      window.removeEventListener('dailyflow:tasks-updated', refresh);
+      window.removeEventListener('dailyflow:events-updated', refresh);
+    };
+  }, [refresh]);
 
   const context = items[0];
   const completedTasks =

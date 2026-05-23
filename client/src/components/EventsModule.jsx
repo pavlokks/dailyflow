@@ -22,6 +22,10 @@ const formatDateTimeInput = (date) => {
   return parsedDate.toISOString().slice(0, 16);
 };
 
+const notifyEventsUpdated = () => {
+  window.dispatchEvent(new Event('dailyflow:events-updated'));
+};
+
 const EventsModule = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -105,6 +109,7 @@ const EventsModule = () => {
       setTitle('');
       setDescription('');
       setDate('');
+      notifyEventsUpdated();
     } catch (requestError) {
       setError(
         getApiErrorMessage(requestError, 'Не вдалося додати подію. Спробуйте ще раз.')
@@ -122,6 +127,7 @@ const EventsModule = () => {
         currentEvents.filter((currentEvent) => currentEvent._id !== eventId)
       );
       loadTrashEvents();
+      notifyEventsUpdated();
     } catch (requestError) {
       setError(
         getApiErrorMessage(requestError, 'Не вдалося видалити подію. Спробуйте ще раз.')
@@ -144,6 +150,7 @@ const EventsModule = () => {
       await Promise.all(events.map((event) => api.delete(`/events/${event._id}`)));
       setEvents([]);
       loadTrashEvents();
+      notifyEventsUpdated();
     } catch (requestError) {
       setError(
         getApiErrorMessage(requestError, 'Не вдалося видалити всі події.')
@@ -173,6 +180,7 @@ const EventsModule = () => {
           .sort((firstEvent, secondEvent) => new Date(firstEvent.date) - new Date(secondEvent.date))
       );
       closeEditEvent();
+      notifyEventsUpdated();
     } catch (requestError) {
       setError(
         getApiErrorMessage(requestError, 'Не вдалося оновити подію. Спробуйте ще раз.')
@@ -192,6 +200,7 @@ const EventsModule = () => {
           (firstEvent, secondEvent) => new Date(firstEvent.date) - new Date(secondEvent.date)
         )
       );
+      notifyEventsUpdated();
     } catch (requestError) {
       setError(
         getApiErrorMessage(requestError, 'Не вдалося відновити подію.')
@@ -206,6 +215,7 @@ const EventsModule = () => {
       setTrashEvents((currentEvents) =>
         currentEvents.filter((currentEvent) => currentEvent._id !== eventId)
       );
+      notifyEventsUpdated();
     } catch (requestError) {
       setError(
         getApiErrorMessage(requestError, 'Не вдалося видалити подію остаточно.')
@@ -224,6 +234,7 @@ const EventsModule = () => {
       setError('');
       await api.delete('/events/trash');
       setTrashEvents([]);
+      notifyEventsUpdated();
     } catch (requestError) {
       setError(
         getApiErrorMessage(requestError, 'Не вдалося очистити кошик подій.')

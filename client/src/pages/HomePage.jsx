@@ -1,20 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 const HomePage = () => {
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem('dailyflowTheme') || 'light'
-  );
   const token = localStorage.getItem('dailyflowToken');
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem('dailyflowTheme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
-  };
 
   return (
     <main className="landing-page">
@@ -24,9 +12,6 @@ const HomePage = () => {
           <strong>DailyFlow</strong>
         </Link>
         <div className="landing-actions">
-          <button type="button" onClick={toggleTheme}>
-            {theme === 'dark' ? 'Світла тема' : 'Темна тема'}
-          </button>
           <Link to={token ? '/dashboard' : '/login'}>
             {token ? 'До кабінету' : 'Увійти'}
           </Link>

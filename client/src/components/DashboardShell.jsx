@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   Bot,
   CalendarDays,
   CloudSun,
   LayoutDashboard,
   LogOut,
-  Moon,
   Newspaper,
-  Sun,
   Target,
   Timer,
   UserRound
@@ -28,25 +26,11 @@ const navigationItems = [
 
 const DashboardShell = ({ children }) => {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem('dailyflowTheme') || 'light'
-  );
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem('dailyflowTheme', theme);
-  }, [theme]);
 
   const handleLogout = () => {
     localStorage.removeItem('dailyflowToken');
     navigate('/login');
   };
-
-  const toggleTheme = () => {
-    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
-  };
-
-  const ThemeIcon = theme === 'dark' ? Sun : Moon;
 
   return (
     <main className="dashboard-page">
@@ -79,10 +63,6 @@ const DashboardShell = ({ children }) => {
         </nav>
 
         <div className="sidebar-footer">
-          <button type="button" onClick={toggleTheme}>
-            <ThemeIcon size={16} />
-            {theme === 'dark' ? 'Світла тема' : 'Темна тема'}
-          </button>
           <button type="button" onClick={handleLogout}>
             <LogOut size={16} />
             Вийти

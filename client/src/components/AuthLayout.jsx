@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 const AuthLayout = ({
@@ -10,11 +10,6 @@ const AuthLayout = ({
   switchTo,
   title
 }) => {
-  useEffect(() => {
-    document.documentElement.dataset.theme =
-      localStorage.getItem('dailyflowTheme') || 'light';
-  }, []);
-
   return (
     <main className="auth-page">
       <section className="auth-panel">

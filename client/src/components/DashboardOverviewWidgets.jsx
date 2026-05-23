@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import useAsyncList from '../hooks/useAsyncList.js';
 import useFocusTimer, { formatFocusTime } from '../hooks/useFocusTimer.js';
 import api from '../services/api.js';
-import { getApiErrorMessage } from '../utils/errors.js';
 import ModuleState from './ModuleState.jsx';
 
 const formatEventDate = (date) =>
@@ -20,6 +19,9 @@ const priorityLabels = {
   low: 'низький',
   medium: 'середній'
 };
+
+const formatTemperature = (temperature) =>
+  temperature !== undefined && temperature !== null ? `${Math.round(temperature)}°C` : '—';
 
 export const TasksOverviewWidget = () => {
   const loadTasks = useCallback(async () => {
@@ -184,8 +186,6 @@ export const WeatherOverviewWidget = () => {
   });
 
   const weather = items[0];
-  const temperature =
-    weather?.temperature !== undefined ? `${Math.round(weather.temperature)}°C` : '-';
 
   return (
     <article className="dashboard-card overview-widget weather-overview-widget">
@@ -194,22 +194,22 @@ export const WeatherOverviewWidget = () => {
           <h2><CloudSun size={18} /> Погода</h2>
           <p>Коротко для плану дня.</p>
         </div>
-        <span>{temperature}</span>
+        <span>{formatTemperature(weather?.temperature)}</span>
       </div>
 
       {isLoading ? (
         <ModuleState tone="loading">Завантажуємо погоду...</ModuleState>
       ) : error ? (
-        <ModuleState tone="error">
-          {getApiErrorMessage(error, 'Погода недоступна. Перевірте місто в профілі.')}
-        </ModuleState>
+        <ModuleState tone="error">{error}</ModuleState>
       ) : (
         <div className="overview-weather">
           <strong>{weather.city || 'Ваше місто'}</strong>
           <p>{weather.description || 'Дані про погоду недоступні'}</p>
           <small>
-            Відчувається {Math.round(weather.feelsLike ?? weather.temperature)}°C,
-            вітер {weather.windSpeed ?? '-'} м/с
+            Відчувається {formatTemperature(weather.feelsLike)}, вітер {weather.windSpeed ?? '—'} м/с
+          </small>
+          <small>
+            Хмарність {weather.clouds ?? '—'}%, тиск {weather.pressure ?? '—'} гПа
           </small>
         </div>
       )}

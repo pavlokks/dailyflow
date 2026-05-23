@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, Settings2 } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowDown, ArrowUp, Settings2, X } from 'lucide-react';
 import AppTopbar from '../components/AppTopbar.jsx';
 import AssistantBrief from '../components/AssistantBrief.jsx';
 import DailySummaryWidget from '../components/DailySummaryWidget.jsx';
@@ -15,24 +15,66 @@ import ProductivityStatsWidget from '../components/ProductivityStatsWidget.jsx';
 
 const storageKey = 'dailyflowDashboardWidgets';
 
-const optionalWidgets = [
+const dashboardWidgets = [
+  {
+    id: 'dailySummary',
+    label: 'AI Daily Summary',
+    description: 'Короткий підсумок дня.',
+    component: DailySummaryWidget,
+    region: 'main',
+    visible: true
+  },
   {
     id: 'events',
-    label: 'Події',
+    label: 'Events',
     description: 'Найближчі дати.',
     component: EventsOverviewWidget,
+    region: 'main',
     visible: true
   },
   {
     id: 'news',
-    label: 'Новини',
+    label: 'News',
     description: 'Кілька заголовків.',
     component: NewsOverviewWidget,
+    region: 'main',
     visible: false
+  },
+  {
+    id: 'weather',
+    label: 'Weather',
+    description: 'Короткий прогноз.',
+    component: WeatherOverviewWidget,
+    region: 'side',
+    visible: true
+  },
+  {
+    id: 'focus',
+    label: 'Focus Mode',
+    description: 'Стан Pomodoro-таймера.',
+    component: FocusOverviewWidget,
+    region: 'side',
+    visible: true
+  },
+  {
+    id: 'productivityStats',
+    label: 'Productivity Statistics',
+    description: 'Прогрес задач і подій.',
+    component: ProductivityStatsWidget,
+    region: 'side',
+    visible: true
+  },
+  {
+    id: 'aiOverview',
+    label: 'AI Overview',
+    description: 'Короткий стан дня.',
+    component: AssistantBrief,
+    region: 'side',
+    visible: true
   }
 ];
 
-const defaultSettings = optionalWidgets.map(({ id, visible }) => ({ id, visible }));
+const defaultSettings = dashboardWidgets.map(({ id, visible }) => ({ id, visible }));
 
 const readSettings = () => {
   try {
@@ -42,7 +84,7 @@ const readSettings = () => {
       return defaultSettings;
     }
 
-    const knownIds = new Set(optionalWidgets.map((widget) => widget.id));
+    const knownIds = new Set(dashboardWidgets.map((widget) => widget.id));
     const validSavedSettings = savedSettings.filter((item) => knownIds.has(item.id));
     const missingSettings = defaultSettings.filter(
       (item) => !validSavedSettings.some((savedItem) => savedItem.id === item.id)
@@ -63,8 +105,24 @@ const DashboardPage = () => {
   const [settings, setSettings] = useState(readSettings);
 
   const widgetsById = useMemo(() => {
-    return new Map(optionalWidgets.map((widget) => [widget.id, widget]));
+    return new Map(dashboardWidgets.map((widget) => [widget.id, widget]));
   }, []);
+
+  useEffect(() => {
+    if (!isCustomizing) {
+      return undefined;
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setIsCustomizing(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isCustomizing]);
 
   const updateSettings = (updater) => {
     setSettings((currentSettings) => {
@@ -99,7 +157,15 @@ const DashboardPage = () => {
     });
   };
 
-  const visibleOptionalSettings = settings.filter((item) => item.visible);
+  const visibleMainWidgets = settings.filter((item) => {
+    const widget = widgetsById.get(item.id);
+    return item.visible && widget?.region === 'main';
+  });
+
+  const visibleSideWidgets = settings.filter((item) => {
+    const widget = widgetsById.get(item.id);
+    return item.visible && widget?.region === 'side';
+  });
 
   return (
     <DashboardShell>
@@ -110,84 +176,115 @@ const DashboardPage = () => {
           <button
             className="secondary-button"
             type="button"
-            onClick={() => setIsCustomizing((currentValue) => !currentValue)}
+            onClick={() => setIsCustomizing(true)}
           >
             <Settings2 size={15} />
-            Вигляд
+            Налаштувати Dashboard
           </button>
         }
       />
 
       <section className="dashboard-workspace">
         <div className="dashboard-main-column">
-          <DailySummaryWidget />
-          <TasksOverviewWidget />
-
-          {visibleOptionalSettings.map((item) => {
+          {visibleMainWidgets.map((item) => {
             const WidgetComponent = widgetsById.get(item.id)?.component;
-
             return WidgetComponent ? <WidgetComponent key={item.id} /> : null;
           })}
+
+          <TasksOverviewWidget />
         </div>
 
         <aside className="dashboard-side-column">
-          <WeatherOverviewWidget />
-          <FocusOverviewWidget />
-          <ProductivityStatsWidget />
-          <AssistantBrief />
-
-          {isCustomizing && (
-            <article className="dashboard-card dashboard-customizer">
-              <div className="card-heading">
-                <div>
-                  <h2><Settings2 size={17} /> Вигляд Dashboard</h2>
-                  <p>Основні блоки залишаються на місці. Тут можна додати або сховати другорядні секції.</p>
-                </div>
-              </div>
-
-              <div className="customizer-list">
-                {settings.map((item, index) => {
-                  const widget = widgetsById.get(item.id);
-
-                  return (
-                    <div className="customizer-item" key={item.id}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={item.visible}
-                          onChange={() => toggleWidget(item.id)}
-                        />
-                        <span>
-                          <strong>{widget.label}</strong>
-                          <small>{widget.description}</small>
-                        </span>
-                      </label>
-                      <div className="customizer-actions">
-                        <button
-                          type="button"
-                          disabled={index === 0}
-                          onClick={() => moveWidget(item.id, -1)}
-                        >
-                          <ArrowUp size={14} />
-                          Вгору
-                        </button>
-                        <button
-                          type="button"
-                          disabled={index === settings.length - 1}
-                          onClick={() => moveWidget(item.id, 1)}
-                        >
-                          <ArrowDown size={14} />
-                          Вниз
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </article>
-          )}
+          {visibleSideWidgets.map((item) => {
+            const WidgetComponent = widgetsById.get(item.id)?.component;
+            return WidgetComponent ? <WidgetComponent key={item.id} /> : null;
+          })}
         </aside>
       </section>
+
+      {isCustomizing && (
+        <div
+          className="dashboard-modal-overlay"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsCustomizing(false);
+            }
+          }}
+        >
+          <section
+            className="dashboard-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dashboard-modal-title"
+          >
+            <div className="dashboard-modal-header">
+              <div>
+                <h2 id="dashboard-modal-title">Налаштувати Dashboard</h2>
+                <p>Покажіть тільки ті блоки, які потрібні на огляді дня.</p>
+              </div>
+              <button
+                className="modal-close-button"
+                type="button"
+                aria-label="Закрити"
+                onClick={() => setIsCustomizing(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="customizer-list">
+              {settings.map((item, index) => {
+                const widget = widgetsById.get(item.id);
+
+                return (
+                  <div className="customizer-item" key={item.id}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={item.visible}
+                        onChange={() => toggleWidget(item.id)}
+                      />
+                      <span>
+                        <strong>{widget.label}</strong>
+                        <small>{widget.description}</small>
+                      </span>
+                    </label>
+                    <div className="customizer-actions">
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={() => moveWidget(item.id, -1)}
+                      >
+                        <ArrowUp size={14} />
+                        Вгору
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === settings.length - 1}
+                        onClick={() => moveWidget(item.id, 1)}
+                      >
+                        <ArrowDown size={14} />
+                        Вниз
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="dashboard-modal-footer">
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => setIsCustomizing(false)}
+              >
+                Close
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </DashboardShell>
   );
 };

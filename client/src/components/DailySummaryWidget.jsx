@@ -87,11 +87,30 @@ const formatUpdatedAt = (date) => {
   }).format(new Date(date));
 };
 
+const loadSummaryContext = async () => {
+  const [tasksResponse, eventsResponse, weatherResponse] = await Promise.allSettled([
+    api.get('/tasks'),
+    api.get('/events'),
+    api.get('/weather')
+  ]);
+
+  if (tasksResponse.status === 'rejected' || eventsResponse.status === 'rejected') {
+    throw new Error('Не вдалося завантажити контекст дня.');
+  }
+
+  return {
+    events: eventsResponse.value.data,
+    tasks: tasksResponse.value.data,
+    weather: weatherResponse.status === 'fulfilled' ? weatherResponse.value.data : {}
+  };
+};
+
 const DailySummaryWidget = () => {
   const [summaryState, setSummaryState] = useState(() => readSummaryCache());
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(() => !readSummaryCache());
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isSummaryStale, setIsSummaryStale] = useState(false);
   const debounceTimerRef = useRef(null);
   const isMountedRef = useRef(true);
   const summaryStateRef = useRef(summaryState);
@@ -111,21 +130,7 @@ const DailySummaryWidget = () => {
         setIsRegenerating(true);
       }
 
-      const [tasksResponse, eventsResponse, weatherResponse] = await Promise.allSettled([
-        api.get('/tasks'),
-        api.get('/events'),
-        api.get('/weather')
-      ]);
-
-      if (tasksResponse.status === 'rejected' || eventsResponse.status === 'rejected') {
-        throw new Error('Не вдалося завантажити контекст дня.');
-      }
-
-      const context = {
-        events: eventsResponse.value.data,
-        tasks: tasksResponse.value.data,
-        weather: weatherResponse.status === 'fulfilled' ? weatherResponse.value.data : {}
-      };
+      const context = await loadSummaryContext();
       const signature = buildSummarySignature(context);
 
       if (mode !== 'manual' && cachedSummary?.signature === signature) {
@@ -139,6 +144,7 @@ const DailySummaryWidget = () => {
         summaryStateRef.current = nextState;
         if (isMountedRef.current) {
           setSummaryState(nextState);
+          setIsSummaryStale(false);
         }
         return;
       }
@@ -166,35 +172,25 @@ const DailySummaryWidget = () => {
       summaryStateRef.current = nextState;
       if (isMountedRef.current) {
         setSummaryState(nextState);
+        setIsSummaryStale(false);
       }
     } catch (requestError) {
       if (!cachedSummary && !currentSummary) {
         try {
-          const [tasksResponse, eventsResponse, weatherResponse] = await Promise.allSettled([
-            api.get('/tasks'),
-            api.get('/events'),
-            api.get('/weather')
-          ]);
+          const context = await loadSummaryContext();
+          const fallbackSummary = buildFallbackSummary(context);
+          const updatedAt = new Date().toISOString();
+          const cacheValue = {
+            ...fallbackSummary,
+            signature: buildSummarySignature(context),
+            updatedAt
+          };
 
-          if (tasksResponse.status === 'fulfilled' && eventsResponse.status === 'fulfilled') {
-            const context = {
-              events: eventsResponse.value.data,
-              tasks: tasksResponse.value.data,
-              weather: weatherResponse.status === 'fulfilled' ? weatherResponse.value.data : {}
-            };
-            const fallbackSummary = buildFallbackSummary(context);
-            const updatedAt = new Date().toISOString();
-            const cacheValue = {
-              ...fallbackSummary,
-              signature: buildSummarySignature(context),
-              updatedAt
-            };
-
-            writeSummaryCache(cacheValue);
-            summaryStateRef.current = cacheValue;
-            if (isMountedRef.current) {
-              setSummaryState(cacheValue);
-            }
+          writeSummaryCache(cacheValue);
+          summaryStateRef.current = cacheValue;
+          if (isMountedRef.current) {
+            setSummaryState(cacheValue);
+            setIsSummaryStale(false);
           }
         } catch {
           // Keep the original error below.
@@ -220,6 +216,15 @@ const DailySummaryWidget = () => {
       summaryStateRef.current = cachedSummary;
       setSummaryState(cachedSummary);
       setIsLoading(false);
+      loadSummaryContext()
+        .then((context) => {
+          if (isMountedRef.current) {
+            setIsSummaryStale(buildSummarySignature(context) !== cachedSummary.signature);
+          }
+        })
+        .catch(() => {
+          // Keep cached summary visible if freshness check fails.
+        });
     } else {
       regenerateSummary({ mode: 'initial' });
     }
@@ -232,6 +237,7 @@ const DailySummaryWidget = () => {
 
   useEffect(() => {
     const handleContextChanged = () => {
+      setIsSummaryStale(true);
       window.clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = window.setTimeout(() => {
         regenerateSummary({ mode: 'auto' });
@@ -253,7 +259,10 @@ const DailySummaryWidget = () => {
       <div className="card-heading">
         <div>
           <h2><ListChecks size={18} /> Підсумок дня</h2>
-          <p>Оновлено: {formatUpdatedAt(summaryState?.updatedAt)}</p>
+          <p>
+            Оновлено: {formatUpdatedAt(summaryState?.updatedAt)}
+            {isSummaryStale && !isRegenerating ? ' · Дані змінились, оновіть summary' : ''}
+          </p>
         </div>
         <button
           className="summary-refresh-button"

@@ -17,10 +17,26 @@ const storageKey = 'dailyflowDashboardWidgets';
 
 const dashboardWidgets = [
   {
+    id: 'aiOverview',
+    label: 'AI Overview',
+    description: 'Короткий стан дня.',
+    component: AssistantBrief,
+    region: 'main',
+    visible: true
+  },
+  {
     id: 'dailySummary',
     label: 'AI Daily Summary',
     description: 'Короткий підсумок дня.',
     component: DailySummaryWidget,
+    region: 'main',
+    visible: true
+  },
+  {
+    id: 'tasks',
+    label: 'Tasks',
+    description: 'Короткий список відкритих задач.',
+    component: TasksOverviewWidget,
     region: 'main',
     visible: true
   },
@@ -41,14 +57,6 @@ const dashboardWidgets = [
     visible: false
   },
   {
-    id: 'weather',
-    label: 'Weather',
-    description: 'Короткий прогноз.',
-    component: WeatherOverviewWidget,
-    region: 'side',
-    visible: true
-  },
-  {
     id: 'focus',
     label: 'Focus Mode',
     description: 'Стан Pomodoro-таймера.',
@@ -57,18 +65,18 @@ const dashboardWidgets = [
     visible: true
   },
   {
-    id: 'productivityStats',
-    label: 'Productivity Statistics',
-    description: 'Прогрес задач і подій.',
-    component: ProductivityStatsWidget,
+    id: 'weather',
+    label: 'Weather',
+    description: 'Короткий прогноз.',
+    component: WeatherOverviewWidget,
     region: 'side',
     visible: true
   },
   {
-    id: 'aiOverview',
-    label: 'AI Overview',
-    description: 'Короткий стан дня.',
-    component: AssistantBrief,
+    id: 'productivityStats',
+    label: 'Productivity Statistics',
+    description: 'Прогрес задач і подій.',
+    component: ProductivityStatsWidget,
     region: 'side',
     visible: true
   }
@@ -89,6 +97,13 @@ const readSettings = () => {
     const missingSettings = defaultSettings.filter(
       (item) => !validSavedSettings.some((savedItem) => savedItem.id === item.id)
     );
+
+    if (missingSettings.length > 0) {
+      return defaultSettings.map((defaultItem) => {
+        const savedItem = validSavedSettings.find((item) => item.id === defaultItem.id);
+        return savedItem ? { ...defaultItem, visible: savedItem.visible } : defaultItem;
+      });
+    }
 
     return [...validSavedSettings, ...missingSettings];
   } catch {
@@ -143,18 +158,83 @@ const DashboardPage = () => {
   const moveWidget = (widgetId, direction) => {
     updateSettings((currentSettings) => {
       const currentIndex = currentSettings.findIndex((item) => item.id === widgetId);
-      const nextIndex = currentIndex + direction;
+      const currentWidget = widgetsById.get(widgetId);
 
-      if (currentIndex < 0 || nextIndex < 0 || nextIndex >= currentSettings.length) {
+      if (currentIndex < 0 || !currentWidget) {
         return currentSettings;
       }
 
+      const sameRegionSettings = currentSettings.filter(
+        (item) => widgetsById.get(item.id)?.region === currentWidget.region
+      );
+      const regionIndex = sameRegionSettings.findIndex((item) => item.id === widgetId);
+      const nextRegionItem = sameRegionSettings[regionIndex + direction];
+
+      if (!nextRegionItem) {
+        return currentSettings;
+      }
+
+      const nextIndex = currentSettings.findIndex((item) => item.id === nextRegionItem.id);
       const nextSettings = [...currentSettings];
-      const [movedWidget] = nextSettings.splice(currentIndex, 1);
-      nextSettings.splice(nextIndex, 0, movedWidget);
+      [nextSettings[currentIndex], nextSettings[nextIndex]] = [
+        nextSettings[nextIndex],
+        nextSettings[currentIndex]
+      ];
 
       return nextSettings;
     });
+  };
+
+  const getSectionSettings = (region) =>
+    settings.filter((item) => widgetsById.get(item.id)?.region === region);
+
+  const renderCustomizerSection = ({ region, title }) => {
+    const sectionSettings = getSectionSettings(region);
+
+    return (
+      <section className="customizer-section">
+        <h3>{title}</h3>
+        <div className="customizer-list">
+          {sectionSettings.map((item, index) => {
+            const widget = widgetsById.get(item.id);
+
+            return (
+              <div className="customizer-item" key={item.id}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={item.visible}
+                    onChange={() => toggleWidget(item.id)}
+                  />
+                  <span>
+                    <strong>{widget.label}</strong>
+                    <small>{widget.description}</small>
+                  </span>
+                </label>
+                <div className="customizer-actions">
+                  <button
+                    type="button"
+                    disabled={index === 0}
+                    onClick={() => moveWidget(item.id, -1)}
+                  >
+                    <ArrowUp size={14} />
+                    Вгору
+                  </button>
+                  <button
+                    type="button"
+                    disabled={index === sectionSettings.length - 1}
+                    onClick={() => moveWidget(item.id, 1)}
+                  >
+                    <ArrowDown size={14} />
+                    Вниз
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    );
   };
 
   const visibleMainWidgets = settings.filter((item) => {
@@ -190,8 +270,6 @@ const DashboardPage = () => {
             const WidgetComponent = widgetsById.get(item.id)?.component;
             return WidgetComponent ? <WidgetComponent key={item.id} /> : null;
           })}
-
-          <TasksOverviewWidget />
         </div>
 
         <aside className="dashboard-side-column">
@@ -233,44 +311,9 @@ const DashboardPage = () => {
               </button>
             </div>
 
-            <div className="customizer-list">
-              {settings.map((item, index) => {
-                const widget = widgetsById.get(item.id);
-
-                return (
-                  <div className="customizer-item" key={item.id}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={item.visible}
-                        onChange={() => toggleWidget(item.id)}
-                      />
-                      <span>
-                        <strong>{widget.label}</strong>
-                        <small>{widget.description}</small>
-                      </span>
-                    </label>
-                    <div className="customizer-actions">
-                      <button
-                        type="button"
-                        disabled={index === 0}
-                        onClick={() => moveWidget(item.id, -1)}
-                      >
-                        <ArrowUp size={14} />
-                        Вгору
-                      </button>
-                      <button
-                        type="button"
-                        disabled={index === settings.length - 1}
-                        onClick={() => moveWidget(item.id, 1)}
-                      >
-                        <ArrowDown size={14} />
-                        Вниз
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="customizer-sections">
+              {renderCustomizerSection({ region: 'main', title: 'Main column' })}
+              {renderCustomizerSection({ region: 'side', title: 'Sidebar widgets' })}
             </div>
 
             <div className="dashboard-modal-footer">

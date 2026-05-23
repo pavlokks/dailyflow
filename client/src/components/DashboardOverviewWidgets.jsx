@@ -15,13 +15,54 @@ const formatEventDate = (date) =>
   }).format(new Date(date));
 
 const priorityLabels = {
-  high: 'високий',
-  low: 'низький',
-  medium: 'середній'
+  high: 'Високий',
+  low: 'Низький',
+  medium: 'Середній'
 };
+
+const priorityOrder = { high: 1, medium: 2, low: 3 };
 
 const formatTemperature = (temperature) =>
   temperature !== undefined && temperature !== null ? `${Math.round(temperature)}°C` : '—';
+
+const formatTaskDeadline = (deadline) => {
+  if (!deadline) return 'Без дедлайну';
+
+  const date = new Date(deadline);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const targetDate = new Date(date);
+  targetDate.setHours(0, 0, 0, 0);
+  const dayDifference = Math.round((targetDate - today) / 86400000);
+
+  if (dayDifference < 0) return 'Прострочено';
+  if (dayDifference === 0) return 'Сьогодні';
+  if (dayDifference === 1) return 'Завтра';
+
+  return new Intl.DateTimeFormat('uk-UA', {
+    day: '2-digit',
+    month: 'short'
+  }).format(date);
+};
+
+const sortDashboardTasks = (tasks) =>
+  [...tasks].sort((firstTask, secondTask) => {
+    const priorityDifference =
+      priorityOrder[firstTask.priority || 'medium'] -
+      priorityOrder[secondTask.priority || 'medium'];
+
+    if (priorityDifference !== 0) return priorityDifference;
+
+    const firstDeadline = firstTask.deadline
+      ? new Date(firstTask.deadline).getTime()
+      : Number.MAX_SAFE_INTEGER;
+    const secondDeadline = secondTask.deadline
+      ? new Date(secondTask.deadline).getTime()
+      : Number.MAX_SAFE_INTEGER;
+
+    return firstDeadline - secondDeadline;
+  });
 
 export const TasksOverviewWidget = () => {
   const loadTasks = useCallback(async () => {
@@ -41,15 +82,18 @@ export const TasksOverviewWidget = () => {
   }, [refresh]);
 
   const openTasks = tasks.filter((task) => !task.completed);
-  const highPriorityTasks = openTasks.filter((task) => task.priority === 'high');
-  const previewTasks = openTasks.slice(0, 3);
+  const previewTasks = sortDashboardTasks(openTasks).slice(0, 4);
+  const overdueTasks = openTasks.filter(
+    (task) => task.deadline && new Date(task.deadline).getTime() < Date.now()
+  ).length;
+  const todayTasks = openTasks.filter((task) => formatTaskDeadline(task.deadline) === 'Сьогодні').length;
 
   return (
-    <article className="dashboard-card overview-widget">
+    <article className="dashboard-card overview-widget tasks-overview-widget">
       <div className="card-heading">
         <div>
           <h2><Target size={18} /> Задачі на зараз</h2>
-          <p>Короткий список без повної форми створення.</p>
+          <p>Найважливіші відкриті задачі за пріоритетом і дедлайном.</p>
         </div>
         <span>{openTasks.length}</span>
       </div>
@@ -62,14 +106,19 @@ export const TasksOverviewWidget = () => {
         <ModuleState>Відкритих задач немає. Додати нову можна на сторінці задач.</ModuleState>
       ) : (
         <div className="overview-widget-content">
-          <p className="overview-helper">
-            Високий пріоритет: <strong>{highPriorityTasks.length}</strong>
-          </p>
-          <ul className="overview-list">
+          <div className="tasks-overview-stats">
+            <span>{todayTasks} сьогодні</span>
+            <span>{overdueTasks} прострочено</span>
+          </div>
+          <ul className="overview-list tasks-overview-list">
             {previewTasks.map((task) => (
               <li key={task._id}>
-                <strong>{task.title}</strong>
-                <span>{priorityLabels[task.priority] || 'середній'}</span>
+                <div>
+                  <strong>{task.title}</strong>
+                  <small>{task.project?.name || 'Без проєкту'}</small>
+                </div>
+                <span>{formatTaskDeadline(task.deadline)}</span>
+                <b>{priorityLabels[task.priority] || 'Середній'}</b>
               </li>
             ))}
           </ul>

@@ -4,13 +4,12 @@ import {
   CalendarDays,
   CloudSun,
   LayoutDashboard,
-  LogOut,
   Newspaper,
   Target,
   Timer,
   UserRound
 } from 'lucide-react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import FloatingFocusTimer from './FloatingFocusTimer.jsx';
 
 const navigationItems = [
@@ -25,23 +24,16 @@ const navigationItems = [
 ];
 
 const DashboardShell = ({ children }) => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem('dailyflowToken');
-    navigate('/login');
-  };
-
   return (
     <main className="dashboard-page">
       <aside className="app-sidebar">
-        <div className="sidebar-brand">
+        <Link className="sidebar-brand" to="/">
           <span>DF</span>
           <div>
             <strong>DailyFlow</strong>
             <p>персональний вебпомічник</p>
           </div>
-        </div>
+        </Link>
 
         <nav className="sidebar-nav" aria-label="Основна навігація">
           {navigationItems.map((item) => {
@@ -62,12 +54,7 @@ const DashboardShell = ({ children }) => {
           })}
         </nav>
 
-        <div className="sidebar-footer">
-          <button type="button" onClick={handleLogout}>
-            <LogOut size={16} />
-            Вийти
-          </button>
-        </div>
+        <div className="sidebar-footer" aria-hidden="true" />
       </aside>
 
       <div className="dashboard-main">{children}</div>

@@ -203,14 +203,26 @@ export const WeatherOverviewWidget = () => {
         <ModuleState tone="error">{error}</ModuleState>
       ) : (
         <div className="overview-weather">
-          <strong>{weather.city || 'Ваше місто'}</strong>
-          <p>{weather.description || 'Дані про погоду недоступні'}</p>
-          <small>
-            Відчувається {formatTemperature(weather.feelsLike)}, вітер {weather.windSpeed ?? '—'} м/с
-          </small>
-          <small>
-            Хмарність {weather.clouds ?? '—'}%, тиск {weather.pressure ?? '—'} гПа
-          </small>
+          <strong>{weather?.city || 'Ваше місто'}</strong>
+          <p>{weather?.description || 'Дані про погоду недоступні'}</p>
+          <dl className="overview-weather-details">
+            <div>
+              <dt>Відчувається</dt>
+              <dd>{formatTemperature(weather?.feelsLike)}</dd>
+            </div>
+            <div>
+              <dt>Вітер</dt>
+              <dd>{weather?.windSpeed ?? '—'} м/с</dd>
+            </div>
+            <div>
+              <dt>Хмарність</dt>
+              <dd>{weather?.clouds ?? '—'}%</dd>
+            </div>
+            <div>
+              <dt>Тиск</dt>
+              <dd>{weather?.pressure ?? '—'} гПа</dd>
+            </div>
+          </dl>
         </div>
       )}
 

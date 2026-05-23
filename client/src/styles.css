@@ -3238,3 +3238,314 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* Palette cleanup: compact neutral system. */
+:root {
+  --df-bg: #F8F8F7;
+  --df-surface-muted: #F1F1EF;
+  --df-surface: #FFFFFF;
+  --df-border: #E5E7EB;
+  --df-text: #1F2937;
+  --df-muted: #6B7280;
+  --df-primary: #2563EB;
+  --df-primary-soft: #F1F1EF;
+  --df-radius: 8px;
+}
+
+body,
+.auth-page,
+.landing-page,
+.dashboard-page {
+  color: var(--df-text);
+  background: var(--df-bg) !important;
+}
+
+p,
+.topbar-subtitle,
+.card-heading p,
+.dashboard-card p,
+.overview-list span,
+.overview-helper,
+.task-description,
+.event-item p,
+.weather-description {
+  color: var(--df-muted);
+}
+
+.app-sidebar {
+  background: var(--df-surface-muted) !important;
+  border-right-color: var(--df-border);
+}
+
+.sidebar-brand {
+  color: var(--df-text);
+  text-decoration: none;
+}
+
+.sidebar-brand > span,
+.landing-brand span {
+  color: var(--df-surface);
+  background: var(--df-primary);
+  border-color: var(--df-primary);
+}
+
+.sidebar-link {
+  color: var(--df-text);
+}
+
+.sidebar-link svg {
+  color: var(--df-muted);
+}
+
+.sidebar-link:hover {
+  background: var(--df-border);
+}
+
+.sidebar-link-active {
+  color: var(--df-primary);
+  background: var(--df-surface);
+}
+
+.sidebar-link-active svg {
+  color: var(--df-primary);
+}
+
+.sidebar-footer:empty {
+  margin-top: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.dashboard-topbar,
+.dashboard-card,
+.auth-form,
+.landing-features article,
+.weather-overview-widget,
+.focus-overview-widget,
+.productivity-stats-card,
+.assistant-card,
+.dashboard-customizer {
+  color: var(--df-text);
+  background: var(--df-surface) !important;
+  border-color: var(--df-border) !important;
+}
+
+.dashboard-workspace .dashboard-card {
+  background: transparent !important;
+}
+
+.daily-summary-text,
+.daily-summary-advice,
+.assistant-metrics div,
+.stats-grid div,
+.profile-summary div,
+.overview-list li,
+.customizer-item,
+.task-item,
+.event-item,
+.generated-task-item,
+.weather-details span {
+  background: var(--df-surface-muted);
+  border-color: var(--df-border);
+}
+
+.secondary-button,
+.overview-link,
+.landing-actions a,
+.landing-actions button,
+.focus-actions button,
+.floating-focus-actions button,
+.customizer-actions button {
+  color: var(--df-primary);
+  background: var(--df-surface);
+  border-color: var(--df-border);
+}
+
+.auth-form button,
+.landing-cta a:first-child,
+.profile-form button,
+.focus-actions button:first-child,
+.floating-focus-actions button:first-child {
+  color: var(--df-surface);
+  background: var(--df-primary);
+  border-color: var(--df-primary);
+}
+
+.profile-logout-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 2px;
+  padding-top: 14px;
+  border-top: 1px solid var(--df-border);
+}
+
+.profile-logout-panel p {
+  margin: 0;
+  color: var(--df-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.profile-logout-panel h2 {
+  margin: 6px 0 0;
+  color: var(--df-text);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.profile-logout-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  padding: 0 12px;
+  color: var(--df-text);
+  background: var(--df-surface);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-logout-button:hover {
+  border-color: var(--df-primary);
+  color: var(--df-primary);
+  background: var(--df-bg);
+}
+
+.overview-focus {
+  display: grid;
+  gap: 6px;
+}
+
+.overview-focus strong,
+.focus-progress strong,
+.floating-focus strong {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.overview-focus strong {
+  color: var(--df-text);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.overview-focus p {
+  margin: 0;
+  color: var(--df-muted);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.focus-progress {
+  width: 164px;
+  height: 164px;
+}
+
+.focus-progress > div {
+  width: 78%;
+  padding: 16px;
+  gap: 6px;
+}
+
+.focus-progress strong {
+  color: var(--df-text);
+  font-size: 1.9rem;
+  font-weight: 750;
+  line-height: 1.05;
+}
+
+.focus-progress p {
+  margin: 0;
+  color: var(--df-muted);
+  font-size: 0.8rem;
+  line-height: 1.25;
+}
+
+.floating-focus {
+  width: 220px;
+  background: var(--df-surface);
+  border-color: var(--df-border);
+}
+
+.floating-focus p {
+  color: var(--df-primary);
+}
+
+.floating-focus strong {
+  font-size: 1.75rem;
+  font-weight: 750;
+  line-height: 1.05;
+}
+
+.overview-weather {
+  display: grid;
+  gap: 7px;
+}
+
+.overview-weather strong {
+  color: var(--df-text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.overview-weather p {
+  margin: 0;
+  color: var(--df-muted);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.overview-weather-details {
+  display: grid;
+  gap: 0;
+  margin: 2px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--df-border);
+}
+
+.overview-weather-details div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+  border-bottom: 1px solid var(--df-border);
+}
+
+.overview-weather-details dt,
+.overview-weather-details dd {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+.overview-weather-details dt {
+  color: var(--df-muted);
+}
+
+.overview-weather-details dd {
+  color: var(--df-text);
+  font-weight: 650;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .profile-logout-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-logout-button {
+    width: 100%;
+  }
+}

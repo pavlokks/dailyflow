@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import AppTopbar from '../components/AppTopbar.jsx';
 import DashboardShell from '../components/DashboardShell.jsx';
 import ModuleState from '../components/ModuleState.jsx';
@@ -6,6 +8,7 @@ import api from '../services/api.js';
 import { getApiErrorMessage } from '../utils/errors.js';
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [city, setCity] = useState('');
   const [error, setError] = useState('');
@@ -61,6 +64,11 @@ const ProfilePage = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('dailyflowToken');
+    navigate('/login');
+  };
+
   return (
     <DashboardShell>
       <AppTopbar
@@ -103,6 +111,17 @@ const ProfilePage = () => {
                   {isSaving ? 'Збереження...' : 'Зберегти'}
                 </button>
               </form>
+
+              <div className="profile-logout-panel">
+                <div>
+                  <p>Сесія</p>
+                  <h2>Вихід з акаунта</h2>
+                </div>
+                <button className="profile-logout-button" type="button" onClick={handleLogout}>
+                  <LogOut size={16} />
+                  Вийти
+                </button>
+              </div>
             </>
           ) : (
             <ModuleState>Профіль недоступний.</ModuleState>

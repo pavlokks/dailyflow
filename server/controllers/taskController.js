@@ -1,8 +1,10 @@
+import mongoose from 'mongoose';
 import Task from '../models/Task.js';
+import Project from '../models/Project.js';
 
 const allowedPriorities = ['low', 'medium', 'high'];
 
-const normalizeTaskPayload = ({ deadline, description, priority, title }) => {
+const normalizeTaskPayload = ({ deadline, description, priority, project, title }) => {
   const payload = {};
 
   if (title !== undefined) {
@@ -21,6 +23,10 @@ const normalizeTaskPayload = ({ deadline, description, priority, title }) => {
     payload.deadline = deadline ? new Date(deadline) : null;
   }
 
+  if (project !== undefined) {
+    payload.project = project || null;
+  }
+
   return payload;
 };
 
@@ -32,9 +38,26 @@ const validateDeadline = (deadline) => {
   return deadline === undefined || !deadline || !Number.isNaN(new Date(deadline).getTime());
 };
 
+const validateProject = async (projectId, userId) => {
+  if (projectId === undefined || projectId === null || projectId === '') {
+    return true;
+  }
+
+  if (!mongoose.isValidObjectId(projectId)) {
+    return false;
+  }
+
+  const project = await Project.findOne({
+    _id: projectId,
+    user: userId
+  });
+
+  return Boolean(project);
+};
+
 export const createTask = async (req, res) => {
   try {
-    const { deadline, description, priority = 'medium', title } = req.body;
+    const { deadline, description, priority = 'medium', project, title } = req.body;
 
     if (!title?.trim()) {
       return res.status(400).json({
@@ -54,17 +77,26 @@ export const createTask = async (req, res) => {
       });
     }
 
+    if (!(await validateProject(project, req.user._id))) {
+      return res.status(400).json({
+        message: 'Project is invalid'
+      });
+    }
+
     const task = await Task.create({
       ...normalizeTaskPayload({
         deadline,
         description,
         priority,
+        project,
         title
       }),
       user: req.user._id
     });
 
-    return res.status(201).json(task);
+    const populatedTask = await Task.findById(task._id).populate('project', 'name');
+
+    return res.status(201).json(populatedTask);
   } catch (error) {
     return res.status(500).json({
       message: 'Failed to create task',
@@ -75,7 +107,9 @@ export const createTask = async (req, res) => {
 
 export const getUserTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const tasks = await Task.find({ user: req.user._id })
+      .populate('project', 'name')
+      .sort({ createdAt: -1 });
 
     return res.json(tasks);
   } catch (error) {
@@ -88,7 +122,7 @@ export const getUserTasks = async (req, res) => {
 
 export const updateTask = async (req, res) => {
   try {
-    const { completed, deadline, description, priority, title } = req.body;
+    const { completed, deadline, description, priority, project, title } = req.body;
 
     const task = await Task.findOne({
       _id: req.params.id,
@@ -119,10 +153,17 @@ export const updateTask = async (req, res) => {
       });
     }
 
+    if (!(await validateProject(project, req.user._id))) {
+      return res.status(400).json({
+        message: 'Project is invalid'
+      });
+    }
+
     const taskPayload = normalizeTaskPayload({
       deadline,
       description,
       priority,
+      project,
       title
     });
 
@@ -142,11 +183,16 @@ export const updateTask = async (req, res) => {
       task.deadline = taskPayload.deadline;
     }
 
+    if (project !== undefined) {
+      task.project = taskPayload.project;
+    }
+
     if (completed !== undefined) {
       task.completed = completed;
     }
 
-    const updatedTask = await task.save();
+    await task.save();
+    const updatedTask = await Task.findById(task._id).populate('project', 'name');
 
     return res.json(updatedTask);
   } catch (error) {

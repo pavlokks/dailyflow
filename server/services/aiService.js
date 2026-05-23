@@ -26,6 +26,15 @@ const getModel = () => process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 const normalizeGoal = (goal) => goal.trim().replace(/\s+/g, ' ');
 
+const buildFallbackProjectName = (goal) => {
+  const normalizedGoal = normalizeGoal(goal);
+  const shortGoal = normalizedGoal.length > 48
+    ? `${normalizedGoal.slice(0, 45).trim()}...`
+    : normalizedGoal;
+
+  return shortGoal || 'Новий проект';
+};
+
 const parseJson = (text) => {
   try {
     return JSON.parse(text);
@@ -116,6 +125,11 @@ const fallbackTasks = (goal) => {
   ];
 };
 
+const fallbackTaskPlan = (goal) => ({
+  projectName: buildFallbackProjectName(goal),
+  tasks: fallbackTasks(goal)
+});
+
 const sanitizeTasks = (tasks, goal) => {
   if (!Array.isArray(tasks)) {
     return fallbackTasks(goal);
@@ -133,17 +147,37 @@ const sanitizeTasks = (tasks, goal) => {
   return sanitizedTasks.length > 0 ? sanitizedTasks : fallbackTasks(goal);
 };
 
+const sanitizeTaskPlan = (taskPlan, goal) => {
+  if (Array.isArray(taskPlan)) {
+    return {
+      projectName: buildFallbackProjectName(goal),
+      tasks: sanitizeTasks(taskPlan, goal)
+    };
+  }
+
+  return {
+    projectName: String(taskPlan?.projectName || buildFallbackProjectName(goal)).trim(),
+    tasks: sanitizeTasks(taskPlan?.tasks, goal)
+  };
+};
+
 export const generateTasksWithAI = async (goal) => {
   const operation = 'generate-tasks';
 
   try {
     const prompt = `Ти допомагаєш користувачу DailyFlow розбити ціль на задачі.
-Згенеруй 4-6 практичних задач для цілі: "${normalizeGoal(goal)}".
-Поверни тільки JSON-масив без markdown.
-Кожен елемент має поля:
-- title: коротка назва українською
-- description: короткий опис українською
-- priority: один з варіантів low, medium, high`;
+Згенеруй коротку нормальну назву проекту і 4-6 практичних задач для цілі: "${normalizeGoal(goal)}".
+Поверни тільки JSON-об'єкт без markdown:
+{
+  "projectName": "коротка назва проекту українською",
+  "tasks": [
+    {
+      "title": "коротка назва задачі українською",
+      "description": "короткий опис українською",
+      "priority": "low | medium | high"
+    }
+  ]
+}`;
 
     const text = await generateJson({ operation, prompt });
 
@@ -152,7 +186,7 @@ export const generateTasksWithAI = async (goal) => {
         reason: 'missing_api_key',
         tasks: 4
       });
-      return fallbackTasks(goal);
+      return fallbackTaskPlan(goal);
     }
 
     const parsedTasks = parseJson(text);
@@ -161,21 +195,21 @@ export const generateTasksWithAI = async (goal) => {
       warnAI(`${operation}: invalid JSON from Gemini, using local fallback`, {
         preview: text.slice(0, 160)
       });
-      return fallbackTasks(goal);
+      return fallbackTaskPlan(goal);
     }
 
-    const tasks = sanitizeTasks(parsedTasks, goal);
+    const taskPlan = sanitizeTaskPlan(parsedTasks, goal);
     logAI(`${operation}: tasks ready`, {
-      tasks: tasks.length,
+      tasks: taskPlan.tasks.length,
       source: 'gemini'
     });
 
-    return tasks;
+    return taskPlan;
   } catch (error) {
     warnAI(`${operation}: Gemini request failed, using local fallback`, {
       error: error.message
     });
-    return fallbackTasks(goal);
+    return fallbackTaskPlan(goal);
   }
 };
 

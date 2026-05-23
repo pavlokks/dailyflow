@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Bot,
   CalendarDays,
   CloudSun,
+  Folder,
+  ListTodo,
   LayoutDashboard,
   Newspaper,
   Target,
   Timer,
   UserRound
 } from 'lucide-react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import api from '../services/api.js';
 import FloatingFocusTimer from './FloatingFocusTimer.jsx';
 
 const navigationItems = [
@@ -24,6 +27,27 @@ const navigationItems = [
 ];
 
 const DashboardShell = ({ children }) => {
+  const location = useLocation();
+  const [projects, setProjects] = useState([]);
+  const selectedProject = new URLSearchParams(location.search).get('project') || 'all';
+  const isTasksPage = location.pathname === '/tasks';
+
+  const loadProjects = useCallback(async () => {
+    try {
+      const { data } = await api.get('/projects');
+      setProjects(data);
+    } catch {
+      setProjects([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadProjects();
+    window.addEventListener('dailyflow:projects-updated', loadProjects);
+
+    return () => window.removeEventListener('dailyflow:projects-updated', loadProjects);
+  }, [loadProjects]);
+
   return (
     <main className="dashboard-page">
       <aside className="app-sidebar">
@@ -53,6 +77,46 @@ const DashboardShell = ({ children }) => {
             );
           })}
         </nav>
+
+        <section className="sidebar-projects" aria-label="Проекти">
+          <p>Проекти</p>
+          <Link
+            className={
+              isTasksPage && selectedProject === 'all'
+                ? 'sidebar-project-link sidebar-project-link-active'
+                : 'sidebar-project-link'
+            }
+            to="/tasks"
+          >
+            <ListTodo size={15} />
+            <span>Усі задачі</span>
+          </Link>
+          <Link
+            className={
+              isTasksPage && selectedProject === 'none'
+                ? 'sidebar-project-link sidebar-project-link-active'
+                : 'sidebar-project-link'
+            }
+            to="/tasks?project=none"
+          >
+            <Folder size={15} />
+            <span>Без проєкту</span>
+          </Link>
+          {projects.slice(0, 8).map((project) => (
+            <Link
+              className={
+                isTasksPage && selectedProject === project._id
+                  ? 'sidebar-project-link sidebar-project-link-active'
+                  : 'sidebar-project-link'
+              }
+              key={project._id}
+              to={`/tasks?project=${project._id}`}
+            >
+              <Folder size={15} />
+              <span>{project.name}</span>
+            </Link>
+          ))}
+        </section>
 
         <div className="sidebar-footer" aria-hidden="true" />
       </aside>

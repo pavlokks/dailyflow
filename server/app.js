@@ -8,6 +8,7 @@ import aiRoutes from './routes/aiRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import newsRoutes from './routes/newsRoutes.js';
+import projectRoutes from './routes/projectRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import weatherRoutes from './routes/weatherRoutes.js';
 
@@ -25,6 +26,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/news', newsRoutes);
+app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/weather', weatherRoutes);
 

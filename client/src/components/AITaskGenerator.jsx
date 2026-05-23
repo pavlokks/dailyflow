@@ -13,6 +13,7 @@ const priorityLabels = {
 const AITaskGenerator = () => {
   const [goal, setGoal] = useState('');
   const [generatedTasks, setGeneratedTasks] = useState([]);
+  const [projectName, setProjectName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -33,6 +34,7 @@ const AITaskGenerator = () => {
         goal: goal.trim()
       });
 
+      setProjectName(data.projectName || goal.trim());
       setGeneratedTasks(Array.isArray(data) ? data : data.tasks || []);
     } catch (requestError) {
       setError(
@@ -56,19 +58,26 @@ const AITaskGenerator = () => {
       setSuccess('');
       setIsAdding(true);
 
+      const { data: project } = await api.post('/projects', {
+        name: projectName.trim() || goal.trim()
+      });
+
       await Promise.all(
         generatedTasks.map((task) =>
           api.post('/tasks', {
             description: task.description || '',
             priority: task.priority || 'medium',
+            project: project._id,
             title: task.title
           })
         )
       );
 
-      setSuccess(`${generatedTasks.length} задач додано.`);
+      setSuccess(`${generatedTasks.length} задач додано до проєкту “${project.name}”.`);
       setGeneratedTasks([]);
+      setProjectName('');
       setGoal('');
+      window.dispatchEvent(new Event('dailyflow:projects-updated'));
       window.dispatchEvent(new Event('dailyflow:tasks-updated'));
     } catch (requestError) {
       setError(
@@ -108,6 +117,16 @@ const AITaskGenerator = () => {
 
       {generatedTasks.length > 0 && (
         <div className="generated-task-list">
+          <label className="generated-project-name">
+            Проєкт
+            <input
+              type="text"
+              value={projectName}
+              onChange={(event) => setProjectName(event.target.value)}
+              placeholder="Назва проєкту"
+            />
+          </label>
+
           {generatedTasks.map((task, index) => (
             <div className="generated-task-item" key={`${task.title}-${index}`}>
               <div>

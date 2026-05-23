@@ -18,13 +18,13 @@ export const generateTasks = async (req, res) => {
     goalLength: goal.trim().length
   });
 
-  const tasks = await generateTasksWithAI(goal);
+  const taskPlan = await generateTasksWithAI(goal);
 
   console.log('[AI] POST /api/ai/generate-tasks completed', {
-    tasks: tasks.length
+    tasks: taskPlan.tasks.length
   });
 
-  return res.json(tasks);
+  return res.json(taskPlan);
 };
 
 export const generateDailySummary = async (req, res) => {

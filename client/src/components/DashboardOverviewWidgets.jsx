@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect } from 'react';
-import { CalendarDays, CloudSun, Newspaper, Play, Target, Timer } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { CalendarDays, Check, CloudSun, Newspaper, Play, Plus, Target, Timer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useAsyncList from '../hooks/useAsyncList.js';
 import useFocusTimer, { formatFocusTime } from '../hooks/useFocusTimer.js';
@@ -64,7 +64,22 @@ const sortDashboardTasks = (tasks) =>
     return firstDeadline - secondDeadline;
   });
 
+const initialQuickTask = {
+  project: '',
+  title: ''
+};
+
+const notifyTasksUpdated = () => {
+  window.dispatchEvent(new Event('dailyflow:tasks-updated'));
+};
+
 export const TasksOverviewWidget = () => {
+  const [projects, setProjects] = useState([]);
+  const [quickTask, setQuickTask] = useState(initialQuickTask);
+  const [quickTaskError, setQuickTaskError] = useState('');
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
+  const [activeTaskId, setActiveTaskId] = useState('');
+
   const loadTasks = useCallback(async () => {
     const { data } = await api.get('/tasks');
     return data;
@@ -80,6 +95,76 @@ export const TasksOverviewWidget = () => {
 
     return () => window.removeEventListener('dailyflow:tasks-updated', refresh);
   }, [refresh]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadProjects = async () => {
+      try {
+        const { data } = await api.get('/projects');
+
+        if (isMounted) {
+          setProjects(data);
+        }
+      } catch {
+        if (isMounted) {
+          setProjects([]);
+        }
+      }
+    };
+
+    loadProjects();
+    window.addEventListener('dailyflow:projects-updated', loadProjects);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('dailyflow:projects-updated', loadProjects);
+    };
+  }, []);
+
+  const handleQuickTaskChange = (event) => {
+    const { name, value } = event.target;
+    setQuickTask((currentTask) => ({ ...currentTask, [name]: value }));
+  };
+
+  const handleQuickTaskSubmit = async (event) => {
+    event.preventDefault();
+
+    const title = quickTask.title.trim();
+    if (!title) return;
+
+    try {
+      setIsCreatingTask(true);
+      setQuickTaskError('');
+      await api.post('/tasks', {
+        deadline: null,
+        description: '',
+        priority: 'medium',
+        project: quickTask.project || null,
+        title
+      });
+      setQuickTask(initialQuickTask);
+      notifyTasksUpdated();
+    } catch {
+      setQuickTaskError('Не вдалося додати задачу. Спробуйте ще раз.');
+    } finally {
+      setIsCreatingTask(false);
+    }
+  };
+
+  const handleCompleteTask = async (task) => {
+    try {
+      setActiveTaskId(task._id);
+      await api.patch(`/tasks/${task._id}`, {
+        completed: true
+      });
+      notifyTasksUpdated();
+    } catch {
+      setQuickTaskError('Не вдалося оновити задачу. Спробуйте ще раз.');
+    } finally {
+      setActiveTaskId('');
+    }
+  };
 
   const openTasks = tasks.filter((task) => !task.completed);
   const previewTasks = sortDashboardTasks(openTasks).slice(0, 4);
@@ -103,7 +188,7 @@ export const TasksOverviewWidget = () => {
       ) : error ? (
         <ModuleState tone="error">{error}</ModuleState>
       ) : openTasks.length === 0 ? (
-        <ModuleState>Відкритих задач немає. Додати нову можна на сторінці задач.</ModuleState>
+        <ModuleState>Відкритих задач немає. Додайте першу прямо тут.</ModuleState>
       ) : (
         <div className="overview-widget-content">
           <div className="tasks-overview-stats">
@@ -113,6 +198,15 @@ export const TasksOverviewWidget = () => {
           <ul className="overview-list tasks-overview-list">
             {previewTasks.map((task) => (
               <li key={task._id}>
+                <button
+                  className="task-overview-complete"
+                  type="button"
+                  aria-label="Позначити виконаною"
+                  onClick={() => handleCompleteTask(task)}
+                  disabled={activeTaskId === task._id}
+                >
+                  <Check size={13} />
+                </button>
                 <div>
                   <strong>{task.title}</strong>
                   <small>{task.project?.name || 'Без проєкту'}</small>
@@ -124,6 +218,34 @@ export const TasksOverviewWidget = () => {
           </ul>
         </div>
       )}
+
+      <form className="dashboard-quick-task" onSubmit={handleQuickTaskSubmit}>
+        <input
+          name="title"
+          type="text"
+          value={quickTask.title}
+          onChange={handleQuickTaskChange}
+          placeholder="Швидко додати задачу..."
+        />
+        <select
+          name="project"
+          value={quickTask.project}
+          onChange={handleQuickTaskChange}
+          aria-label="Проєкт для задачі"
+        >
+          <option value="">Без проєкту</option>
+          {projects.map((project) => (
+            <option key={project._id} value={project._id}>
+              {project.name}
+            </option>
+          ))}
+        </select>
+        <button type="submit" disabled={isCreatingTask || !quickTask.title.trim()}>
+          <Plus size={14} />
+          Додати
+        </button>
+      </form>
+      {quickTaskError && <p className="dashboard-quick-task-error">{quickTaskError}</p>}
 
       <Link className="overview-link" to="/tasks">Перейти до задач</Link>
     </article>

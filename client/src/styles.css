@@ -5083,9 +5083,36 @@ body,
 }
 
 .tasks-overview-list li {
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   column-gap: 8px;
+}
+
+.task-overview-complete {
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--df-border-strong);
+  border-radius: 999px;
+  color: transparent;
+  background: #ffffff;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.task-overview-complete:hover:not(:disabled) {
+  border-color: #22c55e;
+  color: #16a34a;
+  background: #f0fdf4;
+}
+
+.task-overview-complete:disabled {
+  cursor: default;
+  opacity: 0.55;
 }
 
 .tasks-overview-list strong,
@@ -5113,6 +5140,70 @@ body,
 
 .news-overview-widget .overview-list span {
   white-space: nowrap;
+}
+
+.dashboard-quick-task {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 170px) auto;
+  gap: 7px;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--df-border);
+}
+
+.dashboard-quick-task input,
+.dashboard-quick-task select {
+  min-width: 0;
+  min-height: 32px;
+  border: 1px solid var(--df-border);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--df-text);
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.84rem;
+  outline: none;
+}
+
+.dashboard-quick-task input:focus,
+.dashboard-quick-task select:focus {
+  border-color: var(--df-primary);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.dashboard-quick-task button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--df-primary);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: #ffffff;
+  background: var(--df-primary);
+  font-size: 0.82rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.dashboard-quick-task button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.dashboard-quick-task button:disabled {
+  border-color: var(--df-border);
+  color: var(--df-muted);
+  background: var(--df-soft);
+  cursor: default;
+}
+
+.dashboard-quick-task-error {
+  margin: 6px 0 0;
+  color: #b91c1c;
+  font-size: 0.78rem;
+  font-weight: 650;
 }
 
 .focus-overview-actions {
@@ -5157,6 +5248,14 @@ body,
 @media (max-width: 760px) {
   .tasks-overview-list li,
   .news-overview-widget .overview-list li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .task-overview-complete {
+    display: none;
+  }
+
+  .dashboard-quick-task {
     grid-template-columns: minmax(0, 1fr);
   }
 

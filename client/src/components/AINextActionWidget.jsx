@@ -207,7 +207,7 @@ const AINextActionWidget = () => {
                 <small>{recommendation.reason}</small>
               </div>
               <Link className='overview-link' to='/tasks'>
-                Відкрити задачі
+                Перейти до задач
               </Link>
             </div>
           ) : (

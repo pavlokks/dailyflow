@@ -6,12 +6,9 @@ import NewsModule from '../components/NewsModule.jsx';
 const NewsPage = () => {
   return (
     <DashboardShell>
-      <AppTopbar
-        title="Новини"
-        subtitle="Короткий список заголовків, якщо потрібен контекст дня."
-      />
+      <AppTopbar title='Новини' subtitle='Головні заголовки та важливі події дня.' />
 
-      <section className="dashboard-grid module-page-grid">
+      <section className='dashboard-grid module-page-grid'>
         <NewsModule />
       </section>
     </DashboardShell>

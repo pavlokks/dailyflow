@@ -10,26 +10,32 @@ const NewsModule = () => {
     return data;
   }, []);
 
-  const { error, isLoading, items: articles } = useAsyncList({
+  const {
+    error,
+    isLoading,
+    items: articles,
+  } = useAsyncList({
     fallbackError: 'Не вдалося завантажити новини. Перевірте NEWS_API_KEY або спробуйте пізніше.',
-    loadItems: loadNews
+    loadItems: loadNews,
   });
 
   return (
-    <article className="dashboard-card news-card">
-      <div className="card-heading">
+    <article className='dashboard-card news-card'>
+      <div className='card-heading'>
         <div>
-          <h2><Newspaper size={18} /> Новини</h2>
-          <p>Короткий контекст дня без зайвого шуму.</p>
+          <h2>
+            <Newspaper size={18} /> Новини
+          </h2>
+          <p>Короткий контекст без інформаційного шуму.</p>
         </div>
         <span>{articles.length}</span>
       </div>
 
-      {error && <ModuleState tone="error">{error}</ModuleState>}
+      {error && <ModuleState tone='error'>{error}</ModuleState>}
 
-      <div className="news-list">
+      <div className='news-list'>
         {isLoading ? (
-          <ModuleState tone="loading">Завантажуємо новини...</ModuleState>
+          <ModuleState tone='loading'>Завантажуємо новини...</ModuleState>
         ) : articles.length === 0 ? (
           <ModuleState>Новин зараз немає. Можна спокійно повернутися до задач.</ModuleState>
         ) : (
@@ -39,10 +45,10 @@ const NewsModule = () => {
               key={article.url}
             >
               {article.image && <img src={article.image} alt={article.title} />}
-              <div className="news-content">
-                <p className="news-source">{article.source}</p>
+              <div className='news-content'>
+                <p className='news-source'>{article.source}</p>
                 <h3>{article.title}</h3>
-                <a href={article.url} target="_blank" rel="noreferrer">
+                <a href={article.url} target='_blank' rel='noreferrer'>
                   Читати
                 </a>
               </div>

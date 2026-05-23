@@ -25,21 +25,21 @@ const AssistantBrief = () => {
     const [profileResponse, tasksResponse, eventsResponse] = await Promise.all([
       api.get('/auth/me'),
       api.get('/tasks'),
-      api.get('/events')
+      api.get('/events'),
     ]);
 
     return [
       {
         events: eventsResponse.data,
         tasks: tasksResponse.data,
-        user: profileResponse.data.user
-      }
+        user: profileResponse.data.user,
+      },
     ];
   }, []);
 
   const { error, isLoading, items, refresh } = useAsyncList({
     fallbackError: 'Огляд зараз недоступний.',
-    loadItems: loadAssistantContext
+    loadItems: loadAssistantContext,
   });
 
   useEffect(() => {
@@ -53,29 +53,30 @@ const AssistantBrief = () => {
   }, [refresh]);
 
   const context = items[0];
-  const completedTasks =
-    context?.tasks.filter((task) => task.completed).length || 0;
+  const completedTasks = context?.tasks.filter((task) => task.completed).length || 0;
   const openTasks = context?.tasks.length - completedTasks || 0;
 
   return (
-    <article className="dashboard-card assistant-card">
-      <div className="card-heading">
+    <article className='dashboard-card assistant-card'>
+      <div className='card-heading'>
         <div>
-          <h2><ClipboardList size={18} /> Огляд</h2>
-          <p>Поточний стан дня</p>
+          <h2>
+            <ClipboardList size={18} /> Огляд
+          </h2>
+          <p>Поточний стан дня.</p>
         </div>
         <span>{openTasks}</span>
       </div>
 
       {isLoading ? (
-        <ModuleState tone="loading">Завантажуємо огляд...</ModuleState>
+        <ModuleState tone='loading'>Завантажуємо огляд...</ModuleState>
       ) : error ? (
-        <ModuleState tone="error">{error}</ModuleState>
+        <ModuleState tone='error'>{error}</ModuleState>
       ) : (
         <>
-          <p className="assistant-brief">{buildBrief(context)}</p>
+          <p className='assistant-brief'>{buildBrief(context)}</p>
 
-          <div className="assistant-metrics">
+          <div className='assistant-metrics'>
             <div>
               <p>Відкриті</p>
               <strong>{openTasks}</strong>

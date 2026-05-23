@@ -580,7 +580,11 @@ const TasksModule = () => {
             <Plus size={16} /> {isCreating ? 'Додаємо...' : 'Додати'}
           </button>
           <button
-            className='ghost-danger-button'
+            className={
+              confirmDeleteAllAction === 'tasks'
+                ? 'ghost-danger-button bulk-delete-button bulk-delete-button-confirm'
+                : 'ghost-danger-button bulk-delete-button'
+            }
             type='button'
             disabled={isClearing || tasks.length === 0}
             onClick={handleClearTasks}
@@ -742,7 +746,11 @@ const TasksModule = () => {
             <small>{filteredTrashTasks.length} у кошику</small>
           </button>
           <button
-            className='ghost-danger-button'
+            className={
+              confirmDeleteAllAction === 'task-trash'
+                ? 'ghost-danger-button bulk-delete-button bulk-delete-button-confirm'
+                : 'ghost-danger-button bulk-delete-button'
+            }
             type='button'
             disabled={!isTrashOpen || filteredTrashTasks.length === 0}
             onClick={handleEmptyTaskTrash}

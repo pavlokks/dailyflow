@@ -20,15 +20,15 @@ const storageKey = 'dailyflowDashboardWidgets';
 const dashboardWidgets = [
   {
     id: 'aiOverview',
-    label: 'AI Overview',
-    description: 'Короткий стан дня.',
+    label: 'Огляд',
+    description: 'Поточний стан дня.',
     component: AssistantBrief,
     region: 'main',
     visible: true,
   },
   {
     id: 'nextAction',
-    label: 'AI Next Action',
+    label: 'Що робити зараз?',
     description: 'Одна практична порада, що робити зараз.',
     component: AINextActionWidget,
     region: 'main',
@@ -36,7 +36,7 @@ const dashboardWidgets = [
   },
   {
     id: 'dailySummary',
-    label: 'AI Daily Summary',
+    label: 'Підсумок дня',
     description: 'Короткий підсумок дня.',
     component: DailySummaryWidget,
     region: 'main',
@@ -44,7 +44,7 @@ const dashboardWidgets = [
   },
   {
     id: 'tasks',
-    label: 'Tasks',
+    label: 'Задачі',
     description: 'Короткий список відкритих задач.',
     component: TasksOverviewWidget,
     region: 'main',
@@ -52,7 +52,7 @@ const dashboardWidgets = [
   },
   {
     id: 'events',
-    label: 'Events',
+    label: 'Події',
     description: 'Найближчі дати.',
     component: EventsOverviewWidget,
     region: 'main',
@@ -60,7 +60,7 @@ const dashboardWidgets = [
   },
   {
     id: 'news',
-    label: 'News',
+    label: 'Новини',
     description: 'Кілька заголовків.',
     component: NewsOverviewWidget,
     region: 'main',
@@ -68,23 +68,23 @@ const dashboardWidgets = [
   },
   {
     id: 'focus',
-    label: 'Focus Mode',
-    description: 'Стан Pomodoro-таймера.',
+    label: 'Таймер Помодоро',
+    description: '25хв роботи, 5хв перерви.',
     component: FocusOverviewWidget,
     region: 'side',
     visible: true,
   },
   {
     id: 'weather',
-    label: 'Weather',
-    description: 'Короткий прогноз.',
+    label: 'Погода',
+    description: 'Стислий прогноз.',
     component: WeatherOverviewWidget,
     region: 'side',
     visible: true,
   },
   {
     id: 'productivityStats',
-    label: 'Productivity Statistics',
+    label: 'Статистика',
     description: 'Прогрес задач і подій.',
     component: ProductivityStatsWidget,
     region: 'side',
@@ -288,7 +288,6 @@ const DashboardPage = () => {
                     onClick={() => moveWidget(item.id, -1)}
                   >
                     <ArrowUp size={14} />
-                    Вгору
                   </button>
                   <button
                     type='button'
@@ -296,7 +295,6 @@ const DashboardPage = () => {
                     onClick={() => moveWidget(item.id, 1)}
                   >
                     <ArrowDown size={14} />
-                    Вниз
                   </button>
                 </div>
               </div>
@@ -364,8 +362,8 @@ const DashboardPage = () => {
           >
             <div className='dashboard-modal-header'>
               <div>
-                <h2 id='dashboard-modal-title'>Налаштувати Dashboard</h2>
-                <p>Покажіть тільки ті блоки, які потрібні на огляді дня.</p>
+                <h2 id='dashboard-modal-title'>Налаштувати панель</h2>
+                <p>Змінити розташування віджетів.</p>
               </div>
               <button
                 className='modal-close-button'
@@ -378,8 +376,8 @@ const DashboardPage = () => {
             </div>
 
             <div className='customizer-sections'>
-              {renderCustomizerSection({ region: 'main', title: 'Main column' })}
-              {renderCustomizerSection({ region: 'side', title: 'Sidebar widgets' })}
+              {renderCustomizerSection({ region: 'main', title: 'Головна колонка' })}
+              {renderCustomizerSection({ region: 'side', title: 'Бічна панель' })}
             </div>
 
             <div className='dashboard-modal-footer'>
@@ -388,7 +386,7 @@ const DashboardPage = () => {
                 type='button'
                 onClick={() => setIsCustomizing(false)}
               >
-                Close
+                Закрити
               </button>
             </div>
           </section>

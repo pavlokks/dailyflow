@@ -11,7 +11,7 @@ const formatEventDate = (date) =>
     hour: '2-digit',
     minute: '2-digit',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
   }).format(new Date(date));
 
 const formatDateTimeInput = (date) => {
@@ -57,11 +57,16 @@ const EventsModule = () => {
     }
   }, []);
 
-  const { error, isLoading, items: events, setError, setItems: setEvents } =
-    useAsyncList({
-      fallbackError: 'Не вдалося завантажити події. Спробуйте ще раз.',
-      loadItems: loadEvents
-    });
+  const {
+    error,
+    isLoading,
+    items: events,
+    setError,
+    setItems: setEvents,
+  } = useAsyncList({
+    fallbackError: 'Не вдалося завантажити події. Спробуйте ще раз.',
+    loadItems: loadEvents,
+  });
 
   React.useEffect(() => {
     loadTrashEvents();
@@ -97,23 +102,20 @@ const EventsModule = () => {
       const { data } = await api.post('/events', {
         title: trimmedTitle,
         description: trimmedDescription,
-        date
+        date,
       });
 
       setEvents((currentEvents) =>
         [...currentEvents, data].sort(
-          (firstEvent, secondEvent) =>
-            new Date(firstEvent.date) - new Date(secondEvent.date)
-        )
+          (firstEvent, secondEvent) => new Date(firstEvent.date) - new Date(secondEvent.date),
+        ),
       );
       setTitle('');
       setDescription('');
       setDate('');
       notifyEventsUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося додати подію. Спробуйте ще раз.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося додати подію. Спробуйте ще раз.'));
     } finally {
       setIsCreating(false);
     }
@@ -124,14 +126,12 @@ const EventsModule = () => {
       setError('');
       await api.delete(`/events/${eventId}`);
       setEvents((currentEvents) =>
-        currentEvents.filter((currentEvent) => currentEvent._id !== eventId)
+        currentEvents.filter((currentEvent) => currentEvent._id !== eventId),
       );
       loadTrashEvents();
       notifyEventsUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося видалити подію. Спробуйте ще раз.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося видалити подію. Спробуйте ще раз.'));
     }
   };
 
@@ -152,9 +152,7 @@ const EventsModule = () => {
       loadTrashEvents();
       notifyEventsUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося видалити всі події.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося видалити всі події.'));
     } finally {
       setIsClearing(false);
       setConfirmDeleteAllAction('');
@@ -171,20 +169,20 @@ const EventsModule = () => {
       const { data } = await api.put(`/events/${editEvent._id}`, {
         title: editTitle.trim(),
         description: editDescription.trim(),
-        date: editDate
+        date: editDate,
       });
 
       setEvents((currentEvents) =>
         currentEvents
           .map((currentEvent) => (currentEvent._id === data._id ? data : currentEvent))
-          .sort((firstEvent, secondEvent) => new Date(firstEvent.date) - new Date(secondEvent.date))
+          .sort(
+            (firstEvent, secondEvent) => new Date(firstEvent.date) - new Date(secondEvent.date),
+          ),
       );
       closeEditEvent();
       notifyEventsUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося оновити подію. Спробуйте ще раз.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося оновити подію. Спробуйте ще раз.'));
     }
   };
 
@@ -193,18 +191,16 @@ const EventsModule = () => {
       setError('');
       const { data } = await api.put(`/events/${eventId}/restore`);
       setTrashEvents((currentEvents) =>
-        currentEvents.filter((currentEvent) => currentEvent._id !== eventId)
+        currentEvents.filter((currentEvent) => currentEvent._id !== eventId),
       );
       setEvents((currentEvents) =>
         [...currentEvents, data].sort(
-          (firstEvent, secondEvent) => new Date(firstEvent.date) - new Date(secondEvent.date)
-        )
+          (firstEvent, secondEvent) => new Date(firstEvent.date) - new Date(secondEvent.date),
+        ),
       );
       notifyEventsUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося відновити подію.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося відновити подію.'));
     }
   };
 
@@ -213,13 +209,11 @@ const EventsModule = () => {
       setError('');
       await api.delete(`/events/${eventId}/permanent`);
       setTrashEvents((currentEvents) =>
-        currentEvents.filter((currentEvent) => currentEvent._id !== eventId)
+        currentEvents.filter((currentEvent) => currentEvent._id !== eventId),
       );
       notifyEventsUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося видалити подію остаточно.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося видалити подію остаточно.'));
     }
   };
 
@@ -236,85 +230,94 @@ const EventsModule = () => {
       setTrashEvents([]);
       notifyEventsUpdated();
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(requestError, 'Не вдалося очистити кошик подій.')
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося очистити кошик подій.'));
     } finally {
       setConfirmDeleteAllAction('');
     }
   };
 
   return (
-    <article className="dashboard-card events-card">
-      <div className="card-heading">
+    <article className='dashboard-card events-card'>
+      <div className='card-heading'>
         <div>
-          <h2><CalendarDays size={18} /> Події</h2>
-          <p>Зустрічі, дедлайни та важливі дати.</p>
+          <h2>
+            <CalendarDays size={18} /> Події
+          </h2>
+          <p>Керуйте своїм розкладом та дедлайнами.</p>
         </div>
         <span>{events.length}</span>
       </div>
 
-      <form className="event-form" onSubmit={handleCreateEvent}>
+      <form className='event-form' onSubmit={handleCreateEvent}>
         <input
-          type="text"
+          type='text'
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder="Назва події"
+          placeholder='Назва події'
         />
         <input
-          type="datetime-local"
+          type='datetime-local'
           value={date}
           onChange={(event) => setDate(event.target.value)}
         />
         <textarea
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          placeholder="Опис події"
-          rows="3"
+          placeholder='Опис події'
+          rows='3'
         />
-        <div className="event-form-actions">
-          <button type="submit" disabled={isCreating || !title.trim() || !date}>
+        <div className='event-form-actions'>
+          <button type='submit' disabled={isCreating || !title.trim() || !date}>
             <Plus size={16} /> {isCreating ? 'Додаємо...' : 'Додати подію'}
           </button>
           <button
-            className="ghost-danger-button"
-            type="button"
+            className={
+              confirmDeleteAllAction === 'events'
+                ? 'ghost-danger-button bulk-delete-button bulk-delete-button-confirm'
+                : 'ghost-danger-button bulk-delete-button'
+            }
+            type='button'
             disabled={isClearing || events.length === 0}
             onClick={handleClearEvents}
           >
-            <Trash2 size={16} /> {isClearing ? 'Очищення...' : confirmDeleteAllAction === 'events' ? 'Натисніть ще раз' : 'Видалити всі'}
+            <Trash2 size={16} />{' '}
+            {isClearing
+              ? 'Очищення...'
+              : confirmDeleteAllAction === 'events'
+                ? 'Натисніть ще раз'
+                : 'Видалити всі'}
           </button>
         </div>
       </form>
 
-      {error && <ModuleState tone="error">{error}</ModuleState>}
+      {error && <ModuleState tone='error'>{error}</ModuleState>}
 
-      <div className="event-list">
+      <div className='event-list'>
         {isLoading ? (
-          <ModuleState tone="loading">Завантажуємо події...</ModuleState>
+          <ModuleState tone='loading'>Завантажуємо події...</ModuleState>
         ) : events.length === 0 ? (
-          <ModuleState>Подій поки немає. Додайте першу дату, щоб не тримати її в голові.</ModuleState>
+          <ModuleState>
+            Подій поки немає. Додайте першу дату, щоб не тримати її в голові.
+          </ModuleState>
         ) : (
           events.map((currentEvent) => (
-            <div className="event-item" key={currentEvent._id}>
+            <div className='event-item' key={currentEvent._id}>
               <div>
-                <time dateTime={currentEvent.date}>
-                  {formatEventDate(currentEvent.date)}
-                </time>
+                <time dateTime={currentEvent.date}>{formatEventDate(currentEvent.date)}</time>
                 <h3>{currentEvent.title}</h3>
                 {currentEvent.description && <p>{currentEvent.description}</p>}
               </div>
-              <div className="event-actions">
+              <div className='event-actions'>
                 <button
-                  className="event-edit"
-                  type="button"
+                  className='event-edit'
+                  type='button'
                   onClick={() => openEditEvent(currentEvent)}
                 >
                   <Pencil size={15} /> Редагувати
                 </button>
                 <button
-                  className="event-delete"
-                  type="button"
+                  className='event-delete'
+                  type='button'
                   onClick={() => handleDeleteEvent(currentEvent._id)}
                 >
                   <Trash2 size={15} /> Видалити
@@ -325,15 +328,21 @@ const EventsModule = () => {
         )}
       </div>
 
-      <section className="trash-panel">
-        <div className="trash-panel-heading">
+      <section className='trash-panel'>
+        <div className='trash-panel-heading'>
           <div>
-            <h3><Trash2 size={16} /> Кошик подій</h3>
+            <h3>
+              <Trash2 size={16} /> Кошик подій
+            </h3>
             <p>{trashEvents.length} у кошику</p>
           </div>
           <button
-            className="ghost-danger-button"
-            type="button"
+            className={
+              confirmDeleteAllAction === 'event-trash'
+                ? 'ghost-danger-button bulk-delete-button bulk-delete-button-confirm'
+                : 'ghost-danger-button bulk-delete-button'
+            }
+            type='button'
             disabled={trashEvents.length === 0}
             onClick={handleEmptyEventTrash}
           >
@@ -342,24 +351,24 @@ const EventsModule = () => {
         </div>
 
         {isTrashLoading ? (
-          <ModuleState tone="loading">Завантажуємо кошик...</ModuleState>
+          <ModuleState tone='loading'>Завантажуємо кошик...</ModuleState>
         ) : trashEvents.length === 0 ? (
           <ModuleState>Кошик подій порожній.</ModuleState>
         ) : (
-          <div className="trash-list">
+          <div className='trash-list'>
             {trashEvents.map((currentEvent) => (
-              <div className="trash-item" key={currentEvent._id}>
+              <div className='trash-item' key={currentEvent._id}>
                 <div>
                   <strong>{currentEvent.title}</strong>
                   <span>{formatEventDate(currentEvent.date)}</span>
                 </div>
-                <div className="trash-actions">
-                  <button type="button" onClick={() => handleRestoreEvent(currentEvent._id)}>
+                <div className='trash-actions'>
+                  <button type='button' onClick={() => handleRestoreEvent(currentEvent._id)}>
                     <RotateCcw size={14} /> Відновити
                   </button>
                   <button
-                    className="ghost-danger-button"
-                    type="button"
+                    className='ghost-danger-button'
+                    type='button'
                     onClick={() => handlePermanentlyDeleteEvent(currentEvent._id)}
                   >
                     <Trash2 size={14} /> Видалити остаточно
@@ -372,46 +381,50 @@ const EventsModule = () => {
       </section>
 
       {editEvent && (
-        <div className="dashboard-modal-overlay" role="presentation">
-          <section className="dashboard-modal" role="dialog" aria-modal="true">
-            <div className="dashboard-modal-header">
+        <div className='dashboard-modal-overlay' role='presentation'>
+          <section className='dashboard-modal' role='dialog' aria-modal='true'>
+            <div className='dashboard-modal-header'>
               <div>
                 <h2>Редагувати подію</h2>
                 <p>Оновіть назву, дату або опис події.</p>
               </div>
               <button
-                className="modal-close-button"
-                type="button"
-                aria-label="Закрити"
+                className='modal-close-button'
+                type='button'
+                aria-label='Закрити'
                 onClick={closeEditEvent}
               >
                 <X size={18} />
               </button>
             </div>
 
-            <form className="modal-edit-form" onSubmit={handleUpdateEvent}>
+            <form className='modal-edit-form' onSubmit={handleUpdateEvent}>
               <input
-                type="text"
+                type='text'
                 value={editTitle}
                 onChange={(event) => setEditTitle(event.target.value)}
-                placeholder="Назва події"
+                placeholder='Назва події'
               />
               <input
-                type="datetime-local"
+                type='datetime-local'
                 value={editDate}
                 onChange={(event) => setEditDate(event.target.value)}
               />
               <textarea
                 value={editDescription}
                 onChange={(event) => setEditDescription(event.target.value)}
-                placeholder="Опис"
-                rows="3"
+                placeholder='Опис'
+                rows='3'
               />
-              <div className="dashboard-modal-footer">
-                <button className="secondary-button" type="button" onClick={closeEditEvent}>
+              <div className='dashboard-modal-footer'>
+                <button className='secondary-button' type='button' onClick={closeEditEvent}>
                   Скасувати
                 </button>
-                <button className="add-generated-tasks" type="submit" disabled={!editTitle.trim() || !editDate}>
+                <button
+                  className='add-generated-tasks'
+                  type='submit'
+                  disabled={!editTitle.trim() || !editDate}
+                >
                   Зберегти
                 </button>
               </div>

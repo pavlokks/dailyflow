@@ -6,12 +6,9 @@ import WeatherCard from '../components/WeatherCard.jsx';
 const WeatherPage = () => {
   return (
     <DashboardShell>
-      <AppTopbar
-        title="Погода"
-        subtitle="Локальні умови для щоденного планування."
-      />
+      <AppTopbar title='Погода' subtitle='Поточні погодні умови.' />
 
-      <section className="dashboard-grid module-page-grid weather-page-grid">
+      <section className='dashboard-grid module-page-grid weather-page-grid'>
         <WeatherCard />
       </section>
     </DashboardShell>

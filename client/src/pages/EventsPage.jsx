@@ -6,12 +6,9 @@ import EventsModule from '../components/EventsModule.jsx';
 const EventsPage = () => {
   return (
     <DashboardShell>
-      <AppTopbar
-        title="Події"
-        subtitle="Тримайте зустрічі, дедлайни та важливі дати поруч із задачами."
-      />
+      <AppTopbar title='Події' subtitle='Усі важливі дати в одному місці.' />
 
-      <section className="dashboard-grid module-page-grid">
+      <section className='dashboard-grid module-page-grid'>
         <EventsModule />
       </section>
     </DashboardShell>

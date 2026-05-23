@@ -6,11 +6,11 @@ const createToken = (userId) => {
   const jwtSecret = process.env.JWT_SECRET;
 
   if (!jwtSecret) {
-    throw new Error('JWT_SECRET is not defined');
+    throw new Error('JWT ключ невизначений');
   }
 
   return jwt.sign({ id: userId }, jwtSecret, {
-    expiresIn: '7d'
+    expiresIn: '7d',
   });
 };
 
@@ -19,7 +19,7 @@ const toUserResponse = (user) => ({
   name: user.name,
   email: user.email,
   city: user.city,
-  createdAt: user.createdAt
+  createdAt: user.createdAt,
 });
 
 export const registerUser = async (req, res) => {
@@ -28,7 +28,7 @@ export const registerUser = async (req, res) => {
 
     if (!name || !email || !password) {
       return res.status(400).json({
-        message: 'Name, email and password are required'
+        message: "Ім'я, емейл і пароль необхідні",
       });
     }
 
@@ -37,7 +37,7 @@ export const registerUser = async (req, res) => {
 
     if (existingUser) {
       return res.status(409).json({
-        message: 'User with this email already exists'
+        message: 'Такий користувач вже є у системі',
       });
     }
 
@@ -47,19 +47,19 @@ export const registerUser = async (req, res) => {
       name,
       email: normalizedEmail,
       password: hashedPassword,
-      city
+      city,
     });
 
     const token = createToken(user._id);
 
     return res.status(201).json({
       token,
-      user: toUserResponse(user)
+      user: toUserResponse(user),
     });
   } catch (error) {
     return res.status(500).json({
-      message: 'Registration failed',
-      error: error.message
+      message: 'Реєстрація неуспішна',
+      error: error.message,
     });
   }
 };
@@ -70,7 +70,7 @@ export const loginUser = async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({
-        message: 'Email and password are required'
+        message: 'Емейл і пароль необхідні',
       });
     }
 
@@ -79,7 +79,7 @@ export const loginUser = async (req, res) => {
 
     if (!user) {
       return res.status(401).json({
-        message: 'Invalid email or password'
+        message: 'Невірний емейл або пароль',
       });
     }
 
@@ -87,7 +87,7 @@ export const loginUser = async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(401).json({
-        message: 'Invalid email or password'
+        message: 'Невірний емейл або пароль',
       });
     }
 
@@ -95,19 +95,19 @@ export const loginUser = async (req, res) => {
 
     return res.json({
       token,
-      user: toUserResponse(user)
+      user: toUserResponse(user),
     });
   } catch (error) {
     return res.status(500).json({
-      message: 'Login failed',
-      error: error.message
+      message: 'Авторизація неуспішна',
+      error: error.message,
     });
   }
 };
 
 export const getCurrentUser = (req, res) => {
   return res.json({
-    user: toUserResponse(req.user)
+    user: toUserResponse(req.user),
   });
 };
 
@@ -117,7 +117,7 @@ export const updateCurrentUser = async (req, res) => {
 
     if (city === undefined) {
       return res.status(400).json({
-        message: 'City is required'
+        message: 'Місто необхідне',
       });
     }
 
@@ -125,12 +125,12 @@ export const updateCurrentUser = async (req, res) => {
     const updatedUser = await req.user.save();
 
     return res.json({
-      user: toUserResponse(updatedUser)
+      user: toUserResponse(updatedUser),
     });
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to update profile',
-      error: error.message
+      message: 'Оновлення профілю неуспішне',
+      error: error.message,
     });
   }
 };

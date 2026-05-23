@@ -186,9 +186,10 @@ export const TasksOverviewWidget = () => {
       <div className='card-heading'>
         <div>
           <h2>
-            <Target size={18} /> Задачі на зараз
+            <Target size={18} />
+            Задачі
           </h2>
-          <p>Найважливіші відкриті задачі за пріоритетом і дедлайном.</p>
+          <p>Короткий список відкритих задач.</p>
         </div>
         <span>{openTasks.length}</span>
       </div>
@@ -289,9 +290,10 @@ export const EventsOverviewWidget = () => {
       <div className='card-heading'>
         <div>
           <h2>
-            <CalendarDays size={18} /> Найближчі події
+            <CalendarDays size={18} />
+            Події
           </h2>
-          <p>Тільки наступні дати, без повного календаря.</p>
+          <p>Найближчі дати.</p>
         </div>
         <span>{upcomingEvents.length}</span>
       </div>
@@ -344,7 +346,7 @@ export const NewsOverviewWidget = () => {
           <h2>
             <Newspaper size={18} /> Новини
           </h2>
-          <p>Кілька заголовків, якщо потрібен контекст.</p>
+          <p>Кілька заголовків.</p>
         </div>
         <span>{articles.length}</span>
       </div>
@@ -393,7 +395,7 @@ export const WeatherOverviewWidget = () => {
           <h2>
             <CloudSun size={18} /> Погода
           </h2>
-          <p>Коротко для плану дня.</p>
+          <p>Стислий прогноз.</p>
         </div>
         <span>{formatTemperature(weather?.temperature)}</span>
       </div>
@@ -442,9 +444,10 @@ export const FocusOverviewWidget = () => {
       <div className='card-heading'>
         <div>
           <h2>
-            <Timer size={18} /> Фокус
+            <Timer size={18} />
+            Таймер Помодоро
           </h2>
-          <p>Стан поточної Pomodoro-сесії.</p>
+          <p>25хв роботи, 5хв перерви.</p>
         </div>
         <span>{completedSessions}</span>
       </div>
@@ -466,10 +469,10 @@ export const FocusOverviewWidget = () => {
           disabled={isRunning}
         >
           <Play size={14} />
-          {isRunning ? 'Фокус триває' : 'Почати фокус'}
+          {isRunning ? 'Таймер триває' : 'Почати таймер'}
         </button>
         <Link className='overview-link' to='/focus'>
-          Відкрити фокус
+          Відкрити таймер
         </Link>
       </div>
     </article>

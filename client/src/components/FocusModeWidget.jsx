@@ -3,31 +3,26 @@ import { Pause, Play, RotateCcw, Timer } from 'lucide-react';
 import useFocusTimer, { formatFocusTime } from '../hooks/useFocusTimer.js';
 
 const FocusModeWidget = () => {
-  const {
-    completedSessions,
-    isRunning,
-    pause,
-    progress,
-    remainingSeconds,
-    reset,
-    start
-  } = useFocusTimer();
+  const { completedSessions, isRunning, pause, progress, remainingSeconds, reset, start } =
+    useFocusTimer();
 
   return (
-    <article className="dashboard-card focus-mode-card">
-      <div className="card-heading">
+    <article className='dashboard-card focus-mode-card'>
+      <div className='card-heading'>
         <div>
-          <h2><Timer size={18} /> Фокус</h2>
-          <p>25 хвилин роботи без перемикань.</p>
+          <h2>
+            <Timer size={18} /> Таймер Помодоро
+          </h2>
+          <p>25хв роботи, 5хв перерви.</p>
         </div>
         <span>{completedSessions}</span>
       </div>
 
-      <div className="focus-timer" aria-label="Pomodoro timer">
+      <div className='focus-timer' aria-label='Pomodoro timer'>
         <div
-          className="focus-progress"
+          className='focus-progress'
           style={{
-            background: `conic-gradient(#2563eb ${progress}%, #e5e7eb ${progress}%)`
+            background: `conic-gradient(#2563eb ${progress}%, #e5e7eb ${progress}%)`,
           }}
         >
           <div>
@@ -37,19 +32,19 @@ const FocusModeWidget = () => {
         </div>
       </div>
 
-      <div className="focus-actions">
-        <button type="button" onClick={start} disabled={isRunning}>
+      <div className='focus-actions'>
+        <button type='button' onClick={start} disabled={isRunning}>
           <Play size={16} /> Старт
         </button>
-        <button type="button" onClick={pause} disabled={!isRunning}>
+        <button type='button' onClick={pause} disabled={!isRunning}>
           <Pause size={16} /> Пауза
         </button>
-        <button type="button" onClick={reset}>
+        <button type='button' onClick={reset}>
           <RotateCcw size={16} /> Скинути
         </button>
       </div>
 
-      <p className="focus-sessions">
+      <p className='focus-sessions'>
         Завершені сесії: <strong>{completedSessions}</strong>
       </p>
     </article>

@@ -17,31 +17,13 @@ const HomePage = () => {
       </header>
 
       <section className='landing-hero'>
-        <p className='eyebrow'>персональний вебпомічник</p>
+        <p className='eyebrow'>Персональний вебпомічник</p>
         <h1>DailyFlow</h1>
-        <p>
-          Простий простір для задач, подій, погоди, новин і фокус-сесій. Без зайвого шуму: відкрили
-          день, подивилися план, почали працювати.
-        </p>
+        <p>Простір для планування, фокусу і щоденного ритму.</p>
         <div className='landing-cta'>
           <Link to={token ? '/dashboard' : '/register'}>Почати</Link>
           <Link to='/login'>Увійти</Link>
         </div>
-      </section>
-
-      <section className='landing-features' aria-label='Можливості DailyFlow'>
-        <article>
-          <h2>План дня</h2>
-          <p>Задачі, події та короткий підсумок в одному місці.</p>
-        </article>
-        <article>
-          <h2>Фокус</h2>
-          <p>Простий Pomodoro-таймер для спокійної роботи.</p>
-        </article>
-        <article>
-          <h2>Контекст</h2>
-          <p>Погода і новини поруч, коли вони справді потрібні.</p>
-        </article>
       </section>
     </main>
   );

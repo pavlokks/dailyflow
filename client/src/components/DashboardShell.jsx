@@ -20,7 +20,7 @@ const navigationItems = [
   { icon: Target, label: 'Задачі', to: '/tasks' },
   { icon: CalendarDays, label: 'Події', to: '/events' },
   { icon: Bot, label: 'Помічник', to: '/ai-assistant' },
-  { icon: Timer, label: 'Фокус', to: '/focus' },
+  { icon: Timer, label: 'Таймер Помодоро', to: '/focus' },
   { icon: Newspaper, label: 'Новини', to: '/news' },
   { icon: CloudSun, label: 'Погода', to: '/weather' },
   { icon: UserRound, label: 'Профіль', to: '/profile' },
@@ -69,7 +69,7 @@ const DashboardShell = ({ children }) => {
           <span>DF</span>
           <div>
             <strong>DailyFlow</strong>
-            <p>персональний вебпомічник</p>
+            <p>Персональний вебпомічник</p>
           </div>
         </Link>
 

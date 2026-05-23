@@ -9,7 +9,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,7 +19,7 @@ const LoginPage = () => {
 
     setFormData((currentData) => ({
       ...currentData,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -34,12 +34,7 @@ const LoginPage = () => {
       localStorage.setItem('dailyflowToken', data.token);
       navigate('/dashboard');
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(
-          requestError,
-          'Не вдалося увійти. Перевірте email і пароль.'
-        )
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося увійти. Перевірте email і пароль.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -47,36 +42,36 @@ const LoginPage = () => {
 
   return (
     <AuthLayout
-      title="Вхід у DailyFlow"
-      description="Ваші задачі, події та щоденний огляд в одному місці."
-      switchText="Немає акаунта?"
-      switchLabel="Зареєструватися"
-      switchTo="/register"
+      title='Вхід'
+      description='Ваші задачі, події та щоденний огляд в одному місці.'
+      switchText='Немає акаунта?'
+      switchLabel='Зареєструватися'
+      switchTo='/register'
       onSubmit={handleSubmit}
     >
       <FormField
-        label="Email"
-        name="email"
-        type="email"
+        label='Email'
+        name='email'
+        type='email'
         value={formData.email}
         onChange={handleChange}
-        placeholder="pavlo@example.com"
+        placeholder='pavlo@example.com'
         required
       />
 
       <FormField
-        label="Пароль"
-        name="password"
-        type="password"
+        label='Пароль'
+        name='password'
+        type='password'
         value={formData.password}
         onChange={handleChange}
-        placeholder="Ваш пароль"
+        placeholder='Ваш пароль'
         required
       />
 
-      {error && <p className="form-error">{error}</p>}
+      {error && <p className='form-error'>{error}</p>}
 
-      <button type="submit" disabled={isSubmitting}>
+      <button type='submit' disabled={isSubmitting}>
         {isSubmitting ? 'Вхід...' : 'Увійти'}
       </button>
     </AuthLayout>

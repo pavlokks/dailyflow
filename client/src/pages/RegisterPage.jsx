@@ -11,7 +11,7 @@ const RegisterPage = () => {
     name: '',
     email: '',
     password: '',
-    city: ''
+    city: '',
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,7 +21,7 @@ const RegisterPage = () => {
 
     setFormData((currentData) => ({
       ...currentData,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -36,12 +36,7 @@ const RegisterPage = () => {
       localStorage.setItem('dailyflowToken', data.token);
       navigate('/dashboard');
     } catch (requestError) {
-      setError(
-        getApiErrorMessage(
-          requestError,
-          'Не вдалося створити акаунт. Спробуйте ще раз.'
-        )
-      );
+      setError(getApiErrorMessage(requestError, 'Не вдалося створити акаунт. Спробуйте ще раз.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -49,56 +44,56 @@ const RegisterPage = () => {
 
   return (
     <AuthLayout
-      title="Створити DailyFlow"
-      description="Налаштуйте особистий простір для задач, подій, погоди, новин і фокусу."
-      switchText="Вже маєте акаунт?"
-      switchLabel="Увійти"
-      switchTo="/login"
+      title='Реєстрація'
+      description='Налаштуйте особистий простір для задач, подій, погоди, новин і фокусу.'
+      switchText='Вже маєте акаунт?'
+      switchLabel='Увійти'
+      switchTo='/login'
       onSubmit={handleSubmit}
     >
       <FormField
         label="Ім'я"
-        name="name"
-        type="text"
+        name='name'
+        type='text'
         value={formData.name}
         onChange={handleChange}
-        placeholder="Павло"
+        placeholder='Павло'
         required
       />
 
       <FormField
-        label="Email"
-        name="email"
-        type="email"
+        label='Email'
+        name='email'
+        type='email'
         value={formData.email}
         onChange={handleChange}
-        placeholder="pavlo@example.com"
+        placeholder='pavlo@example.com'
         required
       />
 
       <FormField
-        label="Пароль"
-        name="password"
-        type="password"
+        label='Пароль'
+        name='password'
+        type='password'
         value={formData.password}
         onChange={handleChange}
-        placeholder="Мінімум 6 символів"
-        minLength="6"
+        placeholder='Мінімум 6 символів'
+        minLength='6'
         required
       />
 
       <FormField
-        label="Місто"
-        name="city"
-        type="text"
+        label='Місто'
+        name='city'
+        type='text'
         value={formData.city}
         onChange={handleChange}
-        placeholder="Київ"
+        placeholder='Київ'
       />
 
-      {error && <p className="form-error">{error}</p>}
+      {error && <p className='form-error'>{error}</p>}
 
-      <button type="submit" disabled={isSubmitting}>
+      <button type='submit' disabled={isSubmitting}>
         {isSubmitting ? 'Створення...' : 'Зареєструватися'}
       </button>
     </AuthLayout>

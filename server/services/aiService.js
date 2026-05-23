@@ -22,7 +22,7 @@ const getGeminiClient = () => {
   });
 };
 
-const getModel = () => process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const getModel = () => process.env.GEMINI_MODEL;
 
 const normalizeGoal = (goal) => goal.trim().replace(/\s+/g, ' ');
 

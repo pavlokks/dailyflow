@@ -86,13 +86,13 @@ npm install
 ```env
 PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/dailyflow
-JWT_SECRET=replace-with-long-random-secret
+JWT_SECRET=
 
-GEMINI_API_KEY=replace-with-gemini-key
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-3.1-flash-lite
 
-OPENWEATHER_API_KEY=replace-with-openweather-key
-NEWS_API_KEY=replace-with-newsapi-key
+OPENWEATHER_API_KEY=
+NEWS_API_KEY=
 ```
 
 Мінімально для авторизації та базових CRUD потрібні:

@@ -3782,9 +3782,162 @@ p,
 }
 
 .task-check,
+.task-edit,
 .task-delete {
   min-height: 30px;
   font-size: 0.82rem;
+}
+
+.task-edit,
+.event-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  padding: 0 10px;
+  color: var(--df-text);
+  background: var(--df-surface);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.task-edit:hover,
+.event-edit:hover {
+  color: var(--df-primary);
+  background: var(--df-bg);
+}
+
+.event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.trash-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--df-border);
+}
+
+.trash-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trash-panel-heading h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--df-text);
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.trash-panel-heading h3 svg {
+  color: var(--df-muted);
+}
+
+.trash-panel-heading p {
+  margin: 3px 0 0;
+  color: var(--df-muted);
+  font-size: 0.82rem;
+}
+
+.trash-list {
+  display: grid;
+  gap: 8px;
+}
+
+.trash-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  padding: 10px;
+  background: var(--df-surface-muted);
+}
+
+.trash-item strong,
+.trash-item span {
+  display: block;
+  min-width: 0;
+}
+
+.trash-item strong {
+  color: var(--df-text);
+  font-size: 0.9rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.trash-item span {
+  margin-top: 3px;
+  color: var(--df-muted);
+  font-size: 0.78rem;
+}
+
+.trash-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.trash-actions button,
+.trash-panel-heading button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  padding: 0 10px;
+  color: var(--df-text);
+  background: var(--df-surface);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trash-actions button:hover {
+  color: var(--df-primary);
+}
+
+.modal-edit-form {
+  display: grid;
+  gap: 10px;
+}
+
+.modal-edit-form input,
+.modal-edit-form textarea,
+.modal-edit-form select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  padding: 0 12px;
+  color: var(--df-text);
+  background: var(--df-surface);
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.modal-edit-form textarea {
+  min-height: 78px;
+  padding-top: 10px;
+  resize: vertical;
 }
 
 .generated-project-name {
@@ -3816,8 +3969,280 @@ p,
     flex-direction: column;
   }
 
+  .trash-panel-heading,
+  .trash-item {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .trash-panel-heading {
+    flex-direction: column;
+  }
+
+  .event-actions,
+  .trash-actions {
+    justify-content: stretch;
+  }
+
+  .event-actions button,
+  .trash-actions button,
+  .trash-panel-heading button {
+    width: 100%;
+  }
+
   .project-rename-form,
   .project-rename-button {
+    width: 100%;
+  }
+}
+
+/* Tasks polish: compact Todoist-like rhythm. */
+.tasks-card {
+  gap: 10px;
+}
+
+.task-form {
+  gap: 8px;
+  padding-bottom: 4px;
+}
+
+.task-form textarea {
+  min-height: 58px;
+}
+
+.task-form-actions {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.ghost-danger-button,
+.task-delete,
+.event-delete {
+  color: #6b7280;
+  background: #ffffff;
+  border-color: #e5e7eb;
+}
+
+.ghost-danger-button:hover:not(:disabled),
+.task-delete:hover,
+.event-delete:hover {
+  color: #991b1b;
+  background: #fff7f7;
+  border-color: #fecaca;
+}
+
+.ghost-danger-button:disabled {
+  opacity: 0.45;
+}
+
+.projects-toolbar {
+  margin-top: 2px;
+  padding: 10px 0 4px;
+  border-top: 1px solid var(--df-border);
+}
+
+.projects-toolbar h3,
+.task-project-heading h3 {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.projects-toolbar p,
+.task-project-heading p {
+  font-size: 0.76rem;
+}
+
+.project-create-button {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 0.82rem;
+}
+
+.task-list {
+  gap: 12px;
+}
+
+.task-project-group {
+  gap: 6px;
+  border-left: 2px solid transparent;
+  padding-left: 10px;
+}
+
+.task-project-group-active {
+  border-left-color: var(--df-primary);
+}
+
+.task-project-heading {
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid var(--df-border);
+  border-radius: var(--df-radius);
+  background: #ffffff;
+}
+
+.task-project-group-active .task-project-heading {
+  background: #f8f8f7;
+  border-color: #d1d5db;
+}
+
+.task-project-heading h3 svg {
+  width: 14px;
+  height: 14px;
+}
+
+.project-rename-button {
+  width: 28px;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.task-item {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  background: #ffffff;
+}
+
+.task-card-topline {
+  align-items: center;
+}
+
+.task-title {
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.task-description {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.task-meta {
+  margin-top: 5px;
+  gap: 5px;
+}
+
+.task-meta span,
+.task-priority {
+  min-height: 20px;
+  padding: 0 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.task-priority {
+  text-transform: none;
+}
+
+.task-actions {
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.task-check,
+.task-edit,
+.task-delete {
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 0.76rem;
+}
+
+.task-check input {
+  width: 14px;
+  height: 14px;
+}
+
+.task-edit svg,
+.task-delete svg {
+  width: 13px;
+  height: 13px;
+}
+
+.trash-panel {
+  gap: 8px;
+  margin-top: 0;
+  padding-top: 10px;
+}
+
+.trash-panel-heading {
+  min-height: 34px;
+}
+
+.trash-toggle-button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: var(--df-radius);
+  padding: 0 8px;
+  color: var(--df-text);
+  background: transparent;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trash-toggle-button:hover {
+  background: var(--df-surface-muted);
+}
+
+.trash-toggle-button span {
+  font-size: 0.9rem;
+}
+
+.trash-toggle-button small {
+  color: var(--df-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.trash-panel-heading > .ghost-danger-button {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 0.78rem;
+}
+
+.trash-item {
+  padding: 8px 10px;
+}
+
+.trash-actions button {
+  min-height: 28px;
+  font-size: 0.76rem;
+}
+
+.sidebar-projects {
+  gap: 3px;
+}
+
+.sidebar-projects p {
+  margin-bottom: 6px;
+  color: #4b5563;
+}
+
+.sidebar-project-link {
+  min-height: 29px;
+  border: 1px solid transparent;
+  font-size: 0.84rem;
+}
+
+.sidebar-project-link-active {
+  border-color: #d1d5db;
+  box-shadow: inset 2px 0 0 var(--df-primary);
+}
+
+@media (max-width: 760px) {
+  .task-item {
+    grid-template-columns: 1fr;
+  }
+
+  .task-actions {
+    justify-content: stretch;
+  }
+
+  .task-actions button,
+  .task-check {
     width: 100%;
   }
 }

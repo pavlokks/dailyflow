@@ -24,6 +24,10 @@ const taskSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  deletedAt: {
+    type: Date,
+    default: null
+  },
   project: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project',

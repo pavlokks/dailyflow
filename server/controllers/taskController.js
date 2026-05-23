@@ -107,7 +107,11 @@ export const createTask = async (req, res) => {
 
 export const getUserTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ user: req.user._id })
+    const showTrash = req.query.trash === 'true';
+    const tasks = await Task.find({
+      user: req.user._id,
+      deletedAt: showTrash ? { $ne: null } : null
+    })
       .populate('project', 'name')
       .sort({ createdAt: -1 });
 
@@ -126,7 +130,8 @@ export const updateTask = async (req, res) => {
 
     const task = await Task.findOne({
       _id: req.params.id,
-      user: req.user._id
+      user: req.user._id,
+      deletedAt: null
     });
 
     if (!task) {
@@ -205,9 +210,65 @@ export const updateTask = async (req, res) => {
 
 export const deleteTask = async (req, res) => {
   try {
+    const task = await Task.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+      deletedAt: null
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        message: 'Task not found'
+      });
+    }
+
+    task.deletedAt = new Date();
+    await task.save();
+
+    return res.json({
+      message: 'Task moved to trash'
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to delete task',
+      error: error.message
+    });
+  }
+};
+
+export const restoreTask = async (req, res) => {
+  try {
+    const task = await Task.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+      deletedAt: { $ne: null }
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        message: 'Task not found'
+      });
+    }
+
+    task.deletedAt = null;
+    await task.save();
+    const restoredTask = await Task.findById(task._id).populate('project', 'name');
+
+    return res.json(restoredTask);
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to restore task',
+      error: error.message
+    });
+  }
+};
+
+export const permanentlyDeleteTask = async (req, res) => {
+  try {
     const task = await Task.findOneAndDelete({
       _id: req.params.id,
-      user: req.user._id
+      user: req.user._id,
+      deletedAt: { $ne: null }
     });
 
     if (!task) {
@@ -217,11 +278,29 @@ export const deleteTask = async (req, res) => {
     }
 
     return res.json({
-      message: 'Task deleted successfully'
+      message: 'Task permanently deleted'
     });
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to delete task',
+      message: 'Failed to permanently delete task',
+      error: error.message
+    });
+  }
+};
+
+export const emptyTaskTrash = async (req, res) => {
+  try {
+    await Task.deleteMany({
+      user: req.user._id,
+      deletedAt: { $ne: null }
+    });
+
+    return res.json({
+      message: 'Task trash emptied'
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to empty task trash',
       error: error.message
     });
   }

@@ -34,7 +34,11 @@ export const createEvent = async (req, res) => {
 
 export const getUserEvents = async (req, res) => {
   try {
-    const events = await Event.find({ user: req.user._id }).sort({ date: 1 });
+    const showTrash = req.query.trash === 'true';
+    const events = await Event.find({
+      user: req.user._id,
+      deletedAt: showTrash ? { $ne: null } : null
+    }).sort({ date: 1 });
 
     return res.json(events);
   } catch (error) {
@@ -51,7 +55,8 @@ export const updateEvent = async (req, res) => {
 
     const event = await Event.findOne({
       _id: req.params.id,
-      user: req.user._id
+      user: req.user._id,
+      deletedAt: null
     });
 
     if (!event) {
@@ -85,9 +90,64 @@ export const updateEvent = async (req, res) => {
 
 export const deleteEvent = async (req, res) => {
   try {
+    const event = await Event.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+      deletedAt: null
+    });
+
+    if (!event) {
+      return res.status(404).json({
+        message: 'Event not found'
+      });
+    }
+
+    event.deletedAt = new Date();
+    await event.save();
+
+    return res.json({
+      message: 'Event moved to trash'
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to delete event',
+      error: error.message
+    });
+  }
+};
+
+export const restoreEvent = async (req, res) => {
+  try {
+    const event = await Event.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+      deletedAt: { $ne: null }
+    });
+
+    if (!event) {
+      return res.status(404).json({
+        message: 'Event not found'
+      });
+    }
+
+    event.deletedAt = null;
+    const restoredEvent = await event.save();
+
+    return res.json(restoredEvent);
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to restore event',
+      error: error.message
+    });
+  }
+};
+
+export const permanentlyDeleteEvent = async (req, res) => {
+  try {
     const event = await Event.findOneAndDelete({
       _id: req.params.id,
-      user: req.user._id
+      user: req.user._id,
+      deletedAt: { $ne: null }
     });
 
     if (!event) {
@@ -97,11 +157,29 @@ export const deleteEvent = async (req, res) => {
     }
 
     return res.json({
-      message: 'Event deleted successfully'
+      message: 'Event permanently deleted'
     });
   } catch (error) {
     return res.status(500).json({
-      message: 'Failed to delete event',
+      message: 'Failed to permanently delete event',
+      error: error.message
+    });
+  }
+};
+
+export const emptyEventTrash = async (req, res) => {
+  try {
+    await Event.deleteMany({
+      user: req.user._id,
+      deletedAt: { $ne: null }
+    });
+
+    return res.json({
+      message: 'Event trash emptied'
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to empty event trash',
       error: error.message
     });
   }

@@ -15,6 +15,10 @@ const eventSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
+  deletedAt: {
+    type: Date,
+    default: null
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

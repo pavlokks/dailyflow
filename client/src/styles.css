@@ -468,6 +468,12 @@ button:disabled,
   background: var(--df-bg);
 }
 
+.mobile-sidebar-toggle,
+.sidebar-close-button,
+.sidebar-drawer-backdrop {
+  display: none;
+}
+
 .app-sidebar {
   position: sticky;
   top: 0;
@@ -2419,15 +2425,88 @@ input[type='checkbox']:checked {
     grid-template-columns: 1fr;
   }
 
+  .sidebar-drawer-open {
+    overflow: hidden;
+  }
+
+  .mobile-sidebar-toggle {
+    position: fixed;
+    z-index: 80;
+    top: 14px;
+    left: 14px;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--df-border);
+    border-radius: var(--df-radius);
+    color: var(--df-heading);
+    background: var(--df-surface);
+    box-shadow: var(--df-shadow);
+    cursor: pointer;
+  }
+
+  .mobile-sidebar-toggle:hover {
+    color: var(--df-primary);
+    background: var(--df-soft);
+  }
+
+  .sidebar-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: block;
+    border: 0;
+    padding: 0;
+    background: rgba(17, 24, 39, 0.42);
+    cursor: pointer;
+  }
+
   .app-sidebar {
-    position: static;
-    width: 100%;
-    min-height: auto;
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    left: 0;
+    width: min(86vw, 320px);
+    height: 100vh;
+    min-height: 0;
+    overflow-y: auto;
+    transform: translateX(-104%);
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 180ms ease;
+    box-shadow: var(--df-shadow);
+  }
+
+  .app-sidebar-open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .sidebar-close-button {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--df-border);
+    border-radius: var(--df-radius);
+    color: var(--df-muted);
+    background: var(--df-surface);
+    cursor: pointer;
+  }
+
+  .sidebar-close-button:hover {
+    color: var(--df-primary);
+    background: var(--df-soft);
   }
 
   .dashboard-main {
     max-width: none;
-    padding: 18px;
+    padding: 70px 18px 18px;
   }
 }
 
@@ -2443,7 +2522,11 @@ input[type='checkbox']:checked {
 }
 
 @media (max-width: 760px) {
-  .dashboard-topbar,
+  .dashboard-topbar {
+    align-items: center;
+    flex-direction: column;
+  }
+
   .card-heading,
   .trash-panel-heading,
   .profile-logout-panel {

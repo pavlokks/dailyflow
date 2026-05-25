@@ -6,10 +6,12 @@ import {
   Folder,
   ListTodo,
   LayoutDashboard,
+  Menu,
   Newspaper,
   Target,
   Timer,
   UserRound,
+  X,
 } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import api from '../services/api.js';
@@ -28,9 +30,12 @@ const navigationItems = [
 
 const DashboardShell = ({ children }) => {
   const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const selectedProject = new URLSearchParams(location.search).get('project') || 'all';
   const isTasksPage = location.pathname === '/tasks';
+
+  const closeSidebar = () => setIsSidebarOpen(false);
 
   const loadProjects = useCallback(async () => {
     try {
@@ -62,10 +67,66 @@ const DashboardShell = ({ children }) => {
     };
   }, [loadProjects]);
 
+  useEffect(() => {
+    closeSidebar();
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!isSidebarOpen) {
+      return undefined;
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        closeSidebar();
+      }
+    };
+
+    document.body.classList.add('sidebar-drawer-open');
+    window.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.classList.remove('sidebar-drawer-open');
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [isSidebarOpen]);
+
   return (
     <main className='dashboard-page'>
-      <aside className='app-sidebar'>
-        <Link className='brand' to='/'>
+      <button
+        className='mobile-sidebar-toggle'
+        type='button'
+        onClick={() => setIsSidebarOpen(true)}
+        aria-label='Відкрити меню'
+        aria-controls='app-sidebar'
+        aria-expanded={isSidebarOpen}
+      >
+        <Menu size={19} />
+      </button>
+
+      {isSidebarOpen && (
+        <button
+          className='sidebar-drawer-backdrop'
+          type='button'
+          aria-label='Закрити меню'
+          onClick={closeSidebar}
+        />
+      )}
+
+      <aside
+        className={isSidebarOpen ? 'app-sidebar app-sidebar-open' : 'app-sidebar'}
+        id='app-sidebar'
+      >
+        <button
+          className='sidebar-close-button'
+          type='button'
+          onClick={closeSidebar}
+          aria-label='Закрити меню'
+        >
+          <X size={18} />
+        </button>
+
+        <Link className='brand' to='/' onClick={closeSidebar}>
           <span>DF</span>
           <div>
             <strong>DailyFlow</strong>
@@ -83,6 +144,7 @@ const DashboardShell = ({ children }) => {
                   isActive ? 'sidebar-link sidebar-link-active' : 'sidebar-link'
                 }
                 key={item.to}
+                onClick={closeSidebar}
                 to={item.to}
               >
                 <Icon size={16} />
@@ -101,6 +163,7 @@ const DashboardShell = ({ children }) => {
                 : 'sidebar-project-link'
             }
             to='/tasks'
+            onClick={closeSidebar}
           >
             <ListTodo size={15} />
             <span>Усі задачі</span>
@@ -112,6 +175,7 @@ const DashboardShell = ({ children }) => {
                 : 'sidebar-project-link'
             }
             to='/tasks?project=none'
+            onClick={closeSidebar}
           >
             <Folder size={15} />
             <span>Без проєкту</span>
@@ -124,6 +188,7 @@ const DashboardShell = ({ children }) => {
                   : 'sidebar-project-link'
               }
               key={project._id}
+              onClick={closeSidebar}
               to={`/tasks?project=${project._id}`}
             >
               <Folder size={15} />

@@ -804,6 +804,43 @@ const TasksModule = () => {
         </div>
       </section>
 
+      <section className='project-create-panel'>
+        <button
+          className='project-create-toggle'
+          type='button'
+          onClick={() => setIsProjectFormOpen((currentValue) => !currentValue)}
+          aria-expanded={isProjectFormOpen}
+          aria-controls='project-create-form'
+        >
+          <Plus size={15} /> {isProjectFormOpen ? 'Сховати' : 'Новий проєкт'}
+        </button>
+
+        {isProjectFormOpen && (
+          <form className='project-create-form' id='project-create-form' onSubmit={handleCreateProject}>
+            <input
+              type='text'
+              value={newProjectName}
+              onChange={(event) => setNewProjectName(event.target.value)}
+              placeholder='Назва проєкту'
+              aria-label='Назва нового проєкту'
+            />
+            <button type='submit' disabled={isSavingProject || !newProjectName.trim()}>
+              <Plus size={15} /> {isSavingProject ? 'Створюємо...' : 'Створити'}
+            </button>
+            <button
+              className='secondary-button project-create-cancel'
+              type='button'
+              onClick={() => {
+                setNewProjectName('');
+                setIsProjectFormOpen(false);
+              }}
+            >
+              <X size={15} /> Скасувати
+            </button>
+          </form>
+        )}
+      </section>
+
       <div className='task-list'>
         {isLoading ? (
           <ModuleState tone='loading'>Завантажуємо задачі...</ModuleState>
